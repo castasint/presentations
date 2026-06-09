@@ -1,3 +1,4 @@
 # Tool artifacts
 .gstack/
 .playwright-cli/
+kg/.git.bak/
