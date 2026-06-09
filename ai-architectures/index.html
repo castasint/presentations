@@ -1,0 +1,3374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Learning Architectural Patterns: A Comprehensive Guide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/black.min.css">
+    <style>
+        :root {
+            --r-background-color: #1a1a2e;
+            --r-main-font: 'Segoe UI', system-ui, sans-serif;
+            --r-heading-font: 'Segoe UI', system-ui, sans-serif;
+            --r-main-color: #eaeaea;
+            --r-heading-color: #00d4aa;
+            --r-heading1-size: 2.2em;
+            --r-heading2-size: 1.6em;
+            --r-heading3-size: 1.2em;
+        }
+        .reveal { font-size: 28px; }
+        .reveal h1, .reveal h2, .reveal h3 { 
+            text-transform: none; 
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .reveal h1 { color: #00d4aa; text-shadow: 0 0 30px rgba(0,212,170,0.3); }
+        .reveal h2 { color: #4fc3f7; }
+        .reveal h3 { color: #ff8a65; }
+        .reveal ul { line-height: 1.6; }
+        .reveal li { margin-bottom: 0.4em; }
+        .reveal code {
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            background: rgba(255,255,255,0.1);
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+        .reveal pre {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 1em;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            width: 100%;
+        }
+        .reveal pre code {
+            background: transparent;
+            padding: 0;
+            font-size: 0.6em;
+            line-height: 1.4;
+        }
+        .reveal blockquote {
+            background: rgba(0,212,170,0.1);
+            border-left: 4px solid #00d4aa;
+            padding: 0.5em 1em;
+            font-style: italic;
+        }
+        .reveal table {
+            font-size: 0.7em;
+            border-collapse: collapse;
+            margin: 1em auto;
+        }
+        .reveal table th, .reveal table td {
+            border: 1px solid #444;
+            padding: 0.4em 0.8em;
+        }
+        .reveal table th {
+            background: rgba(0,212,170,0.2);
+        }
+        .reveal table tr:nth-child(even) {
+            background: rgba(255,255,255,0.03);
+        }
+        .reveal .slides section .fragment.highlight-current-blue {
+            color: #4fc3f7;
+        }
+        .two-column {
+            display: flex;
+            gap: 2em;
+            text-align: left;
+        }
+        .two-column > div { flex: 1; }
+        .three-column {
+            display: flex;
+            gap: 1.5em;
+            text-align: left;
+        }
+        .three-column > div { flex: 1; }
+        .tag {
+            display: inline-block;
+            background: rgba(0,212,170,0.2);
+            color: #00d4aa;
+            padding: 0.2em 0.6em;
+            border-radius: 12px;
+            font-size: 0.75em;
+            margin: 0.2em;
+        }
+        .tag.purple { background: rgba(156,39,176,0.2); color: #ce93d8; }
+        .tag.orange { background: rgba(255,138,101,0.2); color: #ff8a65; }
+        .formula {
+            background: rgba(255,255,255,0.05);
+            padding: 0.8em;
+            border-radius: 8px;
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            margin: 0.5em 0;
+        }
+        .reveal .progress { background: rgba(0,212,170,0.2); }
+        .reveal .progress span { background: #00d4aa; }
+        .section-title {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .section-number {
+            font-size: 4em;
+            color: rgba(0,212,170,0.3);
+            font-weight: 900;
+            line-height: 1;
+        }
+        .network-layer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0.3em 0;
+            padding: 0.5em;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        .layer-input { background: #1565c0; }
+        .layer-hidden { background: #6a1b9a; }
+        .layer-output { background: #2e7d32; }
+        .layer-attention { background: #c62828; }
+        .layer-norm { background: #455a64; }
+        .layer-ffn { background: #ef6c00; }
+        .arch-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2em;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .arch-arrow { color: #00d4aa; font-size: 1.2em; }
+        .reveal img { border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .paper-ref {
+            font-size: 0.6em;
+            color: #888;
+            margin-top: 0.5em;
+        }
+        .highlight-box {
+            background: rgba(0,212,170,0.1);
+            border: 1px solid rgba(0,212,170,0.3);
+            border-radius: 8px;
+            padding: 1em;
+            margin: 0.5em 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- SLIDE 1: Title -->
+            <section>
+                <h1 style="font-size: 2.8em;">Deep Learning Architectural Patterns</h1>
+                <h3 style="color: #eaeaea;">A Comprehensive Guide to Modern AI Architectures</h3>
+                <p style="margin-top: 2em;">
+                    <span class="tag">Transformers</span>
+                    <span class="tag purple">Mixture of Experts</span>
+                    <span class="tag orange">Multi-Modal</span>
+                    <span class="tag">Diffusion</span>
+                    <span class="tag purple">State Space Models</span>
+                    <span class="tag orange">Vision Transformers</span>
+                    <span class="tag">RAG</span>
+                    <span class="tag purple">Agent Systems</span>
+                </p>
+                <p style="margin-top: 1.5em; font-size: 0.7em; color: #888;">From Perceptrons to Reasoning Models: A Complete Technical Survey</p>
+            </section>
+
+            <!-- SLIDE 2: Table of Contents -->
+            <section>
+                <h2>Table of Contents</h2>
+                <div class="two-column" style="font-size: 0.75em;">
+                    <div>
+                        <p><strong style="color:#00d4aa">I.</strong> Foundations of Deep Learning</p>
+                        <p><strong style="color:#00d4aa">II.</strong> The Transformer Revolution</p>
+                        <p><strong style="color:#00d4aa">III.</strong> Transformer Variants &amp; Evolution</p>
+                        <p><strong style="color:#00d4aa">IV.</strong> Scaling Laws &amp; Large Models</p>
+                        <p><strong style="color:#00d4aa">V.</strong> Mixture of Experts (MoE)</p>
+                        <p><strong style="color:#00d4aa">VI.</strong> Multi-Modal Architectures</p>
+                        <p><strong style="color:#00d4aa">VII.</strong> Vision Architectures</p>
+                    </div>
+                    <div>
+                        <p><strong style="color:#00d4aa">VIII.</strong> Efficient &amp; Novel Architectures</p>
+                        <p><strong style="color:#00d4aa">IX.</strong> Generative Model Architectures</p>
+                        <p><strong style="color:#00d4aa">X.</strong> Advanced Training Paradigms</p>
+                        <p><strong style="color:#00d4aa">XI.</strong> Retrieval &amp; Memory Architectures</p>
+                        <p><strong style="color:#00d4aa">XII.</strong> Agent Architectures</p>
+                        <p><strong style="color:#00d4aa">XIII.</strong> Systems &amp; Hardware Architecture</p>
+                        <p><strong style="color:#00d4aa">XIV.</strong> Future Directions</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION I: FOUNDATIONS -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">I</div>
+                    <h1>Foundations of Deep Learning</h1>
+                    <p>From Perceptrons to Deep Neural Networks</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>The Perceptron (1958)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Frank Rosenblatt's foundational model</li>
+                            <li>Binary classifier based on linear threshold</li>
+                            <li>y = σ(w·x + b) where σ is step function</li>
+                            <li>Learned via error-correction rule</li>
+                            <li>Could only solve <strong>linearly separable</strong> problems</li>
+                        </ul>
+                        <p class="paper-ref">Rosenblatt, F. (1958). The Perceptron: A Probabilistic Model for Information Storage and Organization in the Brain</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            output = { 1 if w·x + b > 0<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ 0 otherwise
+                        </div>
+                        <div class="highlight-box" style="margin-top:1em;">
+                            <strong>Limitation:</strong> Minsky &amp; Papert (1969) proved perceptrons cannot learn XOR — a non-linearly separable function
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Multi-Layer Perceptron (MLP)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Stacked layers of perceptrons</li>
+                            <li><strong>Hidden layers</strong> enable non-linear representation</li>
+                            <li>Universal Approximation Theorem</li>
+                            <li>Requires non-linear activation functions</li>
+                            <li>Trained via <strong>backpropagation</strong> (Rumelhart et al., 1986)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Input Layer</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">Hidden Layer 1</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">Hidden Layer 2</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-output">Output Layer</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Activation Functions</h2>
+                <table>
+                    <tr><th>Function</th><th>Formula</th><th>Properties</th><th>Era</th></tr>
+                    <tr><td>Sigmoid</td><td>σ(x) = 1/(1+e<sup>-x</sup>)</td><td>Smooth, saturates, non-zero-centered</td><td>1980s-90s</td></tr>
+                    <tr><td>Tanh</td><td>tanh(x)</td><td>Zero-centered, still saturates</td><td>1990s-2000s</td></tr>
+                    <tr><td>ReLU</td><td>max(0,x)</td><td>Non-saturating, computationally cheap</td><td>2010-present</td></tr>
+                    <tr><td>Leaky ReLU</td><td>max(αx, x)</td><td>Allows small negative gradients</td><td>2013</td></tr>
+                    <tr><td>GELU</td><td>x·Φ(x)</td><td>Smooth, used in Transformers</td><td>2016</td></tr>
+                    <tr><td>SwiGLU</td><td>Swish + Gating</td><td>Used in PaLM, LLaMA</td><td>2020+</td></tr>
+                    <tr><td>Mish</td><td>x·tanh(softplus(x))</td><td>Self-regularizing, smooth</td><td>2019</td></tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Backpropagation &amp; Gradient Descent</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#ff8a65">Forward Pass</h3>
+                        <ul>
+                            <li>Compute predictions through layers</li>
+                            <li>z<sup>[l]</sup> = W<sup>[l]</sup>a<sup>[l-1]</sup> + b<sup>[l]</sup></li>
+                            <li>a<sup>[l]</sup> = g(z<sup>[l]</sup>)</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:1em">Backward Pass</h3>
+                        <ul>
+                            <li>Compute gradients via chain rule</li>
+                            <li>∂L/∂W<sup>[l]</sup> = δ<sup>[l]</sup> · a<sup>[l-1]T</sup></li>
+                            <li>Update: W := W - α·∂L/∂W</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color:#ff8a65">Optimizers</h3>
+                        <ul style="font-size:0.85em;">
+                            <li><strong>SGD:</strong> Simple, needs tuning</li>
+                            <li><strong>Momentum:</strong> Accelerates in consistent directions</li>
+                            <li><strong>AdaGrad:</strong> Per-parameter learning rates</li>
+                            <li><strong>RMSprop:</strong> Moving average of squared gradients</li>
+                            <li><strong>Adam:</strong> Momentum + RMSprop (most popular)</li>
+                            <li><strong>AdamW:</strong> Decoupled weight decay</li>
+                            <li><strong>Lion:</strong> Memory-efficient, sign-based</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/cnn.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="CNN Architecture"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">CNN Architecture</p></div>
+            <h2>Convolutional Neural Networks (CNNs)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li><strong>Convolution:</strong> Local receptive fields, shared weights</li>
+                            <li><strong>Pooling:</strong> Spatial downsampling (max/average)</li>
+                            <li><strong>Translation invariance</strong> through weight sharing</li>
+                            <li>Hierarchical feature learning</li>
+                            <li>Enable deep vision models</li>
+                        </ul>
+                        <p class="paper-ref">LeCun et al. (1998). Gradient-Based Learning Applied to Document Recognition</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Input Image (H×W×C)</div>
+                            <div class="arch-arrow">↓ Conv + ReLU</div>
+                            <div class="network-layer layer-hidden">Feature Maps</div>
+                            <div class="arch-arrow">↓ Pooling</div>
+                            <div class="network-layer layer-hidden">Downsampled Maps</div>
+                            <div class="arch-arrow">↓ Conv + ReLU</div>
+                            <div class="network-layer layer-hidden">Deeper Features</div>
+                            <div class="arch-arrow">↓ Flatten + FC</div>
+                            <div class="network-layer layer-output">Classification</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>CNN Architecture Evolution</h2>
+                <table>
+                    <tr><th>Model</th><th>Year</th><th>Key Innovation</th><th>Params</th><th>Top-5 Error</th></tr>
+                    <tr><td>LeNet-5</td><td>1998</td><td>First practical CNN</td><td>60K</td><td>-</td></tr>
+                    <tr><td>AlexNet</td><td>2012</td><td>ReLU, Dropout, GPU training</td><td>61M</td><td>15.3%</td></tr>
+                    <tr><td>VGG-16</td><td>2014</td><td>Small 3×3 filters, very deep</td><td>138M</td><td>7.3%</td></tr>
+                    <tr><td>ResNet-152</td><td>2015</td><td>Skip connections, 152 layers</td><td>60M</td><td>3.6%</td></tr>
+                    <tr><td>Inception-v4</td><td>2016</td><td>Multi-scale filters, auxiliary classifiers</td><td>43M</td><td>3.1%</td></tr>
+                    <tr><td>EfficientNet-B7</td><td>2019</td><td>Compound scaling (depth/width/res)</td><td>66M</td><td>2.3%</td></tr>
+                    <tr><td>ConvNeXt-XL</td><td>2022</td><td>CNN meets Transformer design</td><td>350M</td><td>2.2%</td></tr>
+                </table>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/resnet.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="ResNet Residual Block"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">ResNet Residual Block</p></div>
+            <h2>ResNet: Residual Learning</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li><strong>Problem:</strong> Degradation in very deep networks</li>
+                            <li><strong>Solution:</strong> Skip (residual) connections</li>
+                            <li>y = F(x, {W<sub>i</sub>}) + x</li>
+                            <li>Enables gradients to flow directly</li>
+                            <li>Allows training of 1000+ layer networks</li>
+                            <li>Variants: ResNeXt (cardinality), Wide ResNet</li>
+                        </ul>
+                        <p class="paper-ref">He et al. (2015). Deep Residual Learning for Image Recognition</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">x</div>
+                            <div class="arch-arrow">↘</div>
+                            <div class="network-layer layer-hidden" style="width:60%">Conv 3×3 → BN → ReLU</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden" style="width:60%">Conv 3×3 → BN</div>
+                            <div class="arch-arrow">↓ + x (skip)</div>
+                            <div class="network-layer layer-output">ReLU → y</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Recurrent Neural Networks (RNNs)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Process <strong>sequential data</strong></li>
+                            <li>Maintain hidden state across time steps</li>
+                            <li>h<sub>t</sub> = tanh(W<sub>hh</sub>h<sub>t-1</sub> + W<sub>xh</sub>x<sub>t</sub> + b)</li>
+                            <li>Parameters shared across time</li>
+                            <li>Vanishing gradient problem in long sequences</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">x₁</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">h₁ →</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">h₂ →</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">h₃ → ...</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-output">y</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/lstm.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="LSTM Cell"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">LSTM Cell</p></div>
+            <h2>LSTM &amp; GRU: Gated Recurrent Units</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">LSTM (1997)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Cell state + three gates</li>
+                            <li><strong>Forget gate:</strong> f<sub>t</sub> = σ(W<sub>f</sub>·[h<sub>t-1</sub>, x<sub>t</sub>])</li>
+                            <li><strong>Input gate:</strong> i<sub>t</sub> = σ(W<sub>i</sub>·[h<sub>t-1</sub>, x<sub>t</sub>])</li>
+                            <li><strong>Output gate:</strong> o<sub>t</sub> = σ(W<sub>o</sub>·[h<sub>t-1</sub>, x<sub>t</sub>])</li>
+                            <li>Solves vanishing gradients</li>
+                        </ul>
+                        <p class="paper-ref">Hochreiter &amp; Schmidhuber (1997)</p>
+                    </div>
+                    <div>
+                        <h3 style="color:#4fc3f7">GRU (2014)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Simplified gating mechanism</li>
+                            <li><strong>Update gate:</strong> z<sub>t</sub></li>
+                            <li><strong>Reset gate:</strong> r<sub>t</sub></li>
+                            <li>No separate cell state</li>
+                            <li>Fewer parameters, faster training</li>
+                            <li>Often comparable performance to LSTM</li>
+                        </ul>
+                        <p class="paper-ref">Cho et al. (2014)</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Word Embeddings</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#ff8a65">Word2Vec (2013)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li><strong>CBOW:</strong> Predict word from context</li>
+                            <li><strong>Skip-gram:</strong> Predict context from word</li>
+                            <li>Captures semantic relationships</li>
+                            <li>king - man + woman ≈ queen</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">GloVe (2014)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Global vector representation</li>
+                            <li>Combines count-based + prediction-based</li>
+                            <li>Uses global word-word co-occurrence</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color:#ff8a65">FastText (2016)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Subword information</li>
+                            <li>Handles out-of-vocabulary words</li>
+                            <li>Represents words as bags of n-grams</li>
+                        </ul>
+                        <div class="highlight-box" style="margin-top:1em;">
+                            <strong>Key Insight:</strong> Dense vector representations enable neural networks to process language meaningfully, paving the way for sequence-to-sequence models.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Sequence-to-Sequence Models</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li><strong>Encoder:</strong> Compresses input to context vector</li>
+                            <li><strong>Decoder:</strong> Generates output from context</li>
+                            <li>Used for machine translation, summarization</li>
+                            <li>Bottleneck: single fixed-size context vector</li>
+                            <li>Attention mechanism proposed as solution</li>
+                        </ul>
+                        <p class="paper-ref">Sutskever et al. (2014). Sequence to Sequence Learning with Neural Networks</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div style="font-weight:bold; color:#4fc3f7">Encoder (LSTM)</div>
+                            <div class="network-layer layer-input">"Hello"</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-input">"World"</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">Context Vector c</div>
+                            <div class="arch-arrow">↓</div>
+                            <div style="font-weight:bold; color:#ff8a65">Decoder (LSTM)</div>
+                            <div class="network-layer layer-output">"Bonjour"</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-output">"Monde"</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Attention Mechanism (Bahdanau et al., 2015)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Addresses the bottleneck problem</li>
+                            <li>Decoder attends to <strong>all encoder hidden states</strong></li>
+                            <li>Attention scores: e<sub>ij</sub> = score(s<sub>t-1</sub>, h<sub>j</sub>)</li>
+                            <li>Weights: α<sub>ij</sub> = softmax(e<sub>ij</sub>)</li>
+                            <li>Context: c<sub>t</sub> = Σ α<sub>ij</sub>h<sub>j</sub></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Score Functions:</strong><br>
+                            • Dot Product: score(s,h) = s<sup>T</sup>h<br>
+                            • Concat: score(s,h) = v<sup>T</sup>tanh(W<sub>s</sub>s + W<sub>h</sub>h)<br>
+                            • General: score(s,h) = s<sup>T</sup>W<sub>a</sub>h<br>
+                            • Location-based: learns alignment directly
+                        </div>
+                        <p class="paper-ref">Bahdanau et al. (2015). Neural Machine Translation by Jointly Learning to Align and Translate</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION II: TRANSFORMERS -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">II</div>
+                    <h1>The Transformer Revolution</h1>
+                    <p>Attention Is All You Need</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>"Attention Is All You Need" (2017)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Vaswani et al. (Google Brain)</li>
+                            <li><strong>No recurrence, no convolution</strong></li>
+                            <li>Entirely attention-based architecture</li>
+                            <li>Parallelizable training</li>
+                            <li>Superior translation quality</li>
+                            <li>Faster to train than RNNs</li>
+                        </ul>
+                        <p class="paper-ref">Vaswani et al. (2017). Attention Is All You Need. NeurIPS.</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Key Innovation:</strong> Self-attention allows each position to attend to all positions in the previous layer, capturing dependencies regardless of distance.
+                        </div>
+                        <p style="margin-top:1em;"><span class="tag">Self-Attention</span> <span class="tag">Parallel</span> <span class="tag">No RNN</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/transformer.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="Transformer Architecture (Vaswani et al., 2017)"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">Transformer Architecture (Vaswani et al., 2017)</p></div>
+            <h2>Transformer Architecture Overview</h2>
+                <div class="two-column">
+                    <div>
+                        <div style="text-align:center; font-weight:bold; color:#4fc3f7; margin-bottom:0.5em;">Encoder Stack (×N)</div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Input Embeddings + Positional Encoding</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-attention">Multi-Head Self-Attention</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-norm">Add &amp; Norm</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-ffn">Feed Forward Network</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-norm">Add &amp; Norm</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="text-align:center; font-weight:bold; color:#ff8a65; margin-bottom:0.5em;">Decoder Stack (×N)</div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Output Embeddings + Positional Encoding</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-attention">Masked Multi-Head Self-Attention</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-norm">Add &amp; Norm</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-attention">Cross-Attention (Encoder-Decoder)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-ffn">Feed Forward Network</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/self_attention.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="Scaled Dot-Product Attention"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">Scaled Dot-Product Attention</p></div>
+            <h2>Self-Attention: The Core Mechanism</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>For each token, compute attention with <strong>all other tokens</strong></li>
+                            <li>Three learned projections per token:</li>
+                            <li style="margin-left:1em">• <strong>Query (Q):</strong> What am I looking for?</li>
+                            <li style="margin-left:1em">• <strong>Key (K):</strong> What do I contain?</li>
+                            <li style="margin-left:1em">• <strong>Value (V):</strong> What information do I provide?</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            Attention(Q, K, V) = softmax(QK<sup>T</sup> / √d<sub>k</sub>) · V
+                        </div>
+                        <div class="highlight-box" style="margin-top:1em;">
+                            <strong>Scaling factor √d<sub>k</sub>:</strong> Prevents dot products from growing too large in magnitude, pushing softmax into regions with small gradients.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Self-Attention: Step by Step</h2>
+                <div style="font-size:0.85em;">
+                    <p><strong>Input:</strong> X ∈ ℝ<sup>n×d</sup> (n tokens, d dimensions)</p>
+                    <ol>
+                        <li>Project: Q = XW<sup>Q</sup>, K = XW<sup>K</sup>, V = XW<sup>V</sup> where W ∈ ℝ<sup>d×d<sub>k</sub></sup></li>
+                        <li>Compute scores: S = QK<sup>T</sup> ∈ ℝ<sup>n×n</sup></li>
+                        <li>Scale: S = S / √d<sub>k</sub></li>
+                        <li>Apply softmax row-wise: A = softmax(S) ∈ ℝ<sup>n×n</sup> (attention weights)</li>
+                        <li>Weighted sum: Output = AV ∈ ℝ<sup>n×d<sub>v</sub></sup></li>
+                    </ol>
+                    <div class="highlight-box" style="margin-top:0.5em;">
+                        <strong>Complexity:</strong> O(n²·d) time, O(n²) memory for attention matrix. This quadratic complexity is the fundamental bottleneck for long sequences.
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/multihead_attention.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="Multi-Head Attention"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">Multi-Head Attention</p></div>
+            <h2>Multi-Head Attention</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Run <strong>h parallel attention heads</strong></li>
+                            <li>Each head learns different types of relationships</li>
+                            <li>One head: syntactic dependencies</li>
+                            <li>Another: semantic relationships</li>
+                            <li>Another: long-range dependencies</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            MultiHead(Q,K,V) = Concat(head₁,...,headₕ)W<sup>O</sup><br><br>
+                            where head<sub>i</sub> = Attention(QW<sub>i</sub><sup>Q</sup>, KW<sub>i</sub><sup>K</sup>, VW<sub>i</sub><sup>V</sup>)
+                        </div>
+                        <p style="margin-top:1em; font-size:0.8em;">Typical config: h=8 heads, d<sub>k</sub>=d<sub>v</sub>=d/h=64</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Positional Encoding</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Transformers have <strong>no inherent notion of position</strong></li>
+                            <li>Must inject position information</li>
+                            <li>Original: sinusoidal functions</li>
+                            <li>Learned embeddings also common</li>
+                            <li>RoPE (Rotary) now dominant in LLMs</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            PE<sub>(pos, 2i)</sub> = sin(pos / 10000<sup>2i/d</sup>)<br>
+                            PE<sub>(pos, 2i+1)</sub> = cos(pos / 10000<sup>2i/d</sup>)
+                        </div>
+                        <div class="highlight-box" style="margin-top:1em;">
+                            <strong>Properties:</strong><br>
+                            • Unique encoding for each position<br>
+                            • Bounded values<br>
+                            • Linear relation between relative positions
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Layer Normalization &amp; Residual Connections</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">Layer Normalization</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Normalizes across feature dimension</li>
+                            <li>LN(x) = γ ⊙ (x - μ) / √(σ² + ε) + β</li>
+                            <li>Stabilizes training of deep networks</li>
+                            <li>Pre-Norm vs Post-Norm variants</li>
+                        </ul>
+                        <p class="paper-ref">Ba et al. (2016). Layer Normalization</p>
+                    </div>
+                    <div>
+                        <h3 style="color:#ff8a65">Residual Connections</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>output = x + Sublayer(x)</li>
+                            <li>Enables gradient flow in deep stacks</li>
+                            <li>Transformer base: 6 encoder + 6 decoder layers</li>
+                            <li>Modern LLMs: 96+ layers</li>
+                        </ul>
+                        <div class="highlight-box" style="margin-top:1em; font-size:0.8em;">
+                            <strong>Pre-Norm (modern):</strong> LN → Sublayer → Add<br>
+                            <strong>Post-Norm (original):</strong> Sublayer → Add → LN
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Feed-Forward Network (FFN)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Applied <strong>position-wise</strong> (same for all positions)</li>
+                            <li>Two linear transformations with ReLU/GELU</li>
+                            <li>FFN(x) = max(0, xW₁ + b₁)W₂ + b₂</li>
+                            <li>Inner dimension: 4× model dimension (d<sub>ff</sub> = 4d)</li>
+                            <li>Major source of parameters (~2/3 of total)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">x (d=512)</div>
+                            <div class="arch-arrow">↓ W₁</div>
+                            <div class="network-layer layer-hidden">expand (d<sub>ff</sub>=2048)</div>
+                            <div class="arch-arrow">↓ ReLU/GELU</div>
+                            <div class="network-layer layer-hidden">non-linearity</div>
+                            <div class="arch-arrow">↓ W₂</div>
+                            <div class="network-layer layer-output">project (d=512)</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Masked Self-Attention (Decoder)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Prevents attending to future tokens</li>
+                            <li>Critical for <strong>autoregressive generation</strong></li>
+                            <li>Upper-triangular mask: set to -∞</li>
+                            <li>Softmax makes future positions 0</li>
+                            <li>Enables left-to-right generation</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <table style="font-size:0.7em;">
+                            <tr><td></td><td>T1</td><td>T2</td><td>T3</td><td>T4</td></tr>
+                            <tr><td>T1</td><td>0.4</td><td>0</td><td>0</td><td>0</td></tr>
+                            <tr><td>T2</td><td>0.2</td><td>0.5</td><td>0</td><td>0</td></tr>
+                            <tr><td>T3</td><td>0.1</td><td>0.2</td><td>0.6</td><td>0</td></tr>
+                            <tr><td>T4</td><td>0.3</td><td>0.3</td><td>0.4</td><td>0.7</td></tr>
+                        </table>
+                        <p style="font-size:0.7em; color:#888;">Lower triangular attention pattern</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Cross-Attention (Encoder-Decoder)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Decoder queries attend to <strong>encoder outputs</strong></li>
+                            <li>Q from decoder, K/V from encoder</li>
+                            <li>Alignment between source and target</li>
+                            <li>Replaces the fixed context vector</li>
+                            <li>Dynamic, token-level alignment</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            CrossAttn(Q<sub>dec</sub>, K<sub>enc</sub>, V<sub>enc</sub>)<br>
+                            = softmax(Q<sub>dec</sub>K<sub>enc</sub><sup>T</sup> / √d<sub>k</sub>) V<sub>enc</sub>
+                        </div>
+                        <div class="highlight-box" style="margin-top:1em;">
+                            <strong>Usage:</strong> Machine translation, summarization, any seq2seq task. Modern LLMs often omit cross-attention in favor of decoder-only architectures.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Transformer Hyperparameters (Base Model)</h2>
+                <table>
+                    <tr><th>Parameter</th><th>Value</th><th>Description</th></tr>
+                    <tr><td>N (layers)</td><td>6</td><td>Encoder and decoder stacks</td></tr>
+                    <tr><td>d<sub>model</sub></td><td>512</td><td>Embedding dimension</td></tr>
+                    <tr><td>d<sub>ff</sub></td><td>2048</td><td>FFN inner dimension</td></tr>
+                    <tr><td>h (heads)</td><td>8</td><td>Attention heads</td></tr>
+                    <tr><td>d<sub>k</sub> = d<sub>v</sub></td><td>64</td><td>Per-head dimension</td></tr>
+                    <tr><td>P<sub>dropout</sub></td><td>0.1</td><td>Dropout rate</td></tr>
+                    <tr><td>ε<sub>LS</sub></td><td>0.1</td><td>Label smoothing</td></tr>
+                    <tr><td>Total Params</td><td>65M</td><td>Base model</td></tr>
+                    <tr><td>Total Params</td><td>213M</td><td>Big model</td></tr>
+                </table>
+            </section>
+
+            <!-- SECTION III: TRANSFORMER VARIANTS -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">III</div>
+                    <h1>Transformer Variants &amp; Evolution</h1>
+                    <p>BERT, GPT, T5, and Beyond</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>The Three Transformer Families</h2>
+                <div class="three-column" style="font-size:0.8em;">
+                    <div>
+                        <h3 style="color:#4fc3f7">Encoder-Only</h3>
+                        <p><strong>BERT, RoBERTa, ALBERT, DeBERTa</strong></p>
+                        <ul>
+                            <li>Bidirectional attention</li>
+                            <li>See full context</li>
+                            <li>Best for: understanding</li>
+                            <li>Tasks: classification, NER, QA extraction</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color:#ff8a65">Decoder-Only</h3>
+                        <p><strong>GPT, LLaMA, PaLM, Claude</strong></p>
+                        <ul>
+                            <li>Causal (masked) attention</li>
+                            <li>Left-to-right generation</li>
+                            <li>Best for: generation</li>
+                            <li>Tasks: text generation, code, chat</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color:#00d4aa">Encoder-Decoder</h3>
+                        <p><strong>T5, BART, UL2</strong></p>
+                        <ul>
+                            <li>Full encoder + masked decoder</li>
+                            <li>Cross-attention</li>
+                            <li>Best for: translation, summarization</li>
+                            <li>Unified text-to-text framework</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/bert.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="BERT Architecture"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">BERT Architecture</p></div>
+            <h2>BERT: Bidirectional Encoder (2018)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li><strong>B</strong>idirectional <strong>E</strong>ncoder <strong>R</strong>epresentations from <strong>T</strong>ransformers</li>
+                            <li>Devlin et al. (Google)</li>
+                            <li>Trained with two objectives:</li>
+                            <li style="margin-left:1em">1. <strong>MLM:</strong> Masked Language Modeling (15% tokens)</li>
+                            <li style="margin-left:1em">2. <strong>NSP:</strong> Next Sentence Prediction</li>
+                            <li>Base: 12 layers, 110M params</li>
+                            <li>Large: 24 layers, 340M params</li>
+                        </ul>
+                        <p class="paper-ref">Devlin et al. (2018). BERT: Pre-training of Deep Bidirectional Transformers</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Input:</strong> [CLS] The cat sat [MASK] the mat [SEP] It was comfortable [SEP]
+                        </div>
+                        <div class="highlight-box" style="margin-top:0.5em;">
+                            <strong>MLM:</strong> Predict masked word ("on")<br>
+                            <strong>NSP:</strong> Is sentence B next to A? (Yes/No)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>BERT Architecture Details</h2>
+                <table>
+                    <tr><th>Variant</th><th>Layers</th><th>Hidden</th><th>Heads</th><th>Params</th></tr>
+                    <tr><td>BERT-Base</td><td>12</td><td>768</td><td>12</td><td>110M</td></tr>
+                    <tr><td>BERT-Large</td><td>24</td><td>1024</td><td>16</td><td>340M</td></tr>
+                    <tr><td>BERT-Tiny</td><td>2</td><td>128</td><td>2</td><td>4M</td></tr>
+                    <tr><td>BERT-Mini</td><td>4</td><td>256</td><td>4</td><td>11M</td></tr>
+                    <tr><td>BERT-Small</td><td>4</td><td>512</td><td>8</td><td>29M</td></tr>
+                    <tr><td>BERT-Medium</td><td>8</td><td>512</td><td>8</td><td>41M</td></tr>
+                </table>
+                <p style="font-size:0.75em; margin-top:0.5em;">
+                    <span class="tag">WordPiece</span> vocab: 30,522 tokens
+                    <span class="tag">Max length</span> 512 tokens
+                    <span class="tag">Pretraining data</span> BooksCorpus + Wikipedia
+                </p>
+            </section>
+
+            <section>
+                <h2>RoBERTa: Robustly Optimized BERT</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Liu et al. (Facebook AI, 2019)</li>
+                            <li>Hyperparameter tuning matters</li>
+                            <li>Key changes from BERT:</li>
+                            <li style="margin-left:1em">• Train longer, bigger batches</li>
+                            <li style="margin-left:1em">• Remove NSP objective</li>
+                            <li style="margin-left:1em">• Train on longer sequences</li>
+                            <li style="margin-left:1em">• Dynamic masking patterns</li>
+                            <li style="margin-left:1em">• 10x more data (160GB)</li>
+                        </ul>
+                        <p class="paper-ref">Liu et al. (2019). RoBERTa: A Robustly Optimized BERT Pretraining Approach</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Finding:</strong> NSP was actually hurting performance. MLM alone with more data and compute significantly outperforms BERT.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>ALBERT: Parameter Reduction</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Lan et al. (Google, 2019)</li>
+                            <li><strong>Factorized embedding:</strong> VxH -> VxE + ExH</li>
+                            <li><strong>Cross-layer parameter sharing:</strong> Same weights across layers</li>
+                            <li>18x fewer parameters than BERT-large</li>
+                            <li>Slightly lower performance but much faster</li>
+                        </ul>
+                        <p class="paper-ref">Lan et al. (2019). ALBERT: A Lite BERT for Self-supervised Learning</p>
+                    </div>
+                    <div>
+                        <table style="font-size:0.7em;">
+                            <tr><th>Model</th><th>Params</th><th>SQuAD F1</th></tr>
+                            <tr><td>BERT-large</td><td>340M</td><td>90.4</td></tr>
+                            <tr><td>ALBERT-xxlarge</td><td>235M</td><td>89.3</td></tr>
+                        </table>
+                        <p style="font-size:0.7em; margin-top:0.5em;">ALBERT-xxlarge: 12x fewer parameters than BERT-large!</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>DeBERTa: Decoding-enhanced BERT</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>He et al. (Microsoft, 2020)</li>
+                            <li><strong>Disentangled attention:</strong> Separate content and position embeddings</li>
+                            <li><strong>Enhanced mask decoder:</strong> Absolute positions before softmax</li>
+                            <li>Scale-invariant Fine-Tuning (SiFT)</li>
+                            <li>First model to surpass human performance on SuperGLUE</li>
+                        </ul>
+                        <p class="paper-ref">He et al. (2020). DeBERTa: Decoding-enhanced BERT with Disentangled Attention</p>
+                    </div>
+                    <div>
+                        <div class="formula" style="font-size:0.85em;">
+                            E<sub>i,j</sub> = {Qc, Kc} + {Qc, Kp} + {Qp, Kc}
+                        </div>
+                        <p style="font-size:0.8em; margin-top:0.5em;">Content-to-content, content-to-position, position-to-content</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/gpt.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="GPT Decoder-Only Architecture"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">GPT Decoder-Only Architecture</p></div>
+            <h2>GPT Series: Generative Pre-Training</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li><strong>GPT-1</strong> (2018): 117M params, unsupervised pretraining</li>
+                            <li><strong>GPT-2</strong> (2019): 1.5B params, zero-shot capabilities</li>
+                            <li><strong>GPT-3</strong> (2020): 175B params, in-context learning</li>
+                            <li><strong>GPT-4</strong> (2023): ~1.8T params (estimated), multimodal</li>
+                            <li><strong>GPT-4o</strong> (2024): Native multimodal</li>
+                            <li><strong>o1/o3</strong> (2024): Test-time compute scaling</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Core Insight:</strong> Decoder-only autoregressive language modeling scales remarkably with compute, data, and parameters — emergent abilities appear at scale.
+                        </div>
+                        <p style="margin-top:1em;"><span class="tag">Causal LM</span> <span class="tag">In-context Learning</span> <span class="tag">Emergence</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>GPT-3 Architecture Details</h2>
+                <table>
+                    <tr><th>Model</th><th>Params</th><th>Layers</th><th>d_model</th><th>Heads</th><th>Batch</th><th>Context</th></tr>
+                    <tr><td>Small</td><td>125M</td><td>12</td><td>768</td><td>12</td><td>0.5M</td><td>2048</td></tr>
+                    <tr><td>Medium</td><td>350M</td><td>24</td><td>1024</td><td>16</td><td>0.5M</td><td>2048</td></tr>
+                    <tr><td>Large</td><td>760M</td><td>24</td><td>1536</td><td>16</td><td>0.5M</td><td>2048</td></tr>
+                    <tr><td>XL</td><td>1.3B</td><td>24</td><td>2048</td><td>24</td><td>1M</td><td>2048</td></tr>
+                    <tr><td>2.7B</td><td>2.7B</td><td>32</td><td>2560</td><td>32</td><td>1M</td><td>2048</td></tr>
+                    <tr><td>6.7B</td><td>6.7B</td><td>32</td><td>4096</td><td>32</td><td>2M</td><td>2048</td></tr>
+                    <tr><td>13B</td><td>13B</td><td>40</td><td>5140</td><td>40</td><td>2M</td><td>2048</td></tr>
+                    <tr><td>175B (GPT-3)</td><td>175B</td><td>96</td><td>12288</td><td>96</td><td>3.2M</td><td>2048</td></tr>
+                </table>
+                <p class="paper-ref">Brown et al. (2020). Language Models are Few-Shot Learners</p>
+            </section>
+
+            <section>
+                <h2>GPT-3: In-Context Learning</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">Three Settings</h3>
+                        <ul>
+                            <li><strong>Zero-shot:</strong> No examples, just instruction</li>
+                            <li><strong>One-shot:</strong> Single example provided</li>
+                            <li><strong>Few-shot:</strong> Multiple examples (10-100)</li>
+                        </ul>
+                        <p style="font-size:0.8em; margin-top:1em;">No gradient updates — "learning" happens purely through attention over context</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box" style="font-size:0.75em;">
+                            <strong>Example (Few-shot):</strong><br><br>
+                            Translate English to French:<br>
+                            sea otter -> loutre de mer<br>
+                            peppermint -> menthe poivree<br>
+                            plush giraffe -> girafe peluche<br>
+                            cheese ->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/t5.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="T5 Encoder-Decoder Architecture"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">T5 Encoder-Decoder Architecture</p></div>
+            <h2>T5: Text-to-Text Transfer Transformer</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Raffel et al. (Google, 2019)</li>
+                            <li><strong>Unified framework:</strong> Every task as text-to-text</li>
+                            <li>Encoder-decoder architecture</li>
+                            <li>Pretrained with <strong>span corruption</strong></li>
+                            <li>C4 dataset (750GB clean web text)</li>
+                            <li>Variants from Small (60M) to 11B</li>
+                        </ul>
+                        <p class="paper-ref">Raffel et al. (2019). Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box" style="font-size:0.75em;">
+                            <strong>Span Corruption:</strong><br>
+                            Input: Thank you &lt;X&gt; me to your party &lt;Y&gt; week.<br>
+                            Target: &lt;X&gt; for inviting &lt;Y&gt; last<br><br>
+                            <strong>Task Prefixes:</strong><br>
+                            translate: English to German: ...<br>
+                            summarize: ...<br>
+                            question: ...<br>
+                            sentiment: ...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>BART: Denoising Autoencoder</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Lewis et al. (Facebook, 2019)</li>
+                            <li>Bidirectional encoder + <strong>autoregressive decoder</strong></li>
+                            <li>More flexible corruption schemes:</li>
+                            <li style="margin-left:1em">• Token masking</li>
+                            <li style="margin-left:1em">• Token deletion</li>
+                            <li style="margin-left:1em">• Text infilling</li>
+                            <li style="margin-left:1em">• Document rotation</li>
+                            <li style="margin-left:1em">• Sentence shuffling</li>
+                        </ul>
+                        <p class="paper-ref">Lewis et al. (2019). BART: Denoising Sequence-to-Sequence Pre-training</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Text Infilling:</strong><br>
+                            Original: I love eating _ with my friends.<br>
+                            Corrupted: I love eating with my friends.<br>
+                            Target: pizza
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Other Notable Encoder-Decoder Models</h2>
+                <table style="font-size:0.7em;">
+                    <tr><th>Model</th><th>Year</th><th>Organization</th><th>Innovation</th></tr>
+                    <tr><td>MASS</td><td>2019</td><td>Microsoft</td><td>Masked seq2seq pretraining</td></tr>
+                    <tr><td>UniLM</td><td>2019</td><td>Microsoft</td><td>Unified language model (3 masks)</td></tr>
+                    <tr><td>ProphetNet</td><td>2020</td><td>Microsoft</td><td>Future n-gram prediction</td></tr>
+                    <tr><td>Pegasus</td><td>2020</td><td>Google</td><td>Gap sentence generation for summarization</td></tr>
+                    <tr><td>mT5</td><td>2020</td><td>Google</td><td>Multilingual T5 (101 languages)</td></tr>
+                    <tr><td>UL2</td><td>2022</td><td>Google</td><td>Mixture of denoisers (S-denoiser, R-denoiser, X-denoiser)</td></tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Positional Encoding Evolution</h2>
+                <table>
+                    <tr><th>Method</th><th>Type</th><th>Key Property</th><th>Used In</th></tr>
+                    <tr><td>Absolute Sinusoidal</td><td>Fixed</td><td>Unique per position, unbounded distance</td><td>Original Transformer</td></tr>
+                    <tr><td>Learned Absolute</td><td>Learned</td><td>Fixed max length</td><td>BERT, GPT</td></tr>
+                    <tr><td>Relative (Shaw)</td><td>Relative</td><td>Clipped distance embeddings</td><td>Transformer-XL</td></tr>
+                    <tr><td>RoPE</td><td>Rotary</td><td>Encodes relative pos via rotation matrix</td><td>LLaMA, PaLM, GPT-NeoX</td></tr>
+                    <tr><td>ALiBi</td><td>Linear Bias</td><td>Adds distance-based penalty to attention</td><td>BLOOM, MPT</td></tr>
+                    <tr><td>xPos</td><td>Extrapolatable</td><td>Extends to longer sequences</td><td>Some long-context models</td></tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>RoPE: Rotary Position Embedding</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Su et al. (2021)</li>
+                            <li>Encodes position by <strong>rotating</strong> query/key vectors</li>
+                            <li>f(q,m) = qe^(imθ) in complex space</li>
+                            <li>Relative positions naturally encoded</li>
+                            <li>Excellent extrapolation properties</li>
+                            <li>Standard in modern LLMs</li>
+                        </ul>
+                        <p class="paper-ref">Su et al. (2021). RoFormer: Enhanced Transformer with Rotary Position Embedding</p>
+                    </div>
+                    <div>
+                        <div class="formula" style="font-size:0.8em;">
+                            <strong>2D case:</strong><br>
+                            R_Theta,m = <br>
+                            [[cos(mθ), -sin(mθ)],<br>
+                             [sin(mθ),  cos(mθ)]]<br><br>
+                            f(q,m) = R_Theta,m * q
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>ALiBi: Attention with Linear Biases</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Press et al. (2021)</li>
+                            <li><strong>No position embeddings at all</strong></li>
+                            <li>Adds linear bias to attention scores:</li>
+                            <li>softmax(qk^T + m*[-(i-j)])</li>
+                            <li>Each head has learned slope m</li>
+                            <li>Strong extrapolation to longer sequences</li>
+                        </ul>
+                        <p class="paper-ref">Press et al. (2021). Train Short, Test Long: Attention with Linear Biases</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Advantage:</strong> No position embedding lookup. The bias naturally penalizes distant attention, creating an inductive bias for locality.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION IV: SCALING -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">IV</div>
+                    <h1>Scaling Laws &amp; Large Models</h1>
+                    <p>The Era of Scale</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Scaling Laws (Kaplan et al., 2020)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>OpenAI empirical study</li>
+                            <li>Loss scales as a <strong>power law</strong> with:</li>
+                            <li style="margin-left:1em">• Model parameters (N)</li>
+                            <li style="margin-left:1em">• Dataset size (D)</li>
+                            <li style="margin-left:1em">• Compute (C)</li>
+                            <li>L(N) ~ N^(-α) where α ~ 0.076</li>
+                            <li>L(C) ~ C^(-β) where β ~ 0.050</li>
+                        </ul>
+                        <p class="paper-ref">Kaplan et al. (2020). Scaling Laws for Neural Language Models</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Key Finding:</strong> Performance improves predictably with scale. Larger models are more sample-efficient — they reach the same performance with fewer optimization steps.
+                        </div>
+                        <p style="margin-top:1em;"><span class="tag">Power Law</span> <span class="tag">Predictable</span> <span class="tag">Emergence</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Chinchilla Scaling Laws (2022)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Hoffmann et al. (DeepMind)</li>
+                            <li><strong>Revised scaling laws</strong></li>
+                            <li>Kaplan: fix data, scale params</li>
+                            <li>Chinchilla: <strong>params and data should scale equally</strong></li>
+                            <li>Optimal: D ~ 20N (tokens = 20 x params)</li>
+                            <li>GPT-3 was <strong>undertrained</strong></li>
+                        </ul>
+                        <p class="paper-ref">Hoffmann et al. (2022). Training Compute-Optimal Large Language Models</p>
+                    </div>
+                    <div>
+                        <table style="font-size:0.7em;">
+                            <tr><th>Model</th><th>Params</th><th>Tokens</th><th>Ratio</th></tr>
+                            <tr><td>GPT-3</td><td>175B</td><td>300B</td><td>1.7x</td></tr>
+                            <tr><td>Gopher</td><td>280B</td><td>300B</td><td>1.1x</td></tr>
+                            <tr><td>Chinchilla</td><td>70B</td><td>1.4T</td><td>20x</td></tr>
+                            <tr><td>LLaMA-1</td><td>65B</td><td>1.4T</td><td>21.5x</td></tr>
+                            <tr><td>LLaMA-2</td><td>70B</td><td>2T</td><td>28.6x</td></tr>
+                        </table>
+                        <p style="font-size:0.7em; margin-top:0.5em;">Chinchilla-optimal: 70B model outperforms 280B Gopher</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/llama.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="LLaMA Architecture"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">LLaMA Architecture</p></div>
+            <h2>LLaMA: Open Foundation Models</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">LLaMA-1 (2023)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Touvron et al. (Meta)</li>
+                            <li>Chinchilla-optimal training</li>
+                            <li>Trained on publicly available data only</li>
+                            <li>7B, 13B, 33B, 65B variants</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">LLaMA-2 (2023)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>2 trillion tokens</li>
+                            <li>GQA (Grouped Query Attention)</li>
+                            <li>32K context length</li>
+                            <li>Chat variants with RLHF</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color:#00d4aa">LLaMA-3 (2024)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>8B, 70B, 405B variants</li>
+                            <li>15 trillion tokens</li>
+                            <li>New tokenizer (128K vocab)</li>
+                            <li>All data quality filtered</li>
+                        </ul>
+                        <div class="highlight-box" style="margin-top:1em;">
+                            <strong>GQA:</strong> Multiple query heads share same key/value heads. Reduces memory bandwidth during inference by ~30%.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>LLaMA Architecture Details</h2>
+                <table style="font-size:0.7em;">
+                    <tr><th>Config</th><th>7B</th><th>13B</th><th>33B</th><th>65B/70B</th></tr>
+                    <tr><td>Params</td><td>6.7B</td><td>13.0B</td><td>32.5B</td><td>65.2B/70B</td></tr>
+                    <tr><td>Layers</td><td>32</td><td>40</td><td>60</td><td>80</td></tr>
+                    <tr><td>d_model</td><td>4096</td><td>5120</td><td>6656</td><td>8192</td></tr>
+                    <tr><td>Heads</td><td>32</td><td>40</td><td>52</td><td>64</td></tr>
+                    <tr><td>Head Dim</td><td>128</td><td>128</td><td>128</td><td>128</td></tr>
+                    <tr><td>Context</td><td>2048</td><td>2048</td><td>2048</td><td>2048 (LLaMA-1)</td></tr>
+                    <tr><td>Vocab</td><td>32K</td><td>32K</td><td>32K</td><td>32K</td></tr>
+                    <tr><td>FFN</td><td>SwiGLU</td><td>SwiGLU</td><td>SwiGLU</td><td>SwiGLU</td></tr>
+                    <tr><td>Norm</td><td>RMSNorm</td><td>RMSNorm</td><td>RMSNorm</td><td>RMSNorm</td></tr>
+                    <tr><td>Pos Emb</td><td>RoPE</td><td>RoPE</td><td>RoPE</td><td>RoPE</td></tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>PaLM: Pathways Language Model</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Chowdhery et al. (Google, 2022)</li>
+                            <li><strong>540 billion parameters</strong></li>
+                            <li>Trained on 6144 TPU v4 chips</li>
+                            <li>Pathways system for efficient training</li>
+                            <li>Key architectural choices:</li>
+                            <li style="margin-left:1em">• SwiGLU activation</li>
+                            <li style="margin-left:1em">• Parallel layers (PaLM-style)</li>
+                            <li style="margin-left:1em">• Multi-Query Attention</li>
+                            <li style="margin-left:1em">• RoPE embeddings</li>
+                            <li style="margin-left:1em">• Shared input-output embeddings</li>
+                        </ul>
+                        <p class="paper-ref">Chowdhery et al. (2022). PaLM: Scaling Language Modeling with Pathways</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Parallel Layers:</strong><br>
+                            y = x + MLP(LN(x)) + Attention(LN(x))<br><br>
+                            ~15% training speedup with minimal quality loss. Breaks the standard sequential pattern.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Emergent Abilities</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Wei et al. (2022) identified abilities that <strong>appear suddenly</strong> at scale</li>
+                            <li>Not present in smaller models</li>
+                            <li>Examples:</li>
+                            <li style="margin-left:1em">• Few-shot prompting</li>
+                            <li style="margin-left:1em">• Chain-of-thought reasoning</li>
+                            <li style="margin-left:1em">• Instruction following</li>
+                            <li style="margin-left:1em">• Multi-step arithmetic</li>
+                            <li style="margin-left:1em">• Code generation from description</li>
+                        </ul>
+                        <p class="paper-ref">Wei et al. (2022). Emergent Abilities of Large Language Models</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Debate:</strong> Schaeffer et al. (2023) argue emergence may be a metric artifact — using better metrics (like token edit distance) shows smooth, continuous improvement.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION V: MIXTURE OF EXPERTS -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">V</div>
+                    <h1>Mixture of Experts (MoE)</h1>
+                    <p>Conditional Computation at Scale</p>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/moe.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="Mixture of Experts Routing"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">Mixture of Experts Routing</p></div>
+            <h2>What is Mixture of Experts?</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li><strong>Idea:</strong> Not all parameters need to activate for every input</li>
+                            <li>Divide model into <strong>"experts"</strong> (specialized sub-networks)</li>
+                            <li><strong>Router/Gate:</strong> Decides which experts to use</li>
+                            <li>Only a subset of experts active per token</li>
+                            <li>Scale parameters without scaling compute</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Input Token</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-attention">Router Network</div>
+                            <div class="arch-arrow">↓ Selects top-k</div>
+                            <div class="network-layer layer-hidden">Expert 1</div>
+                            <div class="network-layer layer-hidden">Expert 2</div>
+                            <div class="network-layer layer-hidden">Expert 3</div>
+                            <div class="network-layer layer-hidden">...</div>
+                            <div class="network-layer layer-hidden">Expert E</div>
+                            <div class="arch-arrow">↓ Weighted Sum</div>
+                            <div class="network-layer layer-output">Output</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>MoE Formalization</h2>
+                <div style="font-size:0.85em;">
+                    <div class="formula">
+                        y = Sum(i=1 to E) G(x)_i * E_i(x)
+                    </div>
+                    <ul>
+                        <li><strong>E_i(x):</strong> Expert i (typically an FFN)</li>
+                        <li><strong>G(x)_i:</strong> Gate value for expert i</li>
+                        <li><strong>Sparsity:</strong> Most G(x)_i = 0 (only top-k non-zero)</li>
+                    </ul>
+                    <div class="formula">
+                        G(x) = Softmax(TopK(W_g * x, k))
+                    </div>
+                    <p>TopK sets all but the k largest values to -infinity before softmax</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>MoE in Transformers</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Replace <strong>every other FFN</strong> with MoE layer</li>
+                            <li>Attention layers remain dense</li>
+                            <li>Each token routed independently</li>
+                            <li>Experts placed on different devices</li>
+                            <li>Enables massive parameter counts</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-attention">Self-Attention</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">MoE FFN Layer</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-attention">Self-Attention</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">Dense FFN Layer</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-attention">Self-Attention</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">MoE FFN Layer</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>GShard (2021)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Lepikhin et al. (Google)</li>
+                            <li><strong>First massive MoE for Transformers</strong></li>
+                            <li>Scaling to <strong>600 billion parameters</strong></li>
+                            <li>2048 experts, top-2 routing</li>
+                            <li>Applied to machine translation</li>
+                            <li>SPMD partitioning across TPU pods</li>
+                        </ul>
+                        <p class="paper-ref">Lepikhin et al. (2021). GShard: Scaling Giant Models with Conditional Computation</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Top-2 Routing:</strong><br>
+                            Each token sent to 2 experts.<br>
+                            If capacity exceeded, token dropped.<br>
+                            Auxiliary loss for load balancing.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Switch Transformer (2022)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Fedus et al. (Google)</li>
+                            <li><strong>Top-1 routing</strong> (only 1 expert per token)</li>
+                            <li>Simpler, faster, less communication</li>
+                            <li>1.6 trillion parameters</li>
+                            <li>Same speed as T5-XXL (11B dense)</li>
+                            <li>4x pretraining speedup</li>
+                        </ul>
+                        <p class="paper-ref">Fedus et al. (2022). Switch Transformers: Scaling to Trillion Parameter Models</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Capacity Factor:</strong><br>
+                            Each expert processes (tokens_per_batch / num_experts) x capacity_factor<br><br>
+                            Excess tokens are dropped (rare with proper factor)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Load Balancing in MoE</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#ff8a65">The Problem</h3>
+                        <ul>
+                            <li>Router may collapse to few experts</li>
+                            <li>Some experts overloaded, others idle</li>
+                            <li>Wastes capacity, hurts performance</li>
+                        </ul>
+                        <h3 style="color:#4fc3f7; margin-top:0.5em">Solutions</h3>
+                        <ul>
+                            <li><strong>Auxiliary loss:</strong> Encourage uniform routing</li>
+                            <li><strong>Expert choice:</strong> Tokens choose experts, experts choose tokens</li>
+                            <li><strong>Load balancing loss:</strong> L_load = alpha * N * Sum_i f_i * P_i</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>Auxiliary Loss:</strong><br>
+                            loss = alpha * E * Sum(i=1 to E) f_i * P_i<br><br>
+                            f_i = fraction of tokens to expert i<br>
+                            P_i = mean routing probability to expert i<br>
+                            alpha = hyperparameter (typically 0.01)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Expert Choice Routing (Zhou et al., 2022)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li><strong>Reverse the paradigm:</strong></li>
+                            <li>Each expert selects top-k tokens</li>
+                            <li>Guarantees perfect load balancing</li>
+                            <li>No token dropping</li>
+                            <li>Some tokens may be selected by multiple experts</li>
+                            <li>Others may not be selected at all</li>
+                        </ul>
+                        <p class="paper-ref">Zhou et al. (2022). Mixture-of-Experts with Expert Choice Routing</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Comparison:</strong><br><br>
+                            <strong>Token Choice:</strong> Tokens -> pick experts (imbalanced)<br><br>
+                            <strong>Expert Choice:</strong> Experts -> pick tokens (balanced)<br><br>
+                            Expert choice achieves better perplexity with guaranteed balance.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>GLaM: Google Large Model (2021)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Du et al. (Google)</li>
+                            <li><strong>1.2 trillion parameters</strong></li>
+                            <li>64 experts per MoE layer</li>
+                            <li>Top-2 routing</li>
+                            <li>Only 8% of parameters active per token</li>
+                            <li>~96B active params per inference</li>
+                            <li>3x energy efficient than GPT-3</li>
+                        </ul>
+                        <p class="paper-ref">Du et al. (2021). GLaM: Efficient Scaling of Language Models with Mixture-of-Experts</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Efficiency:</strong><br><br>
+                            GLaM (1.2T params, 96B active) outperforms GPT-3 (175B dense) while using 3x less inference energy.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Mixtral 8x7B / 8x22B (2023-2024)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Mistral AI</li>
+                            <li><strong>8 experts, 2 active per token</strong></li>
+                            <li>Sparse MoE architecture</li>
+                            <li>Outperforms GPT-3.5, Llama 2 70B</li>
+                            <li>Apache 2.0 license (open weights)</li>
+                            <li>Mixtral 8x22B: 141B active params</li>
+                        </ul>
+                        <p class="paper-ref">Jiang et al. (2024). Mixtral of Experts</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Architecture:</strong><br><br>
+                            • 32 layers<br>
+                            • 4096 hidden dim (8x7B)<br>
+                            • 32 attention heads<br>
+                            • 8 FFN experts per layer<br>
+                            • Top-2 routing<br>
+                            • 32K context window<br>
+                            • Sliding window attention (4K)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Qwen2-MoE &amp; DeepSeek-MoE</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">DeepSeek-MoE (2024)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li><strong>Fine-grained experts:</strong> More, smaller experts</li>
+                            <li><strong>Shared experts:</strong> Always active common knowledge</li>
+                            <li>145B total, 22B activated</li>
+                            <li>Better expert specialization</li>
+                        </ul>
+                        <p class="paper-ref">Dai et al. (2024). DeepSeekMoE: Towards Ultimate Expert Specialization</p>
+                    </div>
+                    <div>
+                        <h3 style="color:#ff8a65">Qwen2-MoE (2024)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>57B total, 14B activated</li>
+                            <li>64 experts</li>
+                            <li>Optimized routing mechanism</li>
+                            <li>Competitive with larger dense models</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>MoE Challenges &amp; Solutions</h2>
+                <table style="font-size:0.7em;">
+                    <tr><th>Challenge</th><th>Description</th><th>Solutions</th></tr>
+                    <tr><td>Load Imbalance</td><td>Some experts overloaded</td><td>Auxiliary loss, expert choice, capacity factor</td></tr>
+                    <tr><td>Communication</td><td>All-to-all between devices</td><td>EP grouping, all-to-all optimization</td></tr>
+                    <tr><td>Memory</td><td>Storing all expert params</td><td>Offloading, quantization, pruning</td></tr>
+                    <tr><td>Fine-tuning Instability</td><td>MoE models hard to fine-tune</td><td>Expert dropout, stable routing, dense fine-tuning first</td></tr>
+                    <tr><td>Expert Collapse</td><td>All experts become similar</td><td>Noise in routing, load balancing loss</td></tr>
+                    <tr><td>Deployment</td><td>Larger memory footprint</td><td>Expert merging, distillation to dense</td></tr>
+                </table>
+            </section>
+
+            <!-- SECTION VI: MULTI-MODAL -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">VI</div>
+                    <h1>Multi-Modal Architectures</h1>
+                    <p>Aligning Vision, Language, and Beyond</p>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/clip.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="CLIP Dual Encoder Architecture"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">CLIP Dual Encoder Architecture</p></div>
+            <h2>CLIP: Contrastive Language-Image Pre-training</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Radford et al. (OpenAI, 2021)</li>
+                            <li><strong>Joint embedding space</strong> for text and images</li>
+                            <li>Trained on 400M (image, text) pairs</li>
+                            <li>Contrastive objective: maximize cosine similarity of matching pairs</li>
+                            <li>Zero-shot image classification</li>
+                            <li>Foundation for many multi-modal models</li>
+                        </ul>
+                        <p class="paper-ref">Radford et al. (2021). Learning Transferable Visual Models From Natural Language Supervision</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div style="display:flex; gap:1em; justify-content:center;">
+                                <div>
+                                    <div class="network-layer layer-input">Image</div>
+                                    <div class="arch-arrow">↓</div>
+                                    <div class="network-layer layer-hidden">Image Encoder (ViT/RN)</div>
+                                    <div class="arch-arrow">↓</div>
+                                    <div class="network-layer layer-output">Image Embedding</div>
+                                </div>
+                                <div>
+                                    <div class="network-layer layer-input">Text</div>
+                                    <div class="arch-arrow">↓</div>
+                                    <div class="network-layer layer-hidden">Text Encoder (Transformer)</div>
+                                    <div class="arch-arrow">↓</div>
+                                    <div class="network-layer layer-output">Text Embedding</div>
+                                </div>
+                            </div>
+                            <div class="arch-arrow" style="margin-top:0.5em;">↑ Contrastive Loss ↑</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>CLIP Architecture &amp; Training</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">Image Encoders</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>ResNet-50 (RN50): 38M params</li>
+                            <li>ResNet-101 (RN101): 56M params</li>
+                            <li>ViT-B/32: 86M params</li>
+                            <li>ViT-L/14: 304M params</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">Text Encoder</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Transformer (GPT-2 style)</li>
+                            <li>63M-137M params</li>
+                            <li>77 token context</li>
+                            <li>Max vocab 49,152</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>Contrastive Loss:</strong><br>
+                            L = 1/2[L_I + L_T]<br><br>
+                            L_I = -1/N Sum_i log(exp(sim(I_i,T_i)/tau) / Sum_j exp(sim(I_i,T_j)/tau))
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/vit.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="Vision Transformer (ViT)"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">Vision Transformer (ViT)</p></div>
+            <h2>Vision Transformer (ViT)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Dosovitskiy et al. (Google, 2020)</li>
+                            <li>Apply Transformer <strong>directly to image patches</strong></li>
+                            <li>Split image into 16x16 patches</li>
+                            <li>Linear embedding + position encoding</li>
+                            <li>Standard Transformer encoder</li>
+                            <li>[CLS] token for classification</li>
+                        </ul>
+                        <p class="paper-ref">Dosovitskiy et al. (2020). An Image is Worth 16x16 Words</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Image (224x224x3)</div>
+                            <div class="arch-arrow">↓ Patchify</div>
+                            <div class="network-layer layer-hidden">196 patches (16x16)</div>
+                            <div class="arch-arrow">↓ + [CLS] + Pos Emb</div>
+                            <div class="network-layer layer-attention">Transformer Encoder (xL)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-output">[CLS] -> MLP Head</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>ViT Variants &amp; Scaling</h2>
+                <table>
+                    <tr><th>Model</th><th>Layers</th><th>Hidden</th><th>MLP</th><th>Heads</th><th>Params</th></tr>
+                    <tr><td>ViT-Tiny</td><td>12</td><td>192</td><td>768</td><td>3</td><td>5.7M</td></tr>
+                    <tr><td>ViT-Small</td><td>12</td><td>384</td><td>1536</td><td>6</td><td>22M</td></tr>
+                    <tr><td>ViT-Base</td><td>12</td><td>768</td><td>3072</td><td>12</td><td>86M</td></tr>
+                    <tr><td>ViT-Large</td><td>24</td><td>1024</td><td>4096</td><td>16</td><td>307M</td></tr>
+                    <tr><td>ViT-Huge</td><td>32</td><td>1280</td><td>5120</td><td>16</td><td>632M</td></tr>
+                </table>
+                <p style="font-size:0.75em; margin-top:0.5em;">ViT requires large datasets (JFT-300M, ImageNet-21K) to outperform CNNs. With sufficient data, ViT scales better than ResNet.</p>
+            </section>
+
+            <section>
+                <h2>Swin Transformer</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Liu et al. (Microsoft, 2021)</li>
+                            <li><strong>Hierarchical ViT</strong> with shifted windows</li>
+                            <li>Computes self-attention within local windows</li>
+                            <li>Shifted windowing in alternating layers</li>
+                            <li>Reduces complexity from O(n^2) to O(n)</li>
+                            <li>Works as backbone for detection/segmentation</li>
+                        </ul>
+                        <p class="paper-ref">Liu et al. (2021). Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Shifted Window Attention:</strong><br><br>
+                            Layer 1: Windows at regular grid<br>
+                            Layer 2: Windows shifted by (M/2, M/2)<br><br>
+                            Cross-window connections without global attention
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>DALL-E: Text-to-Image Generation</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">DALL-E (2021)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Two-stage model:</li>
+                            <li style="margin-left:1em">1. dVAE compresses images to tokens</li>
+                            <li style="margin-left:1em">2. Autoregressive Transformer models text + image tokens</li>
+                            <li>12 billion parameters</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">DALL-E 2 (2022)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Three components:</li>
+                            <li style="margin-left:1em">1. CLIP for text encoding</li>
+                            <li style="margin-left:1em">2. Prior (text -> CLIP image embedding)</li>
+                            <li style="margin-left:1em">3. Decoder (CLIP embedding -> image)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Text Prompt</div>
+                            <div class="arch-arrow">↓ CLIP</div>
+                            <div class="network-layer layer-hidden">Text Embedding</div>
+                            <div class="arch-arrow">↓ Prior (Diffusion/AR)</div>
+                            <div class="network-layer layer-hidden">Image Embedding</div>
+                            <div class="arch-arrow">↓ Decoder (Diffusion)</div>
+                            <div class="network-layer layer-output">Generated Image</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>DALL-E 3 &amp; Imagen</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">DALL-E 3 (2023)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Improved prompt following</li>
+                            <li>T5-XXL text encoder</li>
+                            <li>Diffusion decoder</li>
+                            <li>Better text rendering in images</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">Imagen (Google, 2022)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>T5-XXL for text understanding</li>
+                            <li>Cascaded diffusion models</li>
+                            <li>64x64 -> 256x256 -> 1024x1024</li>
+                            <li>No CLIP; pure text conditioning</li>
+                        </ul>
+                        <p class="paper-ref">Saharia et al. (2022). Photorealistic Text-to-Image Diffusion Models</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Cascaded Diffusion:</strong><br><br>
+                            Base: 64x64 diffusion<br>
+                            -> Super-resolution: 64->256<br>
+                            -> Super-resolution: 256->1024<br><br>
+                            Each stage conditioned on text + previous output
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/stable_diffusion.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="Latent Diffusion Model (Stable Diffusion)"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">Latent Diffusion Model (Stable Diffusion)</p></div>
+            <h2>Stable Diffusion Architecture</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Rombach et al. (2022)</li>
+                            <li><strong>Latent Diffusion Model</strong></li>
+                            <li>Diffusion in <strong>compressed latent space</strong></li>
+                            <li>Uses pre-trained autoencoder (VAE)</li>
+                            <li>U-Net with cross-attention</li>
+                            <li>Text conditioning via CLIP</li>
+                        </ul>
+                        <p class="paper-ref">Rombach et al. (2022). High-Resolution Image Synthesis with Latent Diffusion Models</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Text Prompt</div>
+                            <div class="arch-arrow">↓ CLIP</div>
+                            <div class="network-layer layer-hidden">Text Embeddings</div>
+                            <div class="arch-arrow">↓ Cross-Attention</div>
+                            <div class="network-layer layer-attention">U-Net (Diffusion)</div>
+                            <div class="arch-arrow">↓ Denoising</div>
+                            <div class="network-layer layer-hidden">Latent Representation</div>
+                            <div class="arch-arrow">↓ VAE Decoder</div>
+                            <div class="network-layer layer-output">Image</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Flamingo: Visual Language Model</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Alayrac et al. (DeepMind, 2022)</li>
+                            <li><strong>Few-shot visual understanding</strong></li>
+                            <li>Pretrained frozen vision + language models</li>
+                            <li><strong>Perceiver Resampler:</strong> Compress variable visual inputs</li>
+                            <li><strong>GATED XATTN-DENSE:</strong> Cross-attention layers inserted in LM</li>
+                            <li>Trained on interleaved image-text data</li>
+                        </ul>
+                        <p class="paper-ref">Alayrac et al. (2022). Flamingo: a Visual Language Model for Few-Shot Learning</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Key Innovation:</strong> Keeps pretrained vision and language models frozen, only trains bridge components. Enables rapid adaptation without catastrophic forgetting.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>LLaVA: Large Language and Vision Assistant</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Liu et al. (2023)</li>
+                            <li>Simple but effective architecture</li>
+                            <li><strong>Frozen CLIP ViT</strong> vision encoder</li>
+                            <li><strong>Linear projection layer</strong> (trainable)</li>
+                            <li><strong>Frozen LLM</strong> (Vicuna/LLaMA)</li>
+                            <li>End-to-end fine-tuned on instruction data</li>
+                        </ul>
+                        <p class="paper-ref">Liu et al. (2023). Visual Instruction Tuning</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div style="display:flex; gap:1em; justify-content:center;">
+                                <div class="network-layer layer-input">Image</div>
+                            </div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">CLIP ViT (frozen)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-attention">Linear Projection</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-input">Text Prompt</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">LLM (frozen/finetuned)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-output">Response</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>GPT-4V &amp; Gemini: Native Multimodality</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">GPT-4V (2023)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Vision capabilities added to GPT-4</li>
+                            <li>Understands images, diagrams, charts</li>
+                            <li>OCR capabilities</li>
+                            <li>Architecture undisclosed</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">Gemini (2023-2024)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Native multimodal from pretraining</li>
+                            <li>Text, image, audio, video, code</li>
+                            <li>Multimodal from start, not bolted-on</li>
+                            <li>Variants: Nano, Pro, Ultra</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Native vs. Assembled:</strong><br><br>
+                            <strong>Assembled (LLaVA, Flamingo):</strong><br>
+                            Connect frozen vision + language models<br><br>
+                            <strong>Native (Gemini, GPT-4o):</strong><br>
+                            Train single model on all modalities jointly from scratch
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>BLIP &amp; BLIP-2</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">BLIP (2022)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Unified vision-language model</li>
+                            <li><strong>Multimodal mixture:</strong> encoder-decoder</li>
+                            <li>CapFilt: Caption filtering and generation</li>
+                            <li>Understands and generates</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">BLIP-2 (2023)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Frozen image encoder + frozen LLM</li>
+                            <li><strong>Q-Former:</strong> Lightweight query transformer</li>
+                            <li>Two-stage pretraining</li>
+                            <li>Efficient bootstrapping from frozen models</li>
+                        </ul>
+                        <p class="paper-ref">Li et al. (2023). BLIP-2: Bootstrapping Language-Image Pre-training</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Image</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">Image Encoder (frozen)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-attention">Q-Former (trainable)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">LLM (frozen)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-output">Text</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Audio &amp; Speech Architectures</h2>
+                <table style="font-size:0.7em;">
+                    <tr><th>Model</th><th>Year</th><th>Type</th><th>Innovation</th></tr>
+                    <tr><td>wav2vec 2.0</td><td>2020</td><td>Self-supervised</td><td>Contrastive pretraining on speech</td></tr>
+                    <tr><td>HuBERT</td><td>2021</td><td>Self-supervised</td><td>Hidden unit BERT, clustering targets</td></tr>
+                    <tr><td>Whisper</td><td>2022</td><td>Supervised</td><td>680K hours multilingual, encoder-decoder</td></tr>
+                    <tr><td>AudioLM</td><td>2022</td><td>Generative</td><td>Audio continuation, hierarchical</td></tr>
+                    <tr><td>MusicLM</td><td>2023</td><td>Generative</td><td>Text-to-music from hummed melodies</td></tr>
+                    <tr><td>VALL-E</td><td>2023</td><td>TTS</td><td>Neural codec + language model</td></tr>
+                    <tr><td>SpeechGPT</td><td>2023</td><td>Speech LLM</td><td>Cross-modal instruction following</td></tr>
+                </table>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/whisper.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="Whisper Encoder-Decoder Architecture"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">Whisper Encoder-Decoder Architecture</p></div>
+            <h2>Whisper Architecture</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Radford et al. (OpenAI, 2022)</li>
+                            <li><strong>Encoder-decoder Transformer</strong></li>
+                            <li>Trained on 680,000 hours of audio</li>
+                            <li>Multilingual, multitask</li>
+                            <li>Variants: Tiny (39M) to Large (1.55B)</li>
+                            <li>Special tokens for tasks:</li>
+                            <li style="margin-left:1em">• Transcribe, translate, timestamps</li>
+                            <li style="margin-left:1em">• Language identification</li>
+                        </ul>
+                        <p class="paper-ref">Radford et al. (2022). Robust Speech Recognition via Large-Scale Weak Supervision</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Log-Mel Spectrogram (30s)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">Encoder (xN)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-attention">Decoder (xN)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-output">Text Tokens</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION VII: VISION ARCHITECTURES -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">VII</div>
+                    <h1>Vision Architectures</h1>
+                    <p>Beyond Classification</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>DETR: Detection Transformer</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Carion et al. (Facebook, 2020)</li>
+                            <li><strong>End-to-end object detection</strong></li>
+                            <li>No anchors, NMS, or complex pipelines</li>
+                            <li>Learned object queries (100 fixed)</li>
+                            <li>Bipartite matching (Hungarian algorithm)</li>
+                            <li>Set-based global loss</li>
+                        </ul>
+                        <p class="paper-ref">Carion et al. (2020). End-to-End Object Detection with Transformers</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Image</div>
+                            <div class="arch-arrow">↓ CNN Backbone</div>
+                            <div class="network-layer layer-hidden">Feature Maps</div>
+                            <div class="arch-arrow">↓ Transformer Encoder</div>
+                            <div class="network-layer layer-attention">Transformer Decoder</div>
+                            <div class="arch-arrow">↓ + Object Queries</div>
+                            <div class="network-layer layer-output">Box + Class Predictions</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>SAM: Segment Anything Model</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Kirillov et al. (Meta, 2023)</li>
+                            <li><strong>Promptable segmentation</strong></li>
+                            <li>Three components:</li>
+                            <li style="margin-left:1em">1. <strong>Image Encoder:</strong> ViT-H (632M params)</li>
+                            <li style="margin-left:1em">2. <strong>Prompt Encoder:</strong> Points, boxes, masks, text</li>
+                            <li style="margin-left:1em">3. <strong>Mask Decoder:</strong> Lightweight transformer</li>
+                            <li>SA-1B dataset: 1 billion masks</li>
+                        </ul>
+                        <p class="paper-ref">Kirillov et al. (2023). Segment Anything</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div style="display:flex; gap:1em; justify-content:center;">
+                                <div class="network-layer layer-input">Image</div>
+                                <div class="network-layer layer-input">Prompt</div>
+                            </div>
+                            <div class="arch-arrow">↓ ↓</div>
+                            <div style="display:flex; gap:1em; justify-content:center;">
+                                <div class="network-layer layer-hidden">Image Encoder</div>
+                                <div class="network-layer layer-hidden">Prompt Encoder</div>
+                            </div>
+                            <div class="arch-arrow">↓ ↓</div>
+                            <div class="network-layer layer-attention">Mask Decoder</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-output">Segmentation Mask</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>ConvNeXt: Modernizing CNNs</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Liu et al. (Facebook, 2022)</li>
+                            <li>"What if we design a CNN like a Transformer?"</li>
+                            <li>Modernized ResNet with:</li>
+                            <li style="margin-left:1em">• Larger kernels (7x7)</li>
+                            <li style="margin-left:1em">• Depthwise separable convolutions</li>
+                            <li style="margin-left:1em">• LayerNorm instead of BatchNorm</li>
+                            <li style="margin-left:1em">• GELU activation</li>
+                            <li style="margin-left:1em">• Fewer activation functions</li>
+                            <li style="margin-left:1em">• Patchify stem</li>
+                            <li>Matches Swin Transformer accuracy</li>
+                        </ul>
+                        <p class="paper-ref">Liu et al. (2022). A ConvNet for the 2020s</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Lesson:</strong> Many Transformer improvements are actually general deep learning improvements, not specific to attention. CNNs + Transformer design choices = competitive performance.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>MAE: Masked Autoencoder</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>He et al. (Meta, 2022)</li>
+                            <li><strong>Asymmetric encoder-decoder</strong></li>
+                            <li>Mask 75% of image patches</li>
+                            <li>Encoder processes only visible patches</li>
+                            <li>Lightweight decoder reconstructs all</li>
+                            <li>Pixel-level reconstruction target</li>
+                            <li>Scalable self-supervised learning</li>
+                        </ul>
+                        <p class="paper-ref">He et al. (2022). Masked Autoencoders Are Scalable Vision Learners</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Image (mask 75%)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-attention">Encoder ViT (on visible only)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">Latent Representations</div>
+                            <div class="arch-arrow">↓ + Mask Tokens</div>
+                            <div class="network-layer layer-hidden">Shallow Decoder</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-output">Reconstructed Image</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>DINO &amp; DINOv2: Self-Distillation</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">DINO (2021)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Self-distillation with no labels</li>
+                            <li>Student + Momentum Teacher</li>
+                            <li>Cross-entropy between outputs</li>
+                            <li>Emerging semantic segmentation</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">DINOv2 (2023)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Scale to 1 billion curated images</li>
+                            <li>Discriminative self-supervised</li>
+                            <li>Strong visual features</li>
+                            <li>Beats OpenCLIP on many tasks</li>
+                        </ul>
+                        <p class="paper-ref">Oquab et al. (2023). DINOv2: Learning Robust Visual Features without Supervision</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>DINO Pipeline:</strong><br><br>
+                            Same image -> different augmentations<br>
+                            Student predicts teacher's output<br>
+                            Teacher = EMA of student weights<br>
+                            No labels needed!
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION VIII: EFFICIENT ARCHITECTURES -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">VIII</div>
+                    <h1>Efficient &amp; Novel Architectures</h1>
+                    <p>Beyond the Standard Transformer</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Linear Attention &amp; Approximations</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li><strong>Problem:</strong> O(n^2) attention is expensive</li>
+                            <li><strong>Goal:</strong> Approximate or replace attention</li>
+                            <li>Approaches:</li>
+                            <li style="margin-left:1em">• Sparse attention patterns</li>
+                            <li style="margin-left:1em">• Kernel methods (Linear Transformer)</li>
+                            <li style="margin-left:1em">• Low-rank approximations</li>
+                            <li style="margin-left:1em">• State space models</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>Linear Attention:</strong><br>
+                            softmax(QK^T)V ~ phi(Q)phi(K)^T V<br><br>
+                            Using feature map phi, reorder:<br>
+                            = phi(Q)(phi(K)^T V)<br><br>
+                            Complexity: O(n^2 d) -> O(n d^2)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Longformer, BigBird &amp; Sparse Patterns</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">Longformer (2020)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Sliding window attention</li>
+                            <li>Dilated attention (skip some tokens)</li>
+                            <li>Global attention on [CLS]</li>
+                            <li>O(n x w) where w = window size</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">BigBird (2020)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Random + Window + Global</li>
+                            <li>Proven to be Turing complete</li>
+                            <li>4096 token context</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <table style="font-size:0.7em;">
+                            <tr><th>Model</th><th>Pattern</th><th>Complexity</th></tr>
+                            <tr><td>Transformer</td><td>Dense</td><td>O(n^2)</td></tr>
+                            <tr><td>Longformer</td><td>Window + Global</td><td>O(n)</td></tr>
+                            <tr><td>BigBird</td><td>Random+Window+Global</td><td>O(n)</td></tr>
+                            <tr><td>Reformer</td><td>LSH hashing</td><td>O(n log n)</td></tr>
+                            <tr><td>Linformer</td><td>Low-rank</td><td>O(n)</td></tr>
+                            <tr><td>Performer</td><td>FAVOR+ kernel</td><td>O(n)</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>FlashAttention</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Dao et al. (2022)</li>
+                            <li><strong>IO-aware exact attention</strong></li>
+                            <li>No approximation — exact same output</li>
+                            <li>Tiling to fit in SRAM</li>
+                            <li>Fewer HBM reads/writes</li>
+                            <li>2-4x speedup, 10-20x memory savings</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">FlashAttention-2 (2023)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Better parallelism</li>
+                            <li>Further 2x speedup</li>
+                        </ul>
+                        <p class="paper-ref">Dao et al. (2022). FlashAttention: Fast and Memory-Efficient Exact Attention</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Memory Hierarchy:</strong><br><br>
+                            HBM (High Bandwidth Memory): Large, slow<br>
+                            SRAM (Shared Memory): Small, fast<br><br>
+                            FlashAttention splits attention into tiles that fit in SRAM, avoiding round-trips to HBM.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Ring Attention</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Liu et al. (2023)</li>
+                            <li>Extends FlashAttention to <strong>infinite context</strong></li>
+                            <li>Blockwise computation across devices</li>
+                            <li>Key-value blocks circulate in ring topology</li>
+                            <li>Computation and communication overlapped</li>
+                            <li>Enables millions of tokens</li>
+                        </ul>
+                        <p class="paper-ref">Liu et al. (2023). Ring Attention with Blockwise Transformers</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Devices arranged in ring:</strong><br><br>
+                            Device 0 -> Device 1 -> Device 2 -> ... -> Device 0<br><br>
+                            Each device computes local attention while passing KV blocks to next device.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>State Space Models (S4)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Gu et al. (2021)</li>
+                            <li>Inspired by <strong>continuous state space</strong></li>
+                            <li>h'(t) = A h(t) + B x(t)</li>
+                            <li>y(t) = C h(t) + D x(t)</li>
+                            <li>Discretized for sequences</li>
+                            <li>O(n) training and inference</li>
+                            <li>Long-range dependencies</li>
+                        </ul>
+                        <p class="paper-ref">Gu et al. (2021). Efficiently Modeling Long Sequences with Structured State Spaces</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>Continuous:</strong><br>
+                            h_dot(t) = A h(t) + B x(t)<br>
+                            y(t) = C h(t)<br><br>
+                            <strong>Discretized:</strong><br>
+                            h_k = A_bar h_{k-1} + B_bar x_k<br>
+                            y_k = C h_k
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/mamba.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="Mamba Selective State Space Model"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">Mamba Selective State Space Model</p></div>
+            <h2>Mamba: Selective State Spaces</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Gu &amp; Dao (2023)</li>
+                            <li><strong>Selection mechanism:</strong> B, C, Delta depend on input</li>
+                            <li>Hardware-aware parallel scan</li>
+                            <li>O(n) complexity like S4</li>
+                            <li>Strong empirical results</li>
+                            <li>Challenges Transformer dominance</li>
+                        </ul>
+                        <p class="paper-ref">Gu &amp; Dao (2023). Mamba: Linear-Time Sequence Modeling with Selective State Spaces</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Key Difference from S4:</strong><br><br>
+                            S4: B, C, Delta are fixed (input-independent)<br><br>
+                            Mamba: B, C, Delta = f(x) (input-dependent)<br><br>
+                            This "selection" allows content-aware reasoning while maintaining linear complexity.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>RWKV: RNN with Transformer Benefits</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Peng (2023)</li>
+                            <li><strong>Parallelizable training</strong> like Transformer</li>
+                            <li><strong>Constant memory inference</strong> like RNN</li>
+                            <li>No attention mechanism</li>
+                            <li>Channel mixing + time decay</li>
+                            <li>14B parameter models trained</li>
+                        </ul>
+                        <p class="paper-ref">Peng (2023). RWKV: Reinventing RNNs for the Transformer Era</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>RWKV Attention:</strong><br><br>
+                            a_t = exp(-w) * a_{t-1} + exp(k_t) * v_t<br>
+                            b_t = exp(-w) * b_{t-1} + exp(k_t)<br>
+                            o_t = sigmoid(r_t) * (a_t / b_t)<br><br>
+                            w = time decay (learned per channel)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>RetNet: Retentive Network</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Sun et al. (2023)</li>
+                            <li>Microsoft's "Transformer killer"</li>
+                            <li><strong>Retention mechanism</strong> replaces attention</li>
+                            <li>Parallel, recurrent, and chunkwise forms</li>
+                            <li>7.7x inference speedup vs Transformer</li>
+                            <li>Comparable perplexity to Transformer</li>
+                        </ul>
+                        <p class="paper-ref">Sun et al. (2023). Retentive Network: A Successor to Transformer for Large Language Models</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>Retention:</strong><br><br>
+                            Q = X W_Q, K = X W_K, V = X W_V<br><br>
+                            R = Q K^T elementwise D<br><br>
+                            D_{nm} = gamma^{n-m} if n >= m, else 0<br><br>
+                            gamma = decay factor (learned per head)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>LoRA: Low-Rank Adaptation</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Hu et al. (2021)</li>
+                            <li><strong>Freeze pretrained weights</strong></li>
+                            <li>Inject trainable rank decomposition matrices</li>
+                            <li>W = W0 + BA where B in R^{d x r}, A in R^{r x k}</li>
+                            <li>r << min(d,k) typically 4-64</li>
+                            <li>Reduces trainable params by 10,000x</li>
+                        </ul>
+                        <p class="paper-ref">Hu et al. (2021). LoRA: Low-Rank Adaptation of Large Language Models</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">x</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">W0 (frozen)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div style="display:flex; gap:0.5em; justify-content:center;">
+                                <div class="network-layer layer-attention" style="font-size:0.7em;">A (r x k)</div>
+                                <div class="network-layer layer-attention" style="font-size:0.7em;">B (d x r)</div>
+                            </div>
+                            <div class="arch-arrow">↓ +</div>
+                            <div class="network-layer layer-output">h = W0 x + BAx</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>QLoRA &amp; Quantization</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">4-bit Quantization</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>NF4 (Normal Float 4): optimal for normal weights</li>
+                            <li>Double quantization of constants</li>
+                            <li>Paged optimizers for memory</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">QLoRA</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Finetune 65B model on single 48GB GPU</li>
+                            <li>Full 16-bit finetuning performance</li>
+                            <li>Dettmers et al. (2023)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <table style="font-size:0.7em;">
+                            <tr><th>Method</th><th>65B Model Memory</th><th>GPU</th></tr>
+                            <tr><td>Full Finetune</td><td>780 GB</td><td>16x A100</td></tr>
+                            <tr><td>LoRA (16-bit)</td><td>~130 GB</td><td>2x A100</td></tr>
+                            <tr><td>QLoRA</td><td>~41 GB</td><td>1x A100</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Knowledge Distillation</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Hinton et al. (2015)</li>
+                            <li><strong>Teacher-Student paradigm</strong></li>
+                            <li>Train small model (student) to mimic large model (teacher)</li>
+                            <li>Soft targets (temperature-scaled softmax)</li>
+                            <li>Transfer "dark knowledge" from probabilities</li>
+                            <li>Modern variants: MiniLLM, GKD, on-policy distillation</li>
+                        </ul>
+                        <p class="paper-ref">Hinton et al. (2015). Distilling the Knowledge in a Neural Network</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>Distillation Loss:</strong><br><br>
+                            L = alpha * CE(y_hard, y_student)<br>
+                            + (1-alpha) * T^2 * KL(softmax(z_T/T), softmax(z_S/T))
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION IX: GENERATIVE MODELS -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">IX</div>
+                    <h1>Generative Model Architectures</h1>
+                    <p>From VAEs to Diffusion</p>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/vae.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="VAE: Variational Autoencoder"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">VAE: Variational Autoencoder</p></div>
+            <h2>Variational Autoencoder (VAE)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Kingma &amp; Welling (2013)</li>
+                            <li><strong>Latent variable model</strong></li>
+                            <li>Encoder: q_phi(z|x) (approximate posterior)</li>
+                            <li>Decoder: p_theta(x|z) (generative model)</li>
+                            <li>Reparameterization trick</li>
+                            <li>ELBO objective</li>
+                        </ul>
+                        <p class="paper-ref">Kingma &amp; Welling (2013). Auto-Encoding Variational Bayes</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>ELBO:</strong><br>
+                            L = E_{q(z|x)}[log p(x|z)]<br>
+                            - D_KL(q(z|x) || p(z))<br><br>
+                            <strong>Reparameterization:</strong><br>
+                            z = mu + sigma elementwise epsilon, epsilon ~ N(0,I)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/gan.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="GAN: Generative Adversarial Network"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">GAN: Generative Adversarial Network</p></div>
+            <h2>Generative Adversarial Networks (GANs)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Goodfellow et al. (2014)</li>
+                            <li><strong>Two-player minimax game</strong></li>
+                            <li><strong>Generator:</strong> Creates fake samples from noise</li>
+                            <li><strong>Discriminator:</strong> Distinguishes real vs fake</li>
+                            <li>Training instability common</li>
+                            <li>Mode collapse problem</li>
+                        </ul>
+                        <p class="paper-ref">Goodfellow et al. (2014). Generative Adversarial Networks</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>Objective:</strong><br><br>
+                            min_G max_D V(D,G) =<br>
+                            E_{x~p_data}[log D(x)] +<br>
+                            E_{z~p_z}[log(1-D(G(z)))]
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>GAN Architecture Evolution</h2>
+                <table style="font-size:0.7em;">
+                    <tr><th>Model</th><th>Year</th><th>Innovation</th></tr>
+                    <tr><td>DCGAN</td><td>2015</td><td>First stable CNN-based GAN</td></tr>
+                    <tr><td>CGAN</td><td>2014</td><td>Conditional generation</td></tr>
+                    <tr><td>WGAN</td><td>2017</td><td>Wasserstein distance, more stable</td></tr>
+                    <tr><td>ProGAN</td><td>2017</td><td>Progressive growing of layers</td></tr>
+                    <tr><td>StyleGAN</td><td>2018</td><td>Style-based generator, mapping network</td></tr>
+                    <tr><td>StyleGAN2</td><td>2019</td><td>AdaIN fixes, path regularization</td></tr>
+                    <tr><td>StyleGAN3</td><td>2021</td><td>Alias-free synthesis</td></tr>
+                    <tr><td>BigGAN</td><td>2018</td><td>Large-scale class-conditional</td></tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Normalizing Flows</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Dinh et al. (2014)</li>
+                            <li><strong>Invertible transformations</strong></li>
+                            <li>z = f(x), x = f^{-1}(z)</li>
+                            <li>Exact log-likelihood computation</li>
+                            <li>Change of variables formula:</li>
+                            <li>p_X(x) = p_Z(f(x)) |det J_f(x)|</li>
+                            <li>Parallel training and sampling</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color:#ff8a65">Key Models</h3>
+                        <ul style="font-size:0.85em;">
+                            <li><strong>NICE:</strong> Additive coupling</li>
+                            <li><strong>RealNVP:</strong> Affine coupling</li>
+                            <li><strong>Glow:</strong> 1x1 convolutions</li>
+                            <li><strong>Flow++:</strong> Improved architecture</li>
+                        </ul>
+                        <div class="highlight-box" style="margin-top:1em;">
+                            <strong>Constraint:</strong> Must preserve dimensionality. Latent and data spaces have same dimension.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/diffusion_process.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="Diffusion Forward & Reverse Process"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">Diffusion Forward & Reverse Process</p></div>
+            <h2>Diffusion Models: Foundations</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Sohl-Dickstein et al. (2015)</li>
+                            <li>Ho et al. (2020) — DDPM</li>
+                            <li><strong>Forward process:</strong> Add noise over T steps</li>
+                            <li><strong>Reverse process:</strong> Learn to denoise</li>
+                            <li>Trained to predict noise epsilon</li>
+                            <li>Any architecture can be denoising network</li>
+                        </ul>
+                        <p class="paper-ref">Ho et al. (2020). Denoising Diffusion Probabilistic Models</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>Forward:</strong><br>
+                            q(x_t|x_{t-1}) = N(x_t; sqrt(1-beta_t) x_{t-1}, beta_t I)<br><br>
+                            <strong>Reverse:</strong><br>
+                            p_theta(x_{t-1}|x_t) = N(x_{t-1}; mu_theta(x_t,t), Sigma_theta(x_t,t))
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Diffusion Model Variants</h2>
+                <table style="font-size:0.7em;">
+                    <tr><th>Variant</th><th>Innovation</th><th>Speedup</th></tr>
+                    <tr><td>DDIM</td><td>Non-Markovian deterministic sampling</td><td>10-50x</td></tr>
+                    <tr><td>DDPM++</td><td>Improved parameterization and architecture</td><td>Better quality</td></tr>
+                    <tr><td>Score SDE</td><td>Continuous-time formulation</td><td>Unified theory</td></tr>
+                    <tr><td>Latent Diffusion</td><td>Diffuse in VAE latent space</td><td>Memory efficient</td></tr>
+                    <tr><td>Consistency Models</td><td>Direct mapping, no iterative denoising</td><td>Single step</td></tr>
+                    <tr><td>Flow Matching</td><td>Optimal transport paths</td><td>More stable</td></tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Flow Matching</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Lipman et al. (2022), Liu et al. (2022)</li>
+                            <li><strong>Learn vector field</strong> that transforms noise to data</li>
+                            <li>Continuous-time flow</li>
+                            <li>Optimal transport paths (straighter)</li>
+                            <li>More stable than diffusion</li>
+                            <li>Used in Stable Diffusion 3, DALL-E 3</li>
+                        </ul>
+                        <p class="paper-ref">Lipman et al. (2022). Flow Matching for Generative Modeling</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>Probability Flow ODE:</strong><br>
+                            dx/dt = v_theta(x,t)<br><br>
+                            <strong>Training:</strong><br>
+                            min_theta E_{t,x_0,x_1} ||v_theta(x_t,t) - (x_1-x_0)||^2<br><br>
+                            where x_t = t x_1 + (1-t) x_0
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION X: TRAINING PARADIGMS -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">X</div>
+                    <h1>Advanced Training Paradigms</h1>
+                    <p>From Pretraining to Alignment</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Three-Stage Training Pipeline</h2>
+                <div class="arch-diagram">
+                    <div class="network-layer layer-input">Stage 1: Pretraining</div>
+                    <div class="arch-arrow">↓ Next-token prediction on large corpus</div>
+                    <div class="network-layer layer-hidden">Base Model</div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="network-layer layer-attention">Stage 2: Supervised Fine-Tuning</div>
+                    <div class="arch-arrow">↓ Instruction-following data</div>
+                    <div class="network-layer layer-hidden">SFT Model</div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="network-layer layer-ffn">Stage 3: RLHF / DPO / RL</div>
+                    <div class="arch-arrow">↓ Human preference data</div>
+                    <div class="network-layer layer-output">Aligned Model (ChatGPT, Claude)</div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Instruction Tuning</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Wei et al. (2021), Sanh et al. (2021)</li>
+                            <li>Fine-tune on <strong>(instruction, input, output)</strong> triples</li>
+                            <li>FLAN, T0, Natural Instructions</li>
+                            <li>Unlocks zero-shot task generalization</li>
+                            <li>Scales with number of tasks</li>
+                        </ul>
+                        <div class="highlight-box" style="margin-top:1em; font-size:0.8em;">
+                            <strong>Example:</strong><br>
+                            Instruction: Translate to French<br>
+                            Input: Hello world<br>
+                            Output: Bonjour le monde
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="color:#ff8a65">Key Datasets</h3>
+                        <ul style="font-size:0.85em;">
+                            <li><strong>Alpaca:</strong> 52K GPT-generated instructions</li>
+                            <li><strong>ShareGPT:</strong> Real ChatGPT conversations</li>
+                            <li><strong>Dolly:</strong> Human-generated</li>
+                            <li><strong>LIMA:</strong> 1K examples, quality over quantity</li>
+                            <li><strong>UltraChat:</strong> 1.5M synthetic dialogues</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/rlhf.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="RLHF Pipeline"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">RLHF Pipeline</p></div>
+            <h2>RLHF: Reinforcement Learning from Human Feedback</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Christiano et al. (2017), Ouyang et al. (2022)</li>
+                            <li><strong>1. Train Reward Model (RM):</strong></li>
+                            <li style="margin-left:1em">• Humans rank model outputs</li>
+                            <li style="margin-left:1em">• Bradley-Terry model: P(y1>y2) = sigma(r(x,y1)-r(x,y2))</li>
+                            <li><strong>2. Optimize Policy with PPO:</strong></li>
+                            <li style="margin-left:1em">• Maximize reward + KL penalty</li>
+                        </ul>
+                        <p class="paper-ref">Ouyang et al. (2022). Training language models to follow instructions with human feedback</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>PPO Objective:</strong><br><br>
+                            max_pi E[r(x,y)]<br>
+                            - beta * D_KL(pi||pi_ref)<br><br>
+                            <strong>RM Loss:</strong><br>
+                            -log sigma(r_theta(x,y_w) - r_theta(x,y_l))
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/dpo.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="DPO: Direct Preference Optimization"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">DPO: Direct Preference Optimization</p></div>
+            <h2>DPO: Direct Preference Optimization</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Rafailov et al. (2023)</li>
+                            <li><strong>No reward model needed!</strong></li>
+                            <li>Directly optimize from preferences</li>
+                            <li>Closed-form solution to RLHF</li>
+                            <li>Simpler, more stable than PPO</li>
+                            <li>Mathematically equivalent under Bradley-Terry model</li>
+                        </ul>
+                        <p class="paper-ref">Rafailov et al. (2023). Direct Preference Optimization: Your Language Model is Secretly a Reward Model</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>DPO Loss:</strong><br><br>
+                            L = -log sigma(beta log[pi(y_w|x)/pi_ref(y_w|x)]<br>
+                            - beta log[pi(y_l|x)/pi_ref(y_l|x)])
+                        </div>
+                        <div class="highlight-box" style="margin-top:1em;">
+                            <strong>Advantage:</strong> Single-stage training. No unstable RL loop. Often matches or exceeds PPO quality.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Other Alignment Methods</h2>
+                <table style="font-size:0.7em;">
+                    <tr><th>Method</th><th>Year</th><th>Key Idea</th></tr>
+                    <tr><td>SLiC</td><td>2023</td><td>Sequence likelihood calibration, simpler than DPO</td></tr>
+                    <tr><td>IPO</td><td>2023</td><td>Identity Preference Optimization, better generalization</td></tr>
+                    <tr><td>KTO</td><td>2024</td><td>Kahneman-Tversky, per-example instead of pairs</td></tr>
+                    <tr><td>SimPO</td><td>2024</td><td>Simple preference optimization, no reference model</td></tr>
+                    <tr><td>ORPO</td><td>2024</td><td>Odds ratio preference optimization, single stage</td></tr>
+                    <tr><td>SPIN</td><td>2024</td><td>Self-play, no human preferences needed</td></tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Constitutional AI</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Bai et al. (Anthropic, 2022)</li>
+                            <li><strong>RL from AI Feedback (RLAIF)</strong></li>
+                            <li>Model critiques and revises its own outputs</li>
+                            <li>Based on constitutional principles</li>
+                            <li>Reduces need for human labels</li>
+                            <li>Used in Claude training</li>
+                        </ul>
+                        <p class="paper-ref">Bai et al. (2022). Constitutional AI: Harmlessness from AI Feedback</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box" style="font-size:0.8em;">
+                            <strong>Process:</strong><br><br>
+                            1. Generate response to harmful prompt<br>
+                            2. Model critiques response by constitution<br>
+                            3. Model revises based on critique<br>
+                            4. Train on revised (preferred) vs original<br>
+                            5. RLHF with AI-generated preferences
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/test_time_compute.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="Test-Time Compute Scaling"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">Test-Time Compute Scaling</p></div>
+            <h2>Test-Time Compute Scaling (o1/o3)</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>OpenAI (2024)</li>
+                            <li><strong>Scale inference-time computation</strong></li>
+                            <li>Chain-of-thought reasoning</li>
+                            <li>Self-consistency / majority voting</li>
+                            <li>Tree search (Monte Carlo Tree Search)</li>
+                            <li>Verifier models</li>
+                            <li>Test-time training</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Paradigm Shift:</strong><br><br>
+                            Traditional: Scale model size<br>
+                            New: Scale thinking time<br><br>
+                            o1/o3 spend tokens/time "thinking" before answering, dramatically improving reasoning on math, coding, and science.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION XI: RETRIEVAL & MEMORY -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">XI</div>
+                    <h1>Retrieval &amp; Memory Architectures</h1>
+                    <p>Extending Context Beyond Parameters</p>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/rag.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="RAG Architecture"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">RAG Architecture</p></div>
+            <h2>RAG: Retrieval-Augmented Generation</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Lewis et al. (Facebook, 2020)</li>
+                            <li><strong>Parametric + Non-parametric memory</strong></li>
+                            <li>Retrieve relevant documents</li>
+                            <li>Condition generation on retrieved context</li>
+                            <li>Reduces hallucination</li>
+                            <li>Knowledge stays current</li>
+                        </ul>
+                        <p class="paper-ref">Lewis et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Query</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">Dense Retrieval (DPR)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">Top-k Documents</div>
+                            <div class="arch-arrow">↓ Concatenate</div>
+                            <div class="network-layer layer-attention">Generator (Seq2Seq LM)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-output">Generated Response</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>RAG Architecture Variants</h2>
+                <table style="font-size:0.7em;">
+                    <tr><th>Variant</th><th>Approach</th><th>Key Feature</th></tr>
+                    <tr><td>DPR</td><td>Dense passage retrieval</td><td>Dual-encoder, bi-encoders</td></tr>
+                    <tr><td>FiD</td><td>Fusion-in-Decoder</td><td>Process each doc separately, fuse in decoder</td></tr>
+                    <tr><td>REPLUG</td><td>Plug-in retrieval</td><td>Retrieve + ensemble without finetuning</td></tr>
+                    <tr><td>Self-RAG</td><td>Reflective retrieval</td><td>Model decides when to retrieve</td></tr>
+                    <tr><td>FLARE</td><td>Active retrieval</td><td>Retrieve proactively during generation</td></tr>
+                    <tr><td>CRAG</td><td>Corrective RAG</td><td>Evaluate and correct retrieved docs</td></tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Memorizing Transformers</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Wu et al. (2022)</li>
+                            <li><strong>kNN-augmented attention</strong></li>
+                            <li>Store key-value pairs in external memory</li>
+                            <li>Retrieve similar past contexts</li>
+                            <li>Interpolates with regular attention</li>
+                            <li>Extends effective context dramatically</li>
+                        </ul>
+                        <p class="paper-ref">Wu et al. (2022). Memorizing Transformers</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>Output:</strong><br><br>
+                            o = alpha * Attention_local(Q,K,V)<br>
+                            + (1-alpha) * kNN-Attention(Q, Memory)<br><br>
+                            Memory = all past (key, value) pairs
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>KV Cache Optimization</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li><strong>Problem:</strong> Autoregressive generation recomputes K,V for all past tokens</li>
+                            <li><strong>Solution:</strong> Cache K,V matrices</li>
+                            <li>Reduces complexity from O(n^3) to O(n^2)</li>
+                            <li>Memory bottleneck for long contexts</li>
+                            <li>Compression methods:</li>
+                            <li style="margin-left:1em">• H2O: Evict less important KV pairs</li>
+                            <li style="margin-left:1em">• StreamingLLM: Keep sink tokens + window</li>
+                            <li style="margin-left:1em">• SnapKV: Select important KV in prefill</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Memory Growth:</strong><br><br>
+                            For layer l, head h:<br>
+                            KV cache = 2 x n x d_head x bytes<br><br>
+                            LLaMA-70B, 32K context:<br>
+                            ~160 GB just for KV cache!
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>External Memory Systems</h2>
+                <table style="font-size:0.7em;">
+                    <tr><th>System</th><th>Mechanism</th><th>Capacity</th></tr>
+                    <tr><td>Neural Turing Machine</td><td>Differentiable memory + attention</td><td>Fixed addressable</td></tr>
+                    <tr><td>Differentiable Neural Computer</td><td>NTM + temporal linking</td><td>Fixed addressable</td></tr>
+                    <tr><td>Memory Networks</td><td>Key-value memory + hops</td><td>Large but fixed</td></tr>
+                    <tr><td>Memorizing Transformer</td><td>kNN over past KV pairs</td><td>Unbounded</td></tr>
+                    <tr><td>RMT</td><td>Recurrent memory tokens</td><td>Bounded segments</td></tr>
+                    <tr><td>Tape</td><td>External read-write tape</td><td>Unbounded</td></tr>
+                </table>
+            </section>
+
+            <!-- SECTION XII: AGENTS -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">XII</div>
+                    <h1>Agent Architectures</h1>
+                    <p>From Models to Acting Systems</p>
+                </div>
+            </section>
+
+            <section>
+                <div style="text-align:center; margin: 1em 0;"><img src="diagrams/react.svg" style="max-width: 85%; max-height: 500px; border-radius: 8px;" alt="ReAct: Reasoning + Acting"><p style="font-size: 0.7em; color: #888; margin-top: 0.5em;">ReAct: Reasoning + Acting</p></div>
+            <h2>ReAct: Reasoning + Acting</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Yao et al. (2022)</li>
+                            <li><strong>Interleave reasoning and actions</strong></li>
+                            <li>Thought -> Action -> Observation -> Thought ...</li>
+                            <li>Uses tools (search, calculator, APIs)</li>
+                            <li>Grounds reasoning in environment</li>
+                            <li>Significantly outperforms chain-of-thought</li>
+                        </ul>
+                        <p class="paper-ref">Yao et al. (2022). ReAct: Synergizing Reasoning and Acting in Language Models</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box" style="font-size:0.75em;">
+                            <strong>Example Trajectory:</strong><br><br>
+                            Thought: I need to find Apple's revenue<br>
+                            Action: Search["Apple revenue 2023"]<br>
+                            Observation: $383.29 billion<br>
+                            Thought: Now I need to compare with Microsoft<br>
+                            Action: Search["Microsoft revenue 2023"]<br>
+                            ...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Reflexion: Self-Reflective Agents</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Shinn et al. (2023)</li>
+                            <li><strong>Verbal reinforcement learning</strong></li>
+                            <li>Agent reflects on failures</li>
+                            <li>Stores reflections in memory</li>
+                            <li>Uses them to improve future attempts</li>
+                            <li>No gradient updates — purely in-context</li>
+                        </ul>
+                        <p class="paper-ref">Shinn et al. (2023). Reflexion: Self-Reflective Agents</p>
+                    </div>
+                    <div>
+                        <div class="arch-diagram">
+                            <div class="network-layer layer-input">Task</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">Actor (Generate)</div>
+                            <div class="arch-arrow">↓</div>
+                            <div class="network-layer layer-hidden">Evaluate (Success?)</div>
+                            <div class="arch-arrow">↓ If fail</div>
+                            <div class="network-layer layer-attention">Self-Reflection</div>
+                            <div class="arch-arrow">↓ Store</div>
+                            <div class="network-layer layer-hidden">Episodic Memory</div>
+                            <div class="arch-arrow">↓ Retry with memory</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Multi-Agent Architectures</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">ChatDev (2023)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Multiple agents with roles</li>
+                            <li>CEO, CTO, Programmer, Designer, Tester</li>
+                            <li>Collaborative software development</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">AutoGen (2023)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Microsoft framework</li>
+                            <li>Conversable agents</li>
+                            <li>Human-in-the-loop support</li>
+                        </ul>
+                        <h3 style="color:#00d4aa; margin-top:0.5em">MetaGPT (2023)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Structured workflows (SOPs)</li>
+                            <li>Shared message pool</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Agent Communication Patterns:</strong><br><br>
+                            • <strong>Debate:</strong> Agents argue to reach consensus<br>
+                            • <strong>Hierarchy:</strong> Manager delegates to workers<br>
+                            • <strong>Market:</strong> Bidding/auction for tasks<br>
+                            • <strong>Chain:</strong> Sequential handoff
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Tool Use &amp; Function Calling</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li><strong>Gorilla:</strong> LLM for API calls</li>
+                            <li><strong>Toolformer:</strong> Self-supervised tool learning</li>
+                            <li><strong>Function calling:</strong> Structured JSON output</li>
+                            <li>Models learn when and how to call tools</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="highlight-box" style="font-size:0.8em;">
+                            <strong>Function Call Format:</strong><br><br>
+                            {<br>
+                            &nbsp;&nbsp;"name": "get_weather",<br>
+                            &nbsp;&nbsp;"arguments": {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;"location": "San Francisco",<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;"unit": "celsius"<br>
+                            &nbsp;&nbsp;}<br>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION XIII: SYSTEMS -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">XIII</div>
+                    <h1>Systems &amp; Hardware Architecture</h1>
+                    <p>Training at Scale</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Distributed Training Strategies</h2>
+                <table style="font-size:0.7em;">
+                    <tr><th>Strategy</th><th>What is split</th><th>Comm Pattern</th><th>Use Case</th></tr>
+                    <tr><td>Data Parallelism</td><td>Batch across GPUs</td><td>All-reduce gradients</td><td>Standard, most common</td></tr>
+                    <tr><td>Model Parallelism</td><td>Layers across GPUs</td><td>Point-to-point</td><td>Large models</td></tr>
+                    <tr><td>Pipeline Parallelism</td><td>Stages (subsets of layers)</td><td>Point-to-point</td><td>Very deep models</td></tr>
+                    <tr><td>Tensor Parallelism</td><td>Individual layers</td><td>All-reduce/All-gather</td><td>Wide layers</td></tr>
+                    <tr><td>Sequence Parallelism</td><td>Sequence dimension</td><td>All-gather</td><td>Long contexts</td></tr>
+                    <tr><td>Expert Parallelism</td><td>MoE experts</td><td>All-to-all</td><td>MoE models</td></tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>ZeRO: Zero Redundancy Optimizer</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Rajbhandari et al. (Microsoft, 2019)</li>
+                            <li>Partitions optimizer states across GPUs</li>
+                            <li><strong>Stage 1:</strong> Partition optimizer states</li>
+                            <li><strong>Stage 2:</strong> + partition gradients</li>
+                            <li><strong>Stage 3:</strong> + partition parameters</li>
+                            <li>Enables training models with trillions of parameters</li>
+                        </ul>
+                        <p class="paper-ref">Rajbhandari et al. (2019). ZeRO: Memory Optimizations Toward Training Trillion Parameter Models</p>
+                    </div>
+                    <div>
+                        <table style="font-size:0.7em;">
+                            <tr><th>Stage</th><th>Memory</th><th>Speed</th></tr>
+                            <tr><td>Baseline</td><td>16Psi</td><td>1x</td></tr>
+                            <tr><td>ZeRO-1</td><td>4Psi</td><td>~1x</td></tr>
+                            <tr><td>ZeRO-2</td><td>2Psi</td><td>~1x</td></tr>
+                            <tr><td>ZeRO-3</td><td>Psi/N</td><td>0.6-0.8x</td></tr>
+                            <tr><td>ZeRO-Offload</td><td>Single GPU</td><td>0.3-0.5x</td></tr>
+                        </table>
+                        <p style="font-size:0.6em;">Psi = model parameter memory</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>TPU vs GPU Architecture</h2>
+                <div class="two-column">
+                    <div>
+                        <h3 style="color:#4fc3f7">GPU (NVIDIA)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>General-purpose parallel processor</li>
+                            <li>Thousands of CUDA cores</li>
+                            <li>Tensor Cores for matrix multiply</li>
+                            <li>Flexible programming (CUDA)</li>
+                            <li>High memory bandwidth (HBM)</li>
+                            <li>NVLink for GPU-to-GPU</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color:#ff8a65">TPU (Google)</h3>
+                        <ul style="font-size:0.85em;">
+                            <li>Domain-specific for ML</li>
+                            <li>Matrix Multiply Units (MXU)</li>
+                            <li>65,536 multiply-accumulate units</li>
+                            <li>Bfloat16 optimized</li>
+                            <li>2D torus mesh interconnect</li>
+                            <li>JAX/TensorFlow optimized</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>LLM Serving Optimization</h2>
+                <table style="font-size:0.7em;">
+                    <tr><th>Technique</th><th>Description</th><th>Impact</th></tr>
+                    <tr><td>Continuous Batching</td><td>Dynamic batching of requests</td><td>10-20x throughput</td></tr>
+                    <tr><td>PagedAttention (vLLM)</td><td>Block-based KV cache management</td><td>2-4x throughput</td></tr>
+                    <tr><td>Speculative Decoding</td><td>Draft small model, verify large</td><td>2-3x speedup</td></tr>
+                    <tr><td>Quantization (INT8/INT4)</td><td>Lower precision weights</td><td>2-4x memory reduction</td></tr>
+                    <tr><td>TensorRT-LLM</td><td>Fused kernels, optimized graphs</td><td>4-6x speedup</td></tr>
+                    <tr><td>Medusa / Lookahead</td><td>Multiple future token prediction</td><td>2x speedup</td></tr>
+                </table>
+            </section>
+
+            <!-- SECTION XIV: FUTURE -->
+            <section>
+                <div class="section-title">
+                    <div class="section-number">XIV</div>
+                    <h1>Future Directions</h1>
+                    <p>What is Next in AI Architecture</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Emerging Research Directions</h2>
+                <div class="three-column" style="font-size:0.75em;">
+                    <div>
+                        <h3 style="color:#4fc3f7">Efficiency</h3>
+                        <ul>
+                            <li>Sub-quadratic architectures</li>
+                            <li>Mixture of Depths</li>
+                            <li>Early exiting</li>
+                            <li>Neural architecture search</li>
+                        </ul>
+                        <h3 style="color:#4fc3f7; margin-top:0.5em">Long Context</h3>
+                        <ul>
+                            <li>Million-token contexts</li>
+                            <li>Hierarchical attention</li>
+                            <li>Recurrent memory</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color:#ff8a65">Reasoning</h3>
+                        <ul>
+                            <li>Neural-symbolic integration</li>
+                            <li>World models</li>
+                            <li>Causal reasoning</li>
+                            <li>Test-time training</li>
+                        </ul>
+                        <h3 style="color:#ff8a65; margin-top:0.5em">Multimodality</h3>
+                        <ul>
+                            <li>Unified world models</li>
+                            <li>Embodied AI</li>
+                            <li>Real-time understanding</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color:#00d4aa">Novel Architectures</h3>
+                        <ul>
+                            <li>Liquid Neural Networks</li>
+                            <li>Neuromorphic computing</li>
+                            <li>Quantum ML</li>
+                            <li>Hyperdimensional computing</li>
+                        </ul>
+                        <h3 style="color:#00d4aa; margin-top:0.5em">Training</h3>
+                        <ul>
+                            <li>Self-play at scale</li>
+                            <li>Synthetic data generation</li>
+                            <li>Curriculum learning</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>World Models &amp; JEPA</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>LeCun's vision for autonomous AI</li>
+                            <li><strong>Joint Embedding Predictive Architecture</strong></li>
+                            <li>Predict in latent space, not pixel space</li>
+                            <li>Hierarchical world model</li>
+                            <li>Configurators for task control</li>
+                            <li>Contrast with generative approaches</li>
+                        </ul>
+                        <p class="paper-ref">LeCun (2022). A Path Towards Autonomous Machine Intelligence</p>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>JEPA vs. Generative:</strong><br><br>
+                            Generative: Predict pixels (expensive, unnecessary)<br><br>
+                            JEPA: Predict representations (efficient, semantic)<br><br>
+                            I-JEPA: Image-level JEPA (2023)<br>
+                            V-JEPA: Video-level JEPA (2024)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Liquid Neural Networks</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Hasani et al. (MIT, 2020)</li>
+                            <li><strong>Continuous-time neural networks</strong></li>
+                            <li>Neural ODEs with input-dependent dynamics</li>
+                            <li>Adapt to changing inputs</li>
+                            <li>Interpretable with few neurons</li>
+                            <li>Truly causal (no fixed window)</li>
+                        </ul>
+                        <p class="paper-ref">Hasani et al. (2020). Liquid Time-constant Networks</p>
+                    </div>
+                    <div>
+                        <div class="formula">
+                            <strong>Liquid Neuron:</strong><br><br>
+                            dx/dt = -[1/tau + f(x,I)]x + f(x,I)*sigma(Ax + BI)<br><br>
+                            tau = time constant<br>
+                            f(x,I) = input-dependent term
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Neuromorphic Computing</h2>
+                <div class="two-column">
+                    <div>
+                        <ul>
+                            <li>Brain-inspired hardware</li>
+                            <li><strong>Spiking Neural Networks (SNNs)</strong></li>
+                            <li>Event-based computation</li>
+                            <li>Ultra-low power</li>
+                            <li>Intel Loihi, IBM TrueNorth</li>
+                            <li>Temporal coding</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <strong>Advantages:</strong><br><br>
+                            • 1000x lower power than GPUs<br>
+                            • Event-driven (no computation when idle)<br>
+                            • Natural temporal processing<br>
+                            • On-chip learning possible<br><br>
+                            <strong>Challenges:</strong> Training instability, limited software
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Summary: The Architectural Landscape</h2>
+                <div style="font-size:0.8em;">
+                    <table>
+                        <tr><th>Pattern</th><th>Best For</th><th>Key Models</th></tr>
+                        <tr><td>Dense Transformers</td><td>General purpose</td><td>GPT-4, LLaMA, Claude</td></tr>
+                        <tr><td>Mixture of Experts</td><td>Scaling parameters</td><td>Mixtral, GLaM, Switch</td></tr>
+                        <tr><td>Multi-Modal</td><td>Vision + Language</td><td>GPT-4V, Gemini, LLaVA</td></tr>
+                        <tr><td>Diffusion</td><td>Image/Audio generation</td><td>Stable Diffusion, DALL-E</td></tr>
+                        <tr><td>State Space</td><td>Long sequences</td><td>Mamba, S4, RWKV</td></tr>
+                        <tr><td>Retrieval-Augmented</td><td>Knowledge tasks</td><td>RAG, kNN-LM</td></tr>
+                        <tr><td>Agent Systems</td><td>Tool use, reasoning</td><td>ReAct, AutoGPT</td></tr>
+                    </table>
+                </div>
+            </section>
+
+            <section>
+                <h1>Thank You</h1>
+                <h3 style="color: #eaeaea;">Questions &amp; Discussion</h3>
+                <p style="margin-top: 2em;">
+                    <span class="tag">Transformers</span>
+                    <span class="tag purple">Mixture of Experts</span>
+                    <span class="tag orange">Multi-Modal</span>
+                    <span class="tag">Diffusion</span>
+                    <span class="tag purple">State Space Models</span>
+                    <span class="tag orange">Vision Transformers</span>
+                    <span class="tag">RAG</span>
+                    <span class="tag purple">Agent Systems</span>
+                </p>
+                <p style="margin-top: 2em; font-size: 0.7em; color: #888;">
+                    Built with Reveal.js | Comprehensive Survey of Deep Learning Architectures
+                </p>
+            </section>
+
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: 'c/t',
+            showSlideNumber: 'all',
+            transition: 'slide',
+            width: 1280,
+            height: 720,
+            margin: 0.04,
+            center: false,
+            controls: true,
+            progress: true,
+            history: true,
+            keyboard: true,
+            overview: true,
+            touch: true,
+            fragments: true,
+            help: true
+        });
+    </script>
+</body>
+</html>

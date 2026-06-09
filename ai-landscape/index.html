@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The AI Landscape: How Everything Fits Together</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c14;--bg2:#0f172a;--card:#141e32;
+  --accent:#3b82f6;--accent2:#06b6d4;--gold:#f59e0b;
+  --green:#10b981;--red:#ef4444;--rose:#f43f5e;--purple:#8b5cf6;--teal:#14b8a6;--orange:#f97316;--pink:#ec4899;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --grad-hero:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#312e81 100%);
+  --shadow:0 25px 50px -12px rgba(0,0,0,.5);
+}
+html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+#deck{position:relative;width:100vw;height:100vh;overflow:hidden}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;align-items:center;padding:3vh 4vw;opacity:0;transform:translateY(30px) scale(.98);transition:all .6s cubic-bezier(.22,1,.36,1)}
+.slide.active{display:flex;opacity:1;transform:translateY(0) scale(1)}
+.slide.prev{display:flex;opacity:0;transform:translateY(-40px) scale(.95)}
+h1{font-size:clamp(2rem,4vw,3.4rem);font-weight:800;line-height:1.1;letter-spacing:-.02em}
+h2{font-size:clamp(1.2rem,2.5vw,1.8rem);font-weight:700;line-height:1.2}
+h3{font-size:clamp(.95rem,1.8vw,1.2rem);font-weight:600}
+p,li{font-size:clamp(.8rem,1.2vw,1rem);line-height:1.6;color:var(--text2)}
+.subtitle{font-size:clamp(.9rem,1.8vw,1.15rem);color:var(--text3);font-weight:400;margin-top:.4rem}
+.badge{display:inline-block;padding:.3rem .8rem;border-radius:999px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+.container{width:100%;max-width:1400px;margin:0 auto}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;width:100%}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;width:100%}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;width:100%}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;width:100%}
+.flex{display:flex;gap:1.2rem;width:100%}
+.col{flex:1}
+.card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:1rem;padding:1.2rem;box-shadow:var(--shadow);transition:transform .3s,box-shadow .3s}
+.card:hover{transform:translateY(-3px);box-shadow:0 25px 50px -12px rgba(0,0,0,.6)}
+.card-gold{border-color:rgba(245,158,11,.25);background:linear-gradient(180deg,rgba(245,158,11,.08) 0%,var(--card) 100%)}
+.card-green{border-color:rgba(16,185,129,.25);background:linear-gradient(180deg,rgba(16,185,129,.08) 0%,var(--card) 100%)}
+.card-red{border-color:rgba(239,68,68,.25);background:linear-gradient(180deg,rgba(239,68,68,.08) 0%,var(--card) 100%)}
+.card-blue{border-color:rgba(59,130,246,.25);background:linear-gradient(180deg,rgba(59,130,246,.08) 0%,var(--card) 100%)}
+.card-purple{border-color:rgba(139,92,246,.25);background:linear-gradient(180deg,rgba(139,92,246,.08) 0%,var(--card) 100%)}
+.card-teal{border-color:rgba(20,184,166,.25);background:linear-gradient(180deg,rgba(20,184,166,.08) 0%,var(--card) 100%)}
+.card-orange{border-color:rgba(249,115,22,.25);background:linear-gradient(180deg,rgba(249,115,22,.08) 0%,var(--card) 100%)}
+.card-pink{border-color:rgba(236,72,153,.25);background:linear-gradient(180deg,rgba(236,72,153,.08) 0%,var(--card) 100%)}
+.card-slate{border-color:rgba(100,116,139,.25);background:linear-gradient(180deg,rgba(100,116,139,.08) 0%,var(--card) 100%)}
+.hero-bg{background:var(--grad-hero);position:relative;overflow:hidden}
+.hero-bg::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity:.4}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;animation:float 8s ease-in-out infinite}
+.orb1{width:400px;height:400px;background:#4f46e5;top:-100px;right:-100px;animation-delay:0s}
+.orb2{width:300px;height:300px;background:#06b6d4;bottom:-80px;left:-80px;animation-delay:2s}
+.orb3{width:250px;height:250px;background:#8b5cf6;top:40%;left:40%;animation-delay:4s}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-30px)}}
+#nav{position:fixed;bottom:0;left:0;right:0;padding:.7rem 1.5rem;background:rgba(8,12,20,.9);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;z-index:1000}
+#progress-bg{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin:0 1.2rem;overflow:hidden}
+#progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s}
+.nav-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:var(--text);padding:.45rem .9rem;border-radius:.5rem;cursor:pointer;font-size:.75rem;font-weight:600;transition:all .2s}
+.nav-btn:hover{background:rgba(255,255,255,.15)}
+#slide-count{font-size:.75rem;color:var(--text3);font-variant-numeric:tabular-nums;min-width:70px;text-align:center}
+.section-indicator{position:fixed;top:1rem;right:1rem;z-index:1000}
+#section-badge{background:rgba(8,12,20,.7);backdrop-filter:blur(8px);padding:.35rem .8rem;border-radius:999px;border:1px solid rgba(255,255,255,.1);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.tag{display:inline-flex;align-items:center;padding:.2rem .55rem;border-radius:4px;font-size:.65rem;font-weight:600;margin:.1rem}
+.tag-red{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
+.tag-green{background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.25)}
+.tag-gold{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.25)}
+.tag-blue{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.25)}
+.tag-purple{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.25)}
+.tag-teal{background:rgba(20,184,166,.15);color:#5eead4;border:1px solid rgba(20,184,166,.25)}
+.tag-orange{background:rgba(249,115,22,.15);color:#fdba74;border:1px solid rgba(249,115,22,.25)}
+.tag-pink{background:rgba(236,72,153,.15);color:#fbcfe8;border:1px solid rgba(236,72,153,.25)}
+.tag-slate{background:rgba(100,116,139,.15);color:#cbd5e1;border:1px solid rgba(100,116,139,.25)}
+.highlight-box{padding:1rem;border-radius:.7rem;border-left:4px solid var(--accent);background:rgba(59,130,246,.06);margin:.8rem 0}
+.highlight-box.green{border-color:var(--green);background:rgba(16,185,129,.06)}
+.highlight-box.red{border-color:var(--red);background:rgba(239,68,68,.06)}
+.highlight-box.gold{border-color:var(--gold);background:rgba(245,158,11,.06)}
+.highlight-box.purple{border-color:var(--purple);background:rgba(139,92,246,.06)}
+.highlight-box.teal{border-color:var(--teal);background:rgba(20,184,166,.06)}
+.highlight-box.orange{border-color:var(--orange);background:rgba(249,115,22,.06)}
+.highlight-box.pink{border-color:var(--pink);background:rgba(236,72,153,.06)}
+.highlight-box.slate{border-color:#64748b;background:rgba(100,116,139,.06)}
+.data-table{width:100%;border-collapse:collapse;font-size:.75rem}
+.data-table th{background:rgba(255,255,255,.06);padding:.5rem .6rem;text-align:left;font-weight:600;color:var(--text);border-bottom:1px solid rgba(255,255,255,.1)}
+.data-table td{padding:.45rem .6rem;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2)}
+.data-table tr:hover td{background:rgba(255,255,255,.02)}
+.icon-wrap{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:.8rem;font-size:1.1rem;font-weight:700}
+.icon-green{background:rgba(16,185,129,.15);color:var(--green)}
+.icon-red{background:rgba(239,68,68,.15);color:var(--red)}
+.icon-gold{background:rgba(245,158,11,.15);color:var(--gold)}
+.icon-blue{background:rgba(59,130,246,.15);color:var(--accent)}
+.icon-purple{background:rgba(139,92,246,.15);color:var(--purple)}
+.icon-teal{background:rgba(20,184,166,.15);color:var(--teal)}
+.icon-orange{background:rgba(249,115,22,.15);color:var(--orange)}
+.icon-pink{background:rgba(236,72,153,.15);color:#f472b6}
+.icon-slate{background:rgba(100,116,139,.15);color:#94a3b8}
+.checklist{display:flex;flex-direction:column;gap:.4rem}
+.check-item{display:flex;align-items:flex-start;gap:.6rem;padding:.45rem .6rem;background:rgba(255,255,255,.03);border-radius:.45rem;border:1px solid rgba(255,255,255,.06);font-size:.8rem;line-height:1.5}
+.check-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;flex-shrink:0;font-weight:700;margin-top:1px}
+.check-yes{background:rgba(16,185,129,.2);color:var(--green)}
+.check-no{background:rgba(239,68,68,.2);color:var(--red)}
+.check-warn{background:rgba(245,158,11,.2);color:var(--gold)}
+.check-blue{background:rgba(59,130,246,.2);color:var(--accent)}
+.timeline{display:flex;gap:.8rem;overflow-x:auto;padding-bottom:.8rem}
+.timeline-item{flex:0 0 200px;padding:1rem;border-radius:.7rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);position:relative}
+.timeline-item::after{content:'';position:absolute;top:1.3rem;right:-.8rem;width:1.6rem;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.timeline-item:last-child::after{display:none}
+.timeline-year{font-size:.75rem;color:var(--accent);font-weight:700;margin-bottom:.2rem}
+.timeline-title{font-size:.85rem;font-weight:600;margin-bottom:.2rem}
+.timeline-desc{font-size:.7rem;color:var(--text3);line-height:1.4}
+.stat-big{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:.2rem}
+
+/* SVG Diagram Styles */
+.svg-container{width:100%;max-width:1100px;margin:0 auto}
+.svg-wide{width:100%;max-width:1200px;margin:0 auto}
+.nested-circle{transition:all .4s ease;cursor:pointer}
+.nested-circle:hover{filter:brightness(1.15)}
+.nested-label{font-size:13px;font-weight:700;fill:#fff;text-anchor:middle;pointer-events:none}
+.nested-sublabel{font-size:9px;fill:#94a3b8;text-anchor:middle;pointer-events:none}
+.connection-line{stroke:rgba(255,255,255,.15);stroke-width:2;fill:none}
+.tree-node{transition:all .3s ease;cursor:pointer}
+.tree-node:hover{filter:brightness(1.2)}
+.tree-line{stroke:rgba(255,255,255,.2);stroke-width:2;fill:none}
+.tree-text{font-size:10px;fill:#e2e8f0;text-anchor:middle;font-weight:600}
+.decision-box{fill:rgba(59,130,246,.1);stroke:rgba(59,130,246,.5);stroke-width:2;rx:8}
+.decision-text{font-size:10px;fill:#e2e8f0;text-anchor:middle;font-weight:600}
+.decision-arrow{stroke:rgba(255,255,255,.3);stroke-width:2;fill:none;marker-end:url(#arrowhead)}
+.viz-legend{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem}
+.viz-legend-item{display:flex;align-items:center;gap:.35rem;font-size:.7rem;color:var(--text3)}
+.viz-legend-dot{width:11px;height:11px;border-radius:50%}
+.satellite{transition:all .3s ease;cursor:pointer}
+.satellite:hover{filter:brightness(1.25);transform-origin:center}
+.sat-line{stroke:rgba(255,255,255,.2);stroke-width:1.5;stroke-dasharray:4,3;fill:none}
+
+@media(max-width:900px){
+  .grid2,.grid3,.grid4,.grid5{grid-template-columns:1fr}
+  .flex{flex-direction:column}
+  .slide{padding:2vh 3vw}
+  .timeline{flex-direction:column}
+  .timeline-item{flex:1 1 auto}
+  .timeline-item::after{display:none}
+}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.animate-in .card,.animate-in .timeline-item,.animate-in .check-item{animation:fadeInUp .5s ease both}
+.animate-in .card:nth-child(1){animation-delay:.05s}.animate-in .card:nth-child(2){animation-delay:.1s}
+.animate-in .card:nth-child(3){animation-delay:.15s}.animate-in .card:nth-child(4){animation-delay:.2s}.animate-in .card:nth-child(5){animation-delay:.25s}
+
+.tooltip{position:absolute;background:rgba(15,23,42,.95);border:1px solid rgba(255,255,255,.15);border-radius:.6rem;padding:.7rem .9rem;pointer-events:none;opacity:0;transition:opacity .2s;z-index:2000;max-width:260px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.tooltip.show{opacity:1}
+.tooltip-title{font-size:.8rem;font-weight:700;color:var(--text);margin-bottom:.2rem}
+.tooltip-body{font-size:.7rem;color:var(--text2);line-height:1.5}
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+<!-- ========================================== -->
+<!-- SLIDE 1: TITLE -->
+<!-- ========================================== -->
+<div class="slide hero-bg active" data-section="Intro">
+  <div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+  <div class="container" style="text-align:center;position:relative;z-index:2">
+    <div class="badge" style="margin-bottom:1.2rem;background:rgba(139,92,246,.15);color:var(--purple);border-color:rgba(139,92,246,.3)">The Complete Map</div>
+    <h1 style="margin-bottom:.4rem">The AI Landscape</h1>
+    <div class="subtitle">How AI, ML, Deep Learning, Computer Vision, NLP, LLMs,<br>GenAI, Reinforcement Learning, GNNs &amp; Quantum ML Fit Together</div>
+    <div style="margin-top:2rem;display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap">
+      <div><div class="stat-big">10+</div><div class="stat-label">Major Fields</div></div>
+      <div><div class="stat-big">30+</div><div class="stat-label">Techniques</div></div>
+      <div><div class="stat-big">1</div><div class="stat-label">Big Truth</div></div>
+    </div>
+    <p style="margin-top:1.5rem;font-size:.85rem;color:var(--text3);max-width:700px;margin-left:auto;margin-right:auto">
+      <strong style="color:var(--rose)">Spoiler:</strong> LLMs are NOT the only way. Most real-world problems are solved faster, cheaper, and better with classical techniques.
+    </p>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 2: THE BIG PICTURE (BUBBLE MAP) -->
+<!-- ========================================== -->
+<div class="slide" data-section="The Map">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:.5rem">
+      <div class="badge" style="margin-bottom:.4rem">The Hierarchy</div>
+      <h1>The Big Picture</h1>
+      <p class="subtitle">Concentric layers + satellite specializations. Hover any bubble.</p>
+    </div>
+    <div class="svg-container">
+      <svg viewBox="0 0 1000 560" style="width:100%;height:auto">
+        <defs>
+          <radialGradient id="gAI" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(59,130,246,.18)"/><stop offset="100%" stop-color="rgba(59,130,246,.03)"/></radialGradient>
+          <radialGradient id="gML" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(20,184,166,.2)"/><stop offset="100%" stop-color="rgba(20,184,166,.04)"/></radialGradient>
+          <radialGradient id="gDL" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(245,158,11,.22)"/><stop offset="100%" stop-color="rgba(245,158,11,.04)"/></radialGradient>
+          <radialGradient id="gGen" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(236,72,153,.2)"/><stop offset="100%" stop-color="rgba(236,72,153,.04)"/></radialGradient>
+          <radialGradient id="gLLM" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(239,68,68,.2)"/><stop offset="100%" stop-color="rgba(239,68,68,.04)"/></radialGradient>
+          <filter id="glow2"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+
+        <!-- AI: Outer -->
+        <circle cx="500" cy="300" r="255" fill="url(#gAI)" stroke="rgba(59,130,246,.35)" stroke-width="2" class="nested-circle" data-tip="ai"/>
+        <text x="500" y="52" class="nested-label" fill="#93c5fd">ARTIFICIAL INTELLIGENCE</text>
+        <text x="500" y="68" class="nested-sublabel">Intelligent machines: reasoning, perception, action, learning</text>
+
+        <!-- Classical AI (right side of AI, not nested inside ML) -->
+        <ellipse cx="760" cy="240" rx="95" ry="65" fill="rgba(100,116,139,.1)" stroke="rgba(100,116,139,.4)" stroke-width="1.5" class="nested-circle" data-tip="classical"/>
+        <text x="760" y="230" class="nested-label" style="font-size:11px" fill="#94a3b8">CLASSICAL / SYMBOLIC AI</text>
+        <text x="760" y="245" class="nested-sublabel">Expert Systems, Search, Logic</text>
+        <text x="760" y="258" class="nested-sublabel">Planning, Knowledge Graphs</text>
+
+        <!-- Data Science (left side, adjacent/overlapping) -->
+        <ellipse cx="240" cy="240" rx="95" ry="65" fill="rgba(139,92,246,.1)" stroke="rgba(139,92,246,.35)" stroke-width="1.5" class="nested-circle" data-tip="ds"/>
+        <text x="240" y="230" class="nested-label" style="font-size:11px" fill="#c4b5fd">DATA SCIENCE</text>
+        <text x="240" y="245" class="nested-sublabel">Statistics, Visualization, EDA</text>
+        <text x="240" y="258" class="nested-sublabel">Domain Knowledge + ML Tools</text>
+
+        <!-- Machine Learning (center-left) -->
+        <circle cx="430" cy="310" r="165" fill="url(#gML)" stroke="rgba(20,184,166,.35)" stroke-width="2" class="nested-circle" data-tip="ml"/>
+        <text x="340" y="180" class="nested-label" fill="#5eead4">MACHINE LEARNING</text>
+        <text x="340" y="195" class="nested-sublabel">Algorithms that learn patterns from data</text>
+
+        <!-- Classical ML inside ML -->
+        <ellipse cx="330" cy="340" rx="65" ry="42" fill="rgba(16,185,129,.1)" stroke="rgba(16,185,129,.4)" stroke-width="1.5" class="nested-circle" data-tip="classicalml"/>
+        <text x="330" y="333" class="nested-label" style="font-size:10px" fill="#6ee7b7">CLASSICAL ML</text>
+        <text x="330" y="348" class="nested-sublabel">RF, XGB, SVM, k-NN</text>
+
+        <!-- Deep Learning inside ML -->
+        <circle cx="500" cy="325" r="95" fill="url(#gDL)" stroke="rgba(245,158,11,.4)" stroke-width="2" class="nested-circle" data-tip="dl"/>
+        <text x="500" y="260" class="nested-label" fill="#fcd34d">DEEP LEARNING</text>
+        <text x="500" y="275" class="nested-sublabel">Neural networks with many layers</text>
+
+        <!-- Generative AI hub inside DL -->
+        <circle cx="500" cy="340" r="42" fill="url(#gGen)" stroke="rgba(236,72,153,.45)" stroke-width="2" class="nested-circle" data-tip="genai"/>
+        <text x="500" y="335" class="nested-label" style="font-size:10px" fill="#fbcfe8">GENERATIVE AI</text>
+        <text x="500" y="350" class="nested-sublabel">Creates new content</text>
+
+        <!-- Satellite nodes around DL -->
+        <!-- Computer Vision -->
+        <line x1="575" y1="305" x2="650" y2="270" class="sat-line"/>
+        <circle cx="650" cy="270" r="32" fill="rgba(249,115,22,.12)" stroke="rgba(249,115,22,.45)" stroke-width="1.5" class="satellite" data-tip="cv"/>
+        <text x="650" y="266" class="nested-label" style="font-size:9px" fill="#fdba74">COMPUTER</text>
+        <text x="650" y="278" class="nested-label" style="font-size:9px" fill="#fdba74">VISION</text>
+
+        <!-- NLP -->
+        <line x1="580" y1="340" x2="660" y2="340" class="sat-line"/>
+        <circle cx="660" cy="340" r="32" fill="rgba(59,130,246,.12)" stroke="rgba(59,130,246,.45)" stroke-width="1.5" class="satellite" data-tip="nlp"/>
+        <text x="660" y="336" class="nested-label" style="font-size:9px" fill="#93c5fd">NATURAL</text>
+        <text x="660" y="348" class="nested-label" style="font-size:9px" fill="#93c5fd">LANGUAGE</text>
+
+        <!-- Speech/Audio -->
+        <line x1="575" y1="375" x2="650" y2="410" class="sat-line"/>
+        <circle cx="650" cy="410" r="30" fill="rgba(139,92,246,.12)" stroke="rgba(139,92,246,.45)" stroke-width="1.5" class="satellite" data-tip="speech"/>
+        <text x="650" y="406" class="nested-label" style="font-size:9px" fill="#c4b5fd">SPEECH &amp;</text>
+        <text x="650" y="418" class="nested-label" style="font-size:9px" fill="#c4b5fd">AUDIO</text>
+
+        <!-- Reinforcement Learning -->
+        <line x1="425" y1="420" x2="425" y2="480" class="sat-line"/>
+        <circle cx="425" cy="490" r="34" fill="rgba(6,182,212,.12)" stroke="rgba(6,182,212,.45)" stroke-width="1.5" class="satellite" data-tip="rl"/>
+        <text x="425" y="486" class="nested-label" style="font-size:9px" fill="#a5f3fc">REINFORCEMENT</text>
+        <text x="425" y="498" class="nested-label" style="font-size:9px" fill="#a5f3fc">LEARNING</text>
+
+        <!-- Graph Neural Networks -->
+        <line x1="360" y1="380" x2="300" y2="420" class="sat-line"/>
+        <circle cx="290" cy="430" r="32" fill="rgba(245,158,11,.1)" stroke="rgba(245,158,11,.4)" stroke-width="1.5" class="satellite" data-tip="gnn"/>
+        <text x="290" y="426" class="nested-label" style="font-size:9px" fill="#fcd34d">GRAPH</text>
+        <text x="290" y="438" class="nested-label" style="font-size:9px" fill="#fcd34d">NETWORKS</text>
+
+        <!-- Time Series -->
+        <line x1="470" y1="420" x2="470" y2="480" class="sat-line"/>
+        <circle cx="470" cy="490" r="30" fill="rgba(16,185,129,.1)" stroke="rgba(16,185,129,.4)" stroke-width="1.5" class="satellite" data-tip="ts"/>
+        <text x="470" y="486" class="nested-label" style="font-size:9px" fill="#6ee7b7">TIME</text>
+        <text x="470" y="498" class="nested-label" style="font-size:9px" fill="#6ee7b7">SERIES</text>
+
+        <!-- LLM (satellite of NLP) -->
+        <line x1="692" y1="340" x2="760" y2="340" class="sat-line" stroke="rgba(239,68,68,.3)"/>
+        <circle cx="775" cy="340" r="28" fill="url(#gLLM)" stroke="rgba(239,68,68,.5)" stroke-width="1.5" class="satellite" data-tip="llm"/>
+        <text x="775" y="337" class="nested-label" style="font-size:9px" fill="#fca5a5">LLMs</text>
+        <text x="775" y="349" class="nested-label" style="font-size:8px" fill="#fca5a5">GPT, Claude</text>
+
+        <!-- Robotics (satellite of Classical AI + RL) -->
+        <line x1="760" y1="305" x2="760" y2="360" class="sat-line"/>
+        <circle cx="760" cy="380" r="30" fill="rgba(100,116,139,.1)" stroke="rgba(100,116,139,.4)" stroke-width="1.5" class="satellite" data-tip="robotics"/>
+        <text x="760" y="376" class="nested-label" style="font-size:9px" fill="#94a3b8">ROBOTICS</text>
+        <text x="760" y="388" class="nested-label" style="font-size:8px" fill="#94a3b8">+ Autonomous Systems</text>
+
+        <!-- Quantum ML (dashed, separate branch from AI) -->
+        <line x1="500" y1="45" x2="500" y2="15" class="sat-line" stroke-dasharray="3,3"/>
+        <line x1="500" y1="15" x2="880" y2="15" class="sat-line" stroke-dasharray="3,3"/>
+        <line x1="880" y1="15" x2="880" y2="90" class="sat-line" stroke-dasharray="3,3"/>
+        <circle cx="880" cy="110" r="32" fill="rgba(6,182,212,.1)" stroke="rgba(6,182,212,.45)" stroke-width="1.5" stroke-dasharray="3,2" class="satellite" data-tip="qml"/>
+        <text x="880" y="106" class="nested-label" style="font-size:9px" fill="#a5f3fc">QUANTUM</text>
+        <text x="880" y="118" class="nested-label" style="font-size:9px" fill="#a5f3fc">ML</text>
+        <text x="880" y="155" class="nested-sublabel">Emerging / Research</text>
+      </svg>
+    </div>
+    <div class="viz-legend">
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:rgba(59,130,246,.6)"></div>AI</div>
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:rgba(139,92,246,.6)"></div>Data Science</div>
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:rgba(100,116,139,.6)"></div>Classical AI</div>
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:rgba(20,184,166,.6)"></div>Machine Learning</div>
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:rgba(16,185,129,.6)"></div>Classical ML</div>
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:rgba(245,158,11,.6)"></div>Deep Learning</div>
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:rgba(236,72,153,.6)"></div>Generative AI</div>
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:rgba(239,68,68,.6)"></div>LLMs</div>
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:rgba(6,182,212,.6)"></div>Satellites (CV, NLP, RL, GNNs...)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 3: INTERACTIVE DEFINITIONS -->
+<!-- ========================================== -->
+<div class="slide" data-section="Definitions">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem">What Each Means</div>
+      <h1>Quick Definitions</h1>
+    </div>
+    <div class="grid3">
+      <div class="card card-blue">
+        <div class="icon-wrap icon-blue" style="margin:0 auto .8rem">AI</div>
+        <h3 style="text-align:center">Artificial Intelligence</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.8rem">The <strong>broadest field</strong>: any technique enabling machines to mimic human intelligence. Rule-based systems, search, planning, logic, learning.</p>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-blue">Expert Systems</span><span class="tag tag-blue">Search</span><span class="tag tag-blue">Planning</span><span class="tag tag-blue">Logic</span>
+        </div>
+      </div>
+      <div class="card card-purple">
+        <div class="icon-wrap icon-purple" style="margin:0 auto .8rem">DS</div>
+        <h3 style="text-align:center">Data Science</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.8rem"><strong>Interdisciplinary practice</strong> of extracting knowledge from data. Stats, visualization, ML tools, domain expertise. Overlaps with ML but doesn't contain it.</p>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-purple">Statistics</span><span class="tag tag-purple">Visualization</span><span class="tag tag-purple">EDA</span><span class="tag tag-purple">SQL</span>
+        </div>
+      </div>
+      <div class="card card-teal">
+        <div class="icon-wrap icon-teal" style="margin:0 auto .8rem">ML</div>
+        <h3 style="text-align:center">Machine Learning</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.8rem">A <strong>subset of AI</strong> where systems learn patterns from data. Includes both classical algorithms and deep neural networks.</p>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-teal">Supervised</span><span class="tag tag-teal">Unsupervised</span><span class="tag tag-teal">Self-Supervised</span>
+        </div>
+      </div>
+      <div class="card card-gold">
+        <div class="icon-wrap icon-gold" style="margin:0 auto .8rem">DL</div>
+        <h3 style="text-align:center">Deep Learning</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.8rem">A <strong>subset of ML</strong> using neural networks with many layers. Excels at unstructured data: images, text, audio, video, graphs.</p>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-gold">CNNs</span><span class="tag tag-gold">RNNs</span><span class="tag tag-gold">Transformers</span><span class="tag tag-gold">GNNs</span>
+        </div>
+      </div>
+      <div class="card card-red">
+        <div class="icon-wrap icon-red" style="margin:0 auto .8rem">LLM</div>
+        <h3 style="text-align:center">LLMs</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.8rem">A <strong>subset of DL (NLP)</strong>: massive transformer models trained on text. GPT-4, Claude, LLaMA. Great at language, not everything.</p>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-red">GPT-4</span><span class="tag tag-red">Claude</span><span class="tag tag-red">LLaMA</span><span class="tag tag-red">Gemini</span>
+        </div>
+      </div>
+      <div class="card card-pink">
+        <div class="icon-wrap icon-pink" style="margin:0 auto .8rem">Gen</div>
+        <h3 style="text-align:center">Generative AI</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.8rem">Models that <strong>create new content</strong>: text, images, music, code. Includes LLMs, diffusion, GANs, VAEs, flow models. Not all GenAI is LLMs!</p>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-pink">Diffusion</span><span class="tag tag-pink">GANs</span><span class="tag tag-pink">VAEs</span><span class="tag tag-pink">Flows</span>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box purple" style="margin-top:1rem;text-align:center">
+      <strong>Key Insight:</strong> Every LLM is Deep Learning. Every DL model is ML. Every ML model is AI. 
+      <strong style="color:var(--rose)">But AI is much bigger than LLMs.</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 4: THE FAMILY TREE (HORIZONTAL) -->
+<!-- ========================================== -->
+<div class="slide" data-section="Family Tree">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:.5rem">
+      <div class="badge" style="margin-bottom:.4rem">Relationships</div>
+      <h1>The Complete AI Family Tree</h1>
+      <p class="subtitle">Every major branch, from Symbolic AI to Quantum ML. Hover nodes to explore.</p>
+    </div>
+    <div class="svg-wide">
+      <svg viewBox="0 0 1200 620" style="width:100%;height:auto">
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="rgba(255,255,255,.25)"/></marker>
+        </defs>
+
+        <!-- Level 0: ROOT -->
+        <rect x="20" y="280" width="100" height="36" rx="8" fill="rgba(59,130,246,.18)" stroke="#3b82f6" stroke-width="2" class="tree-node"/>
+        <text x="70" y="303" class="tree-text" fill="#93c5fd">AI</text>
+
+        <!-- Connect root to level 1 -->
+        <line x1="120" y1="280" x2="160" y2="130" class="tree-line"/><line x1="120" y1="298" x2="160" y2="298" class="tree-line"/><line x1="120" y1="316" x2="160" y2="470" class="tree-line"/>
+
+        <!-- LEVEL 1 -->
+        <rect x="160" y="110" width="130" height="36" rx="8" fill="rgba(100,116,139,.15)" stroke="#64748b" stroke-width="1.5" class="tree-node"/>
+        <text x="225" y="133" class="tree-text" fill="#94a3b8">Classical AI</text>
+
+        <rect x="160" y="280" width="130" height="36" rx="8" fill="rgba(20,184,166,.15)" stroke="#14b8a6" stroke-width="1.5" class="tree-node"/>
+        <text x="225" y="303" class="tree-text" fill="#5eead4">Machine Learning</text>
+
+        <rect x="160" y="450" width="130" height="36" rx="8" fill="rgba(139,92,246,.12)" stroke="#8b5cf6" stroke-width="1.5" class="tree-node"/>
+        <text x="225" y="473" class="tree-text" fill="#c4b5fd">Data Science</text>
+
+        <!-- CLASSICAL AI children -->
+        <line x1="290" y1="128" x2="330" y2="60" class="tree-line"/><line x1="290" y1="128" x2="330" y2="100" class="tree-line"/>
+        <line x1="290" y1="128" x2="330" y2="140" class="tree-line"/><line x1="290" y1="128" x2="330" y2="180" class="tree-line"/>
+
+        <rect x="330" y="42" width="130" height="30" rx="6" fill="rgba(100,116,139,.1)" stroke="#64748b" stroke-width="1" class="tree-node"/>
+        <text x="395" y="61" class="tree-text" style="font-size:9px" fill="#94a3b8">Expert Systems</text>
+        <rect x="330" y="82" width="130" height="30" rx="6" fill="rgba(100,116,139,.1)" stroke="#64748b" stroke-width="1" class="tree-node"/>
+        <text x="395" y="101" class="tree-text" style="font-size:9px" fill="#94a3b8">Search &amp; Planning</text>
+        <rect x="330" y="122" width="130" height="30" rx="6" fill="rgba(100,116,139,.1)" stroke="#64748b" stroke-width="1" class="tree-node"/>
+        <text x="395" y="141" class="tree-text" style="font-size:9px" fill="#94a3b8">Logic Programming</text>
+        <rect x="330" y="162" width="130" height="30" rx="6" fill="rgba(100,116,139,.1)" stroke="#64748b" stroke-width="1" class="tree-node"/>
+        <text x="395" y="181" class="tree-text" style="font-size:9px" fill="#94a3b8">Knowledge Graphs</text>
+
+        <!-- ML children -->
+        <line x1="290" y1="298" x2="330" y2="240" class="tree-line"/><line x1="290" y1="298" x2="330" y2="298" class="tree-line"/>
+        <line x1="290" y1="298" x2="330" y2="356" class="tree-line"/>
+
+        <rect x="330" y="222" width="130" height="30" rx="6" fill="rgba(245,158,11,.12)" stroke="#f59e0b" stroke-width="1" class="tree-node"/>
+        <text x="395" y="241" class="tree-text" style="font-size:9px" fill="#fcd34d">Deep Learning</text>
+        <rect x="330" y="280" width="130" height="30" rx="6" fill="rgba(16,185,129,.12)" stroke="#10b981" stroke-width="1" class="tree-node"/>
+        <text x="395" y="299" class="tree-text" style="font-size:9px" fill="#6ee7b7">Classical ML</text>
+        <rect x="330" y="338" width="130" height="30" rx="6" fill="rgba(6,182,212,.12)" stroke="#06b6d4" stroke-width="1" class="tree-node"/>
+        <text x="395" y="357" class="tree-text" style="font-size:9px" fill="#a5f3fc">Reinforcement Learning</text>
+
+        <!-- DEEP LEARNING children -->
+        <line x1="460" y1="237" x2="500" y2="180" class="tree-line"/><line x1="460" y1="237" x2="500" y2="210" class="tree-line"/>
+        <line x1="460" y1="237" x2="500" y2="240" class="tree-line"/><line x1="460" y1="237" x2="500" y2="270" class="tree-line"/>
+        <line x1="460" y1="237" x2="500" y2="300" class="tree-line"/><line x1="460" y1="237" x2="500" y2="330" class="tree-line"/>
+
+        <rect x="500" y="162" width="130" height="28" rx="6" fill="rgba(249,115,22,.12)" stroke="#f97316" stroke-width="1" class="tree-node"/>
+        <text x="565" y="180" class="tree-text" style="font-size:9px" fill="#fdba74">Computer Vision</text>
+        <rect x="500" y="192" width="130" height="28" rx="6" fill="rgba(59,130,246,.12)" stroke="#3b82f6" stroke-width="1" class="tree-node"/>
+        <text x="565" y="210" class="tree-text" style="font-size:9px" fill="#93c5fd">NLP</text>
+        <rect x="500" y="222" width="130" height="28" rx="6" fill="rgba(139,92,246,.12)" stroke="#8b5cf6" stroke-width="1" class="tree-node"/>
+        <text x="565" y="240" class="tree-text" style="font-size:9px" fill="#c4b5fd">Speech &amp; Audio</text>
+        <rect x="500" y="252" width="130" height="28" rx="6" fill="rgba(245,158,11,.1)" stroke="#f59e0b" stroke-width="1" class="tree-node"/>
+        <text x="565" y="270" class="tree-text" style="font-size:9px" fill="#fcd34d">Graph Neural Networks</text>
+        <rect x="500" y="282" width="130" height="28" rx="6" fill="rgba(16,185,129,.1)" stroke="#10b981" stroke-width="1" class="tree-node"/>
+        <text x="565" y="300" class="tree-text" style="font-size:9px" fill="#6ee7b7">Time Series</text>
+        <rect x="500" y="312" width="130" height="28" rx="6" fill="rgba(236,72,153,.12)" stroke="#ec4899" stroke-width="1" class="tree-node"/>
+        <text x="565" y="330" class="tree-text" style="font-size:9px" fill="#fbcfe8">Generative Models</text>
+
+        <!-- CV grandchildren -->
+        <line x1="630" y1="176" x2="670" y2="150" class="tree-line"/><line x1="630" y1="176" x2="670" y2="176" class="tree-line"/>
+        <line x1="630" y1="176" x2="670" y2="202" class="tree-line"/>
+        <rect x="670" y="136" width="120" height="24" rx="5" fill="rgba(249,115,22,.08)" stroke="#f97316" stroke-width="1" class="tree-node"/>
+        <text x="730" y="151" class="tree-text" style="font-size:8px" fill="#fdba74">CNNs, ViTs</text>
+        <rect x="670" y="162" width="120" height="24" rx="5" fill="rgba(249,115,22,.08)" stroke="#f97316" stroke-width="1" class="tree-node"/>
+        <text x="730" y="177" class="tree-text" style="font-size:8px" fill="#fdba74">YOLO, DETR, SAM</text>
+        <rect x="670" y="188" width="120" height="24" rx="5" fill="rgba(249,115,22,.08)" stroke="#f97316" stroke-width="1" class="tree-node"/>
+        <text x="730" y="203" class="tree-text" style="font-size:8px" fill="#fdba74">Segmentation, Pose</text>
+
+        <!-- NLP grandchildren -->
+        <line x1="630" y1="206" x2="670" y2="230" class="tree-line"/><line x1="630" y1="206" x2="670" y2="256" class="tree-line"/>
+        <line x1="630" y1="206" x2="670" y2="282" class="tree-line"/>
+        <rect x="670" y="216" width="120" height="24" rx="5" fill="rgba(59,130,246,.08)" stroke="#3b82f6" stroke-width="1" class="tree-node"/>
+        <text x="730" y="231" class="tree-text" style="font-size:8px" fill="#93c5fd">RNNs, LSTMs</text>
+        <rect x="670" y="242" width="120" height="24" rx="5" fill="rgba(59,130,246,.08)" stroke="#3b82f6" stroke-width="1" class="tree-node"/>
+        <text x="730" y="257" class="tree-text" style="font-size:8px" fill="#93c5fd">Transformers, BERT</text>
+        <rect x="670" y="268" width="120" height="24" rx="5" fill="rgba(239,68,68,.1)" stroke="#ef4444" stroke-width="1" class="tree-node"/>
+        <text x="730" y="283" class="tree-text" style="font-size:8px" fill="#fca5a5">GPT / LLMs</text>
+
+        <!-- GenAI grandchildren -->
+        <line x1="630" y1="326" x2="670" y2="314" class="tree-line"/><line x1="630" y1="326" x2="670" y2="340" class="tree-line"/>
+        <line x1="630" y1="326" x2="670" y2="366" class="tree-line"/><line x1="630" y1="326" x2="670" y2="392" class="tree-line"/>
+        <rect x="670" y="300" width="120" height="24" rx="5" fill="rgba(236,72,153,.08)" stroke="#ec4899" stroke-width="1" class="tree-node"/>
+        <text x="730" y="315" class="tree-text" style="font-size:8px" fill="#fbcfe8">Diffusion Models</text>
+        <rect x="670" y="326" width="120" height="24" rx="5" fill="rgba(236,72,153,.08)" stroke="#ec4899" stroke-width="1" class="tree-node"/>
+        <text x="730" y="341" class="tree-text" style="font-size:8px" fill="#fbcfe8">GANs / VAEs</text>
+        <rect x="670" y="352" width="120" height="24" rx="5" fill="rgba(236,72,153,.08)" stroke="#ec4899" stroke-width="1" class="tree-node"/>
+        <text x="730" y="367" class="tree-text" style="font-size:8px" fill="#fbcfe8">Flow Models</text>
+        <rect x="670" y="378" width="120" height="24" rx="5" fill="rgba(236,72,153,.08)" stroke="#ec4899" stroke-width="1" class="tree-node"/>
+        <text x="730" y="393" class="tree-text" style="font-size:8px" fill="#fbcfe8">Autoregressive</text>
+
+        <!-- CLASSICAL ML children -->
+        <line x1="460" y1="295" x2="500" y2="390" class="tree-line"/><line x1="460" y1="295" x2="500" y2="420" class="tree-line"/>
+        <line x1="460" y1="295" x2="500" y2="450" class="tree-line"/><line x1="460" y1="295" x2="500" y2="480" class="tree-line"/>
+        <rect x="500" y="378" width="130" height="24" rx="5" fill="rgba(16,185,129,.08)" stroke="#10b981" stroke-width="1" class="tree-node"/>
+        <text x="565" y="393" class="tree-text" style="font-size:8px" fill="#6ee7b7">Regression &amp; Trees</text>
+        <rect x="500" y="408" width="130" height="24" rx="5" fill="rgba(16,185,129,.08)" stroke="#10b981" stroke-width="1" class="tree-node"/>
+        <text x="565" y="423" class="tree-text" style="font-size:8px" fill="#6ee7b7">SVM, k-NN, Naive Bayes</text>
+        <rect x="500" y="438" width="130" height="24" rx="5" fill="rgba(16,185,129,.08)" stroke="#10b981" stroke-width="1" class="tree-node"/>
+        <text x="565" y="453" class="tree-text" style="font-size:8px" fill="#6ee7b7">Clustering (k-means, DBSCAN)</text>
+        <rect x="500" y="468" width="130" height="24" rx="5" fill="rgba(16,185,129,.08)" stroke="#10b981" stroke-width="1" class="tree-node"/>
+        <text x="565" y="483" class="tree-text" style="font-size:8px" fill="#6ee7b7">Dimension Reduction (PCA)</text>
+
+        <!-- RL children -->
+        <line x1="460" y1="353" x2="500" y2="510" class="tree-line"/><line x1="460" y1="353" x2="500" y2="540" class="tree-line"/>
+        <line x1="460" y1="353" x2="500" y2="570" class="tree-line"/>
+        <rect x="500" y="498" width="130" height="24" rx="5" fill="rgba(6,182,212,.08)" stroke="#06b6d4" stroke-width="1" class="tree-node"/>
+        <text x="565" y="513" class="tree-text" style="font-size:8px" fill="#a5f3fc">Q-Learning, DQN</text>
+        <rect x="500" y="528" width="130" height="24" rx="5" fill="rgba(6,182,212,.08)" stroke="#06b6d4" stroke-width="1" class="tree-node"/>
+        <text x="565" y="543" class="tree-text" style="font-size:8px" fill="#a5f3fc">PPO, AlphaZero</text>
+        <rect x="500" y="558" width="130" height="24" rx="5" fill="rgba(6,182,212,.08)" stroke="#06b6d4" stroke-width="1" class="tree-node"/>
+        <text x="565" y="573" class="tree-text" style="font-size:8px" fill="#a5f3fc">Multi-Agent RL</text>
+
+        <!-- DATA SCIENCE children -->
+        <line x1="290" y1="468" x2="330" y2="520" class="tree-line"/><line x1="290" y1="468" x2="330" y2="550" class="tree-line"/>
+        <line x1="290" y1="468" x2="330" y2="580" class="tree-line"/>
+        <rect x="330" y="508" width="130" height="24" rx="5" fill="rgba(139,92,246,.08)" stroke="#8b5cf6" stroke-width="1" class="tree-node"/>
+        <text x="395" y="523" class="tree-text" style="font-size:8px" fill="#c4b5fd">Statistics &amp; Hypothesis Testing</text>
+        <rect x="330" y="538" width="130" height="24" rx="5" fill="rgba(139,92,246,.08)" stroke="#8b5cf6" stroke-width="1" class="tree-node"/>
+        <text x="395" y="553" class="tree-text" style="font-size:8px" fill="#c4b5fd">Visualization &amp; BI</text>
+        <rect x="330" y="568" width="130" height="24" rx="5" fill="rgba(139,92,246,.08)" stroke="#8b5cf6" stroke-width="1" class="tree-node"/>
+        <text x="395" y="583" class="tree-text" style="font-size:8px" fill="#c4b5fd">A/B Testing &amp; Experimentation</text>
+
+        <!-- ROBOTICS (connects Classical AI + RL) -->
+        <line x1="120" y1="316" x2="140" y2="380" class="tree-line" style="stroke-dasharray:4,3"/>
+        <line x1="290" y1="353" x2="200" y2="380" class="tree-line" style="stroke-dasharray:4,3"/>
+        <rect x="140" y="362" width="110" height="28" rx="6" fill="rgba(100,116,139,.1)" stroke="#64748b" stroke-width="1" stroke-dasharray="3,2" class="tree-node"/>
+        <text x="195" y="380" class="tree-text" style="font-size:9px" fill="#94a3b8">Robotics</text>
+
+        <!-- QUANTUM ML (dashed from ML) -->
+        <line x1="225" y1="280" x2="225" y2="220" class="tree-line" style="stroke-dasharray:5,4"/>
+        <line x1="225" y1="220" x2="800" y2="220" class="tree-line" style="stroke-dasharray:5,4"/>
+        <line x1="800" y1="220" x2="800" y2="100" class="tree-line" style="stroke-dasharray:5,4"/>
+        <rect x="740" y="70" width="120" height="28" rx="6" fill="rgba(6,182,212,.1)" stroke="#06b6d4" stroke-width="1" stroke-dasharray="3,2" class="tree-node"/>
+        <text x="800" y="88" class="tree-text" style="font-size:9px" fill="#a5f3fc">Quantum ML</text>
+        <text x="800" y="108" class="nested-sublabel">QAOA, VQE, Quantum Kernels</text>
+
+        <!-- Legend text -->
+        <text x="850" y="580" class="nested-sublabel" style="font-size:10px">Solid = direct lineage. Dashed = cross-domain / emerging.</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 5: THE MYTH -->
+<!-- ========================================== -->
+<div class="slide" data-section="The Myth" style="background:linear-gradient(135deg,#2a0a1a 0%,#450a0a 50%,#1a0a2e 100%)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(239,68,68,.2);color:#fca5a5;border-color:rgba(239,68,68,.4)">The Big Misconception</div>
+      <h1 style="font-size:clamp(2.2rem,4.5vw,3.5rem)">"Just Use an LLM"</h1>
+      <p class="subtitle" style="color:#fca5a5">Why this thinking costs you speed, money, and accuracy</p>
+    </div>
+    <div class="grid2">
+      <div class="card card-red">
+        <h3 style="margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem"><span style="font-size:1.4rem">&#10060;</span> The Hype Trap</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Overkill:</strong> Using GPT-4 to classify 10k rows = burning money</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Slow:</strong> LLM inference is 1000x slower than XGBoost</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Unpredictable:</strong> LLMs hallucinate. Classical models don't.</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Opaque:</strong> Can't explain WHY an LLM made a decision</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Expensive:</strong> $10-30 per 1M tokens vs $0 for open-source ML</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Bad at:</strong> Math, precise logic, real-time predictions</span></div>
+        </div>
+      </div>
+      <div class="card card-green">
+        <h3 style="margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem"><span style="font-size:1.4rem">&#9989;</span> The Reality</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>80% of problems</strong> are solved by classical ML</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>XGBoost + CSV</strong> beats LLM for structured data</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Linear regression</strong> still powers millions of forecasts</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Rule engines</strong> are faster than LLMs for known logic</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>CV models</strong> (YOLO, ResNet) beat LLMs at vision</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>GNNs</strong> dominate drug discovery and fraud graphs</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box gold" style="margin-top:1rem;text-align:center">
+      <strong style="color:var(--gold);font-size:1.05rem">"The right tool for the right job."</strong><br>
+      <span style="color:var(--text3)">LLMs are incredible at language understanding and generation. They are terrible at precise math, real-time prediction, computer vision, and small-data problems.</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========================================== -->
+<!-- SLIDE 6: DECISION TREE (FIXED, NO OVERLAPS) -->
+<!-- ========================================== -->
+<div class="slide" data-section="Decision Tree">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:.5rem">
+      <div class="badge" style="margin-bottom:.4rem">Navigator</div>
+      <h1>When To Use What</h1>
+      <p class="subtitle">A practical decision flowchart. Follow the arrows from top.</p>
+    </div>
+    <div class="svg-wide">
+      <svg viewBox="0 0 1200 680" style="width:100%;height:auto">
+        <defs>
+          <marker id="arrowhead2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="rgba(255,255,255,.4)"/></marker>
+        </defs>
+
+        <!-- START -->
+        <rect x="520" y="10" width="160" height="34" rx="8" fill="rgba(59,130,246,.2)" stroke="#3b82f6" stroke-width="2"/>
+        <text x="600" y="31" class="decision-text" style="font-size:11px">What is your data &amp; goal?</text>
+
+        <!-- Level 1: 5 branches -->
+        <line x1="560" y1="44" x2="180" y2="90" class="decision-arrow"/>
+        <line x1="580" y1="44" x2="380" y2="90" class="decision-arrow"/>
+        <line x1="600" y1="44" x2="600" y2="90" class="decision-arrow"/>
+        <line x1="620" y1="44" x2="820" y2="90" class="decision-arrow"/>
+        <line x1="640" y1="44" x2="1020" y2="90" class="decision-arrow"/>
+
+        <rect x="80" y="90" width="200" height="32" rx="6" fill="rgba(139,92,246,.15)" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="180" y="110" class="decision-text" style="font-size:10px">Structured Data (Tables, CSV)</text>
+
+        <rect x="290" y="90" width="180" height="32" rx="6" fill="rgba(245,158,11,.15)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="380" y="110" class="decision-text" style="font-size:10px">Images or Video</text>
+
+        <rect x="510" y="90" width="180" height="32" rx="6" fill="rgba(59,130,246,.15)" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="600" y="110" class="decision-text" style="font-size:10px">Text or Documents</text>
+
+        <rect x="730" y="90" width="180" height="32" rx="6" fill="rgba(6,182,212,.15)" stroke="#06b6d4" stroke-width="1.5"/>
+        <text x="820" y="110" class="decision-text" style="font-size:10px">Audio / Speech / Music</text>
+
+        <rect x="940" y="90" width="160" height="32" rx="6" fill="rgba(100,116,139,.15)" stroke="#64748b" stroke-width="1.5"/>
+        <text x="1020" y="110" class="decision-text" style="font-size:10px">Graphs or Decisions</text>
+
+        <!-- STRUCTURED branch -->
+        <line x1="180" y1="122" x2="120" y2="160" class="decision-arrow"/>
+        <line x1="180" y1="122" x2="240" y2="160" class="decision-arrow"/>
+        <rect x="40" y="160" width="160" height="28" rx="5" fill="rgba(16,185,129,.12)" stroke="#10b981" stroke-width="1"/>
+        <text x="120" y="178" class="decision-text" style="font-size:9px">Small Data (&lt;10k rows)</text>
+        <rect x="200" y="160" width="160" height="28" rx="5" fill="rgba(16,185,129,.12)" stroke="#10b981" stroke-width="1"/>
+        <text x="280" y="178" class="decision-text" style="font-size:9px">Big Data (&gt;100k rows)</text>
+
+        <line x1="120" y1="188" x2="120" y2="230" class="decision-arrow"/>
+        <rect x="30" y="230" width="180" height="42" rx="5" fill="rgba(16,185,129,.08)" stroke="#10b981" stroke-width="1"/>
+        <text x="120" y="248" class="decision-text" style="font-size:10px">Logistic Regression</text>
+        <text x="120" y="262" class="decision-text" style="font-size:8px;fill:#94a3b8">Decision Trees, SVM, k-NN</text>
+
+        <line x1="280" y1="188" x2="280" y2="230" class="decision-arrow"/>
+        <rect x="190" y="230" width="180" height="42" rx="5" fill="rgba(16,185,129,.08)" stroke="#10b981" stroke-width="1"/>
+        <text x="280" y="248" class="decision-text" style="font-size:10px">XGBoost / LightGBM</text>
+        <text x="280" y="262" class="decision-text" style="font-size:8px;fill:#94a3b8">Random Forest, TabNet</text>
+
+        <!-- Extra structured: Time Series -->
+        <line x1="180" y1="122" x2="180" y2="160" class="decision-arrow" style="stroke-dasharray:3,3"/>
+        <rect x="130" y="290" width="140" height="28" rx="5" fill="rgba(16,185,129,.08)" stroke="#10b981" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="200" y="308" class="decision-text" style="font-size:9px">Time Series? → ARIMA, Prophet, N-BEATS</text>
+
+        <!-- IMAGES branch -->
+        <line x1="380" y1="122" x2="380" y2="160" class="decision-arrow"/>
+        <rect x="310" y="160" width="140" height="28" rx="5" fill="rgba(245,158,11,.12)" stroke="#f59e0b" stroke-width="1"/>
+        <text x="380" y="178" class="decision-text" style="font-size:9px">Classification / Detection?</text>
+        <line x1="380" y1="188" x2="320" y2="230" class="decision-arrow"/>
+        <line x1="380" y1="188" x2="440" y2="230" class="decision-arrow"/>
+        <rect x="250" y="230" width="140" height="42" rx="5" fill="rgba(249,115,22,.08)" stroke="#f97316" stroke-width="1"/>
+        <text x="320" y="248" class="decision-text" style="font-size:10px">CNNs / Vision Transformers</text>
+        <text x="320" y="262" class="decision-text" style="font-size:8px;fill:#94a3b8">ResNet, ViT, EfficientNet</text>
+        <rect x="410" y="230" width="140" height="42" rx="5" fill="rgba(249,115,22,.08)" stroke="#f97316" stroke-width="1"/>
+        <text x="480" y="248" class="decision-text" style="font-size:10px">Object Detection</text>
+        <text x="480" y="262" class="decision-text" style="font-size:8px;fill:#94a3b8">YOLO, DETR, Segment Anything</text>
+
+        <!-- Segmentation -->
+        <line x1="380" y1="188" x2="380" y2="230" class="decision-arrow" style="stroke-dasharray:3,3"/>
+        <rect x="340" y="290" width="120" height="28" rx="5" fill="rgba(249,115,22,.06)" stroke="#f97316" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="400" y="308" class="decision-text" style="font-size:9px">Segmentation? → U-Net, Mask R-CNN</text>
+
+        <!-- Image generation -->
+        <line x1="380" y1="122" x2="380" y2="160" class="decision-arrow" style="stroke-dasharray:3,3"/>
+        <rect x="340" y="340" width="120" height="28" rx="5" fill="rgba(236,72,153,.08)" stroke="#ec4899" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="400" y="358" class="decision-text" style="font-size:9px">Generate Images? → Diffusion, GANs</text>
+
+        <!-- TEXT branch -->
+        <line x1="600" y1="122" x2="600" y2="160" class="decision-arrow"/>
+        <rect x="530" y="160" width="140" height="28" rx="5" fill="rgba(59,130,246,.12)" stroke="#3b82f6" stroke-width="1"/>
+        <text x="600" y="178" class="decision-text" style="font-size:9px">Need generation?</text>
+        <line x1="600" y1="188" x2="540" y2="230" class="decision-arrow"/>
+        <line x1="600" y1="188" x2="660" y2="230" class="decision-arrow"/>
+        <rect x="470" y="230" width="140" height="42" rx="5" fill="rgba(239,68,68,.1)" stroke="#ef4444" stroke-width="1"/>
+        <text x="540" y="248" class="decision-text" style="font-size:10px">YES → LLM / GenAI</text>
+        <text x="540" y="262" class="decision-text" style="font-size:8px;fill:#94a3b8">GPT-4, Claude, LLaMA</text>
+        <rect x="630" y="230" width="140" height="42" rx="5" fill="rgba(20,184,166,.1)" stroke="#14b8a6" stroke-width="1"/>
+        <text x="700" y="248" class="decision-text" style="font-size:10px">NO → BERT / Embeddings</text>
+        <text x="700" y="262" class="decision-text" style="font-size:8px;fill:#94a3b8">Classification, NER, Sentiment</text>
+
+        <!-- Text summarization/QA -->
+        <line x1="600" y1="188" x2="600" y2="230" class="decision-arrow" style="stroke-dasharray:3,3"/>
+        <rect x="550" y="290" width="140" height="28" rx="5" fill="rgba(239,68,68,.06)" stroke="#ef4444" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="620" y="308" class="decision-text" style="font-size:9px">Summarize / Q&amp;A? → LLM + RAG</text>
+
+        <!-- AUDIO branch -->
+        <line x1="820" y1="122" x2="820" y2="160" class="decision-arrow"/>
+        <rect x="750" y="160" width="140" height="28" rx="5" fill="rgba(6,182,212,.12)" stroke="#06b6d4" stroke-width="1"/>
+        <text x="820" y="178" class="decision-text" style="font-size:9px">Speech recognition?</text>
+        <line x1="820" y1="188" x2="760" y2="230" class="decision-arrow"/>
+        <line x1="820" y1="188" x2="880" y2="230" class="decision-arrow"/>
+        <rect x="690" y="230" width="140" height="42" rx="5" fill="rgba(6,182,212,.08)" stroke="#06b6d4" stroke-width="1"/>
+        <text x="760" y="248" class="decision-text" style="font-size:10px">Transcription</text>
+        <text x="760" y="262" class="decision-text" style="font-size:8px;fill:#94a3b8">Whisper, Wav2Vec</text>
+        <rect x="850" y="230" width="140" height="42" rx="5" fill="rgba(236,72,153,.08)" stroke="#ec4899" stroke-width="1"/>
+        <text x="920" y="248" class="decision-text" style="font-size:10px">Music Generation</text>
+        <text x="920" y="262" class="decision-text" style="font-size:8px;fill:#94a3b8">MusicGen, Jukebox, Diffusion</text>
+
+        <!-- GRAPHS / DECISIONS branch -->
+        <line x1="1020" y1="122" x2="1020" y2="160" class="decision-arrow"/>
+        <rect x="950" y="160" width="140" height="28" rx="5" fill="rgba(100,116,139,.12)" stroke="#64748b" stroke-width="1"/>
+        <text x="1020" y="178" class="decision-text" style="font-size:9px">What type?</text>
+        <line x1="1020" y1="188" x2="960" y2="230" class="decision-arrow"/>
+        <line x1="1020" y1="188" x2="1080" y2="230" class="decision-arrow"/>
+        <line x1="1020" y1="188" x2="1020" y2="230" class="decision-arrow"/>
+        <rect x="890" y="230" width="140" height="42" rx="5" fill="rgba(245,158,11,.08)" stroke="#f59e0b" stroke-width="1"/>
+        <text x="960" y="248" class="decision-text" style="font-size:10px">Graph Data</text>
+        <text x="960" y="262" class="decision-text" style="font-size:8px;fill:#94a3b8">GNNs, GraphSAGE, GAT</text>
+        <rect x="1050" y="230" width="140" height="42" rx="5" fill="rgba(6,182,212,.08)" stroke="#06b6d4" stroke-width="1"/>
+        <text x="1120" y="248" class="decision-text" style="font-size:10px">Sequential Decisions</text>
+        <text x="1120" y="262" class="decision-text" style="font-size:8px;fill:#94a3b8">PPO, DQN, Deep RL</text>
+        <rect x="970" y="290" width="140" height="42" rx="5" fill="rgba(16,185,129,.08)" stroke="#10b981" stroke-width="1"/>
+        <text x="1040" y="308" class="decision-text" style="font-size:10px">Recommendation</text>
+        <text x="1040" y="322" class="decision-text" style="font-size:8px;fill:#94a3b8">Collaborative Filtering, Deep MF</text>
+
+        <!-- Quantum callout -->
+        <line x1="1020" y1="272" x2="1020" y2="380" class="decision-arrow" style="stroke-dasharray:3,3"/>
+        <rect x="950" y="380" width="140" height="42" rx="5" fill="rgba(6,182,212,.06)" stroke="#06b6d4" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="1020" y="398" class="decision-text" style="font-size:10px">Quantum ML?</text>
+        <text x="1020" y="412" class="decision-text" style="font-size:8px;fill:#94a3b8">Research only. QAOA, VQE.</text>
+
+        <!-- Bottom summary row -->
+        <rect x="100" y="480" width="200" height="50" rx="6" fill="rgba(16,185,129,.06)" stroke="#10b981" stroke-width="1"/>
+        <text x="200" y="500" class="decision-text" style="font-size:10px">Tabular → Classical ML</text>
+        <text x="200" y="516" class="decision-text" style="font-size:8px;fill:#94a3b8">Fast, cheap, interpretable</text>
+
+        <rect x="340" y="480" width="200" height="50" rx="6" fill="rgba(249,115,22,.06)" stroke="#f97316" stroke-width="1"/>
+        <text x="440" y="500" class="decision-text" style="font-size:10px">Vision → CNNs / ViTs</text>
+        <text x="440" y="516" class="decision-text" style="font-size:8px;fill:#94a3b8">Specialized, efficient</text>
+
+        <rect x="580" y="480" width="200" height="50" rx="6" fill="rgba(239,68,68,.06)" stroke="#ef4444" stroke-width="1"/>
+        <text x="680" y="500" class="decision-text" style="font-size:10px">Language → LLMs (if gen)</text>
+        <text x="680" y="516" class="decision-text" style="font-size:8px;fill:#94a3b8">Expensive but powerful</text>
+
+        <rect x="820" y="480" width="200" height="50" rx="6" fill="rgba(6,182,212,.06)" stroke="#06b6d4" stroke-width="1"/>
+        <text x="920" y="500" class="decision-text" style="font-size:10px">Decisions → RL / GNNs</text>
+        <text x="920" y="516" class="decision-text" style="font-size:8px;fill:#94a3b8">For actions &amp; graphs</text>
+
+        <text x="600" y="570" class="nested-sublabel" style="font-size:11px">Solid arrows = primary path. Dashed = alternative or conditional path.</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 7: USE CASE MATRIX -->
+<!-- ========================================== -->
+<div class="slide" data-section="Use Cases">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem">Practical Guide</div>
+      <h1>The Right Tool For The Job</h1>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <tr>
+          <th style="min-width:140px">Problem Type</th>
+          <th style="min-width:130px">Best Approach</th>
+          <th style="min-width:130px">Why Not LLM?</th>
+          <th style="min-width:150px">Example Tools</th>
+          <th style="min-width:100px">Speed</th>
+          <th style="min-width:80px">Cost</th>
+        </tr>
+        <tr>
+          <td><strong>Sales Forecasting</strong></td>
+          <td><span class="tag tag-green">Classical ML</span></td>
+          <td>Overkill, no language needed</td>
+          <td>Prophet, XGBoost, ARIMA, N-BEATS</td>
+          <td><span class="tag tag-green">Instant</span></td>
+          <td><span class="tag tag-green">$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Fraud Detection</strong></td>
+          <td><span class="tag tag-green">Classical ML</span></td>
+          <td>Needs explainability + speed</td>
+          <td>Isolation Forest, XGBoost, GNNs</td>
+          <td><span class="tag tag-green">&lt;10ms</span></td>
+          <td><span class="tag tag-green">$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Image Classification</strong></td>
+          <td><span class="tag tag-orange">Deep Learning (CV)</span></td>
+          <td>LLMs are bad at pixel tasks</td>
+          <td>ResNet, ViT, EfficientNet</td>
+          <td><span class="tag tag-green">Fast</span></td>
+          <td><span class="tag tag-green">$$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Object Detection</strong></td>
+          <td><span class="tag tag-orange">Deep Learning (CV)</span></td>
+          <td>Vision-specific models win</td>
+          <td>YOLO, DETR, Segment Anything</td>
+          <td><span class="tag tag-green">Real-time</span></td>
+          <td><span class="tag tag-green">$$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Medical Imaging</strong></td>
+          <td><span class="tag tag-orange">CNNs / U-Net</span></td>
+          <td>Needs pixel-precision, not text</td>
+          <td>U-Net, nnU-Net, MedSAM</td>
+          <td><span class="tag tag-gold">~1s</span></td>
+          <td><span class="tag tag-gold">$$$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Sentiment Analysis</strong></td>
+          <td><span class="tag tag-teal">NLP (BERT)</span></td>
+          <td>LLM works but expensive at scale</td>
+          <td>BERT, RoBERTa, DistilBERT</td>
+          <td><span class="tag tag-green">Fast</span></td>
+          <td><span class="tag tag-green">$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Document Q&amp;A</strong></td>
+          <td><span class="tag tag-red">LLM + RAG</span></td>
+          <td>This is what LLMs excel at</td>
+          <td>GPT-4, Claude, LLaMA + RAG</td>
+          <td><span class="tag tag-gold">Seconds</span></td>
+          <td><span class="tag tag-gold">$$$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Code Generation</strong></td>
+          <td><span class="tag tag-red">LLM</span></td>
+          <td>Specialized models exist too</td>
+          <td>Copilot, CodeT5, StarCoder</td>
+          <td><span class="tag tag-gold">~1s</span></td>
+          <td><span class="tag tag-gold">$$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Speech-to-Text</strong></td>
+          <td><span class="tag tag-blue">Audio DL</span></td>
+          <td>Not a text task; audio models win</td>
+          <td>Whisper, Wav2Vec, DeepSpeech</td>
+          <td><span class="tag tag-green">Realtime</span></td>
+          <td><span class="tag tag-green">$$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Game Playing / Robot</strong></td>
+          <td><span class="tag tag-teal">Reinforcement Learning</span></td>
+          <td>LLMs don't learn from actions</td>
+          <td>PPO, SAC, MuZero</td>
+          <td><span class="tag tag-gold">Training: hrs</span></td>
+          <td><span class="tag tag-gold">$$$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Image Generation</strong></td>
+          <td><span class="tag tag-pink">Diffusion / GAN</span></td>
+          <td>Not an LLM task at all</td>
+          <td>Stable Diffusion, DALL-E, Midjourney</td>
+          <td><span class="tag tag-gold">Seconds</span></td>
+          <td><span class="tag tag-gold">$$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Drug Discovery</strong></td>
+          <td><span class="tag tag-purple">Graph Neural Nets</span></td>
+          <td>Molecular graphs need GNNs</td>
+          <td>GraphConv, GAT, AlphaFold</td>
+          <td><span class="tag tag-red">Hours</span></td>
+          <td><span class="tag tag-gold">$$$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Social Network Analysis</strong></td>
+          <td><span class="tag tag-purple">GNNs</span></td>
+          <td>Relationships are graphs, not text</td>
+          <td>GraphSAGE, GAT, PinSage</td>
+          <td><span class="tag tag-green">Fast</span></td>
+          <td><span class="tag tag-gold">$$</span></td>
+        </tr>
+        <tr>
+          <td><strong>Music Generation</strong></td>
+          <td><span class="tag tag-pink">Diffusion / Transformers</span></td>
+          <td>Audio domain, not language</td>
+          <td>MusicGen, Jukebox, AudioLDM</td>
+          <td><span class="tag tag-gold">Seconds</span></td>
+          <td><span class="tag tag-gold">$$</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 8: DEEP DIVE — COMPUTER VISION, NLP, SPEECH -->
+<!-- ========================================== -->
+<div class="slide" data-section="Deep Dive">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem">The Major Branches</div>
+      <h1>Computer Vision, NLP &amp; Speech</h1>
+      <p class="subtitle">The three pillars of modern Deep Learning — and what lives inside each</p>
+    </div>
+    <div class="grid3">
+      <div class="card card-orange">
+        <div class="icon-wrap icon-orange" style="margin:0 auto .8rem">CV</div>
+        <h3 style="text-align:center">Computer Vision</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.78rem">Teaching machines to "see" and understand visual information.</p>
+        <div class="checklist" style="margin-top:.6rem">
+          <div class="check-item"><span class="check-icon check-orange">C</span><span><strong>Classification:</strong> ResNet, ViT, EfficientNet</span></div>
+          <div class="check-item"><span class="check-icon check-orange">D</span><span><strong>Detection:</strong> YOLO, DETR, Faster R-CNN</span></div>
+          <div class="check-item"><span class="check-icon check-orange">S</span><span><strong>Segmentation:</strong> U-Net, Mask R-CNN, SAM</span></div>
+          <div class="check-item"><span class="check-icon check-orange">G</span><span><strong>Generation:</strong> Stable Diffusion (images), GANs</span></div>
+          <div class="check-item"><span class="check-icon check-orange">V</span><span><strong>Video:</strong> Video transformers, action recognition</span></div>
+        </div>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-orange">Self-driving</span><span class="tag tag-orange">Medical imaging</span><span class="tag tag-orange">Quality control</span>
+        </div>
+      </div>
+      <div class="card card-blue">
+        <div class="icon-wrap icon-blue" style="margin:0 auto .8rem">NLP</div>
+        <h3 style="text-align:center">Natural Language Processing</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.78rem">Teaching machines to read, understand, and generate human language.</p>
+        <div class="checklist" style="margin-top:.6rem">
+          <div class="check-item"><span class="check-icon check-blue">E</span><span><strong>Embeddings:</strong> Word2Vec, GloVe, Sentence-BERT</span></div>
+          <div class="check-item"><span class="check-icon check-blue">U</span><span><strong>Understanding:</strong> BERT, RoBERTa, DeBERTa</span></div>
+          <div class="check-item"><span class="check-icon check-blue">G</span><span><strong>Generation:</strong> GPT-4, Claude, LLaMA, Gemini</span></div>
+          <div class="check-item"><span class="check-icon check-blue">T</span><span><strong>Translation:</strong> T5, BART, mBART</span></div>
+          <div class="check-item"><span class="check-icon check-blue">R</span><span><strong>Retrieval:</strong> RAG, vector DBs, embeddings search</span></div>
+        </div>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-blue">Chatbots</span><span class="tag tag-blue">Search</span><span class="tag tag-blue">Document AI</span><span class="tag tag-blue">Code</span>
+        </div>
+      </div>
+      <div class="card card-purple">
+        <div class="icon-wrap icon-purple" style="margin:0 auto .8rem">Sp</div>
+        <h3 style="text-align:center">Speech &amp; Audio</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.78rem">Processing sound: speech recognition, synthesis, music, and audio events.</p>
+        <div class="checklist" style="margin-top:.6rem">
+          <div class="check-item"><span class="check-icon check-purple">A</span><span><strong>ASR:</strong> Whisper, Wav2Vec, DeepSpeech</span></div>
+          <div class="check-item"><span class="check-icon check-purple">T</span><span><strong>TTS:</strong> VALL-E, Tortoise, Bark</span></div>
+          <div class="check-item"><span class="check-icon check-purple">M</span><span><strong>Music Gen:</strong> MusicGen, Jukebox, AudioLDM</span></div>
+          <div class="check-item"><span class="check-icon check-purple">E</span><span><strong>Event Detection:</strong> Audio classification, separation</span></div>
+          <div class="check-item"><span class="check-icon check-purple">C</span><span><strong>Codec:</strong> EnCodec, SoundStream compression</span></div>
+        </div>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-purple">Voice assistants</span><span class="tag tag-purple">Transcription</span><span class="tag tag-purple">DJ tools</span>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box" style="margin-top:1rem;text-align:center">
+      <strong>These three domains are converging.</strong> Multimodal models (GPT-4V, Gemini, Claude 3) can now process text + images + audio together — 
+      but under the hood, they still use specialized encoders for each modality fused into a transformer backbone.
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 9: RL, GNNs, TIME SERIES -->
+<!-- ========================================== -->
+<div class="slide" data-section="RL & GNNs">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem">Specialized Domains</div>
+      <h1>Reinforcement Learning, GNNs &amp; Time Series</h1>
+      <p class="subtitle">Often overlooked, absolutely critical for specific problem types</p>
+    </div>
+    <div class="grid3">
+      <div class="card card-teal">
+        <div class="icon-wrap icon-teal" style="margin:0 auto .8rem">RL</div>
+        <h3 style="text-align:center">Reinforcement Learning</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.78rem">Learning by <strong>trial and error</strong> through interaction with an environment. Reward signal drives behavior.</p>
+        <div class="checklist" style="margin-top:.6rem">
+          <div class="check-item"><span class="check-icon check-teal">Q</span><span><strong>Q-Learning / DQN:</strong> Value-based, discrete actions</span></div>
+          <div class="check-item"><span class="check-icon check-teal">P</span><span><strong>PPO / A3C:</strong> Policy gradient, continuous control</span></div>
+          <div class="check-item"><span class="check-icon check-teal">A</span><span><strong>AlphaZero:</strong> Self-play + MCTS (Chess, Go)</span></div>
+          <div class="check-item"><span class="check-icon check-teal">M</span><span><strong>Multi-Agent:</strong> Agents compete or cooperate</span></div>
+        </div>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-teal">Robotics</span><span class="tag tag-teal">Game AI</span><span class="tag tag-teal">Trading</span><span class="tag tag-teal">Autonomous driving</span>
+        </div>
+      </div>
+      <div class="card card-gold">
+        <div class="icon-wrap icon-gold" style="margin:0 auto .8rem">G</div>
+        <h3 style="text-align:center">Graph Neural Networks</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.78rem">Neural networks for <strong>graph-structured data</strong>: nodes connected by edges with relationships.</p>
+        <div class="checklist" style="margin-top:.6rem">
+          <div class="check-item"><span class="check-icon check-gold">G</span><span><strong>GCN:</strong> Graph Convolutional Networks</span></div>
+          <div class="check-item"><span class="check-icon check-gold">A</span><span><strong>GAT:</strong> Graph Attention Networks</span></div>
+          <div class="check-item"><span class="check-icon check-gold">S</span><span><strong>GraphSAGE:</strong> Inductive representation learning</span></div>
+          <div class="check-item"><span class="check-icon check-gold">T</span><span><strong>GT:</strong> Graph Transformers (recent)</span></div>
+        </div>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-gold">Fraud detection</span><span class="tag tag-gold">Drug discovery</span><span class="tag tag-gold">Social nets</span><span class="tag tag-gold">Rec systems</span>
+        </div>
+      </div>
+      <div class="card card-green">
+        <div class="icon-wrap icon-green" style="margin:0 auto .8rem">TS</div>
+        <h3 style="text-align:center">Time Series</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.78rem">Predicting the future from past sequential data. Finance, weather, IoT, demand forecasting.</p>
+        <div class="checklist" style="margin-top:.6rem">
+          <div class="check-item"><span class="check-icon check-green">C</span><span><strong>Classical:</strong> ARIMA, Prophet, ETS, Exponential Smoothing</span></div>
+          <div class="check-item"><span class="check-icon check-green">M</span><span><strong>ML:</strong> XGBoost with lag features, LightGBM</span></div>
+          <div class="check-item"><span class="check-icon check-green">D</span><span><strong>Deep:</strong> LSTM, Temporal CNN, N-BEATS, N-HiTS</span></div>
+          <div class="check-item"><span class="check-icon check-green">T</span><span><strong>Transformers:</strong> Informer, Autoformer, PatchTST</span></div>
+        </div>
+        <div style="margin-top:.6rem;text-align:center">
+          <span class="tag tag-green">Demand forecasting</span><span class="tag tag-green">Stock prediction</span><span class="tag tag-green">IoT sensors</span>
+        </div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:1rem">
+      <div class="card card-slate">
+        <h3 style="margin-bottom:.5rem">Symbolic / Classical AI</h3>
+        <p style="font-size:.8rem;margin-bottom:.5rem">Before neural networks dominated, AI was built on <strong>logic, rules, and search</strong>. Still relevant today.</p>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-slate">1</span><span><strong>Expert Systems:</strong> Hardcoded if-then rules (MYCIN, modern business rules)</span></div>
+          <div class="check-item"><span class="check-icon check-slate">2</span><span><strong>Search:</strong> A*, DFS, BFS — pathfinding, game trees, scheduling</span></div>
+          <div class="check-item"><span class="check-icon check-slate">3</span><span><strong>Knowledge Graphs:</strong> Google Knowledge Graph, enterprise ontologies</span></div>
+          <div class="check-item"><span class="check-icon check-slate">4</span><span><strong>Planning:</strong> PDDL, automated planning for logistics &amp; robotics</span></div>
+        </div>
+        <div style="margin-top:.5rem">
+          <span class="tag tag-slate">Prolog</span><span class="tag tag-slate">OWL</span><span class="tag tag-slate">SPARQL</span><span class="tag tag-slate">Drools</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:.5rem">Robotics &amp; Embodied AI</h3>
+        <p style="font-size:.8rem;margin-bottom:.5rem">The intersection of CV, RL, control theory, and mechanics. AI that physically interacts with the world.</p>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-blue">S</span><span><strong>SLAM:</strong> Simultaneous Localization and Mapping</span></div>
+          <div class="check-item"><span class="check-icon check-blue">M</span><span><strong>Manipulation:</strong> Grasping, dexterous hand control</span></div>
+          <div class="check-item"><span class="check-icon check-blue">N</span><span><strong>Navigation:</strong> Path planning, obstacle avoidance</span></div>
+          <div class="check-item"><span class="check-icon check-blue">H</span><span><strong>Humanoids:</strong> Tesla Optimus, Boston Dynamics Atlas, Figure AI</span></div>
+        </div>
+        <div style="margin-top:.5rem">
+          <span class="tag tag-blue">ROS</span><span class="tag tag-blue">Gazebo</span><span class="tag tag-blue">Isaac Sim</span><span class="tag tag-blue">Sim-to-real</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 10: QUANTUM ML -->
+<!-- ========================================== -->
+<div class="slide" data-section="Quantum ML" style="background:linear-gradient(135deg,#0a1a2e 0%,#0f172a 50%,#1a1b3d 100%)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(6,182,212,.15);color:#a5f3fc;border-color:rgba(6,182,212,.3)">Emerging</div>
+      <h1>Where Does Quantum ML Fit?</h1>
+    </div>
+    <div class="grid2">
+      <div class="card" style="border-color:rgba(6,182,212,.25);background:linear-gradient(180deg,rgba(6,182,212,.08) 0%,var(--card) 100%)">
+        <div class="icon-wrap" style="margin:0 auto .8rem;background:rgba(6,182,212,.15);color:#22d3ee">Q</div>
+        <h3 style="text-align:center">Quantum Machine Learning</h3>
+        <p style="margin-top:.4rem;text-align:center;font-size:.8rem">Algorithms that run on <strong>quantum computers</strong> or use quantum-inspired methods on classical hardware. Still largely experimental.</p>
+        <div class="checklist" style="margin-top:.8rem">
+          <div class="check-item"><span class="check-icon check-blue">A</span><span><strong>QAOA:</strong> Quantum Approximate Optimization Algorithm</span></div>
+          <div class="check-item"><span class="check-icon check-blue">V</span><span><strong>VQE:</strong> Variational Quantum Eigensolver (chemistry)</span></div>
+          <div class="check-item"><span class="check-icon check-blue">K</span><span><strong>Quantum Kernels:</strong> Feature maps on quantum circuits</span></div>
+          <div class="check-item"><span class="check-icon check-blue">D</span><span><strong>Quantum Annealing:</strong> D-Wave for combinatorial optimization</span></div>
+          <div class="check-item"><span class="check-icon check-blue">H</span><span><strong>Hamiltonian Simulation:</strong> Quantum systems modeling</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:1rem">
+          <h3 style="margin-bottom:.5rem">Current Status: NISQ Era</h3>
+          <div class="checklist">
+            <div class="check-item"><span class="check-icon check-warn">~</span><span><strong>NISQ:</strong> Noisy Intermediate-Scale Quantum (50–1000 qubits)</span></div>
+            <div class="check-item"><span class="check-icon check-no">!</span><span><strong>No proven quantum advantage</strong> for most ML tasks yet</span></div>
+            <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Promising:</strong> Quantum chemistry, optimization, simulation</span></div>
+            <div class="check-item"><span class="check-icon check-warn">~</span><span><strong>Timeline:</strong> 5–15 years to practical quantum ML at scale</span></div>
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(6,182,212,.2);background:rgba(6,182,212,.05)">
+          <h3 style="margin-bottom:.5rem">The Quantum-Classical Hybrid</h3>
+          <p style="font-size:.8rem">Most near-term QML uses <strong>variational circuits</strong>: quantum processors handle specific subroutines while classical optimizers tune parameters. Think of it as a quantum GPU accelerator — not a replacement for classical deep learning.</p>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box teal" style="margin-top:1rem;text-align:center">
+      <strong>Bottom line:</strong> Quantum ML is fascinating research, but for production ML in 2025–2030, classical and deep learning methods remain dominant. 
+      Watch this space for optimization, materials science, and cryptography breakthroughs.
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 11: COMPARISON CARDS -->
+<!-- ========================================== -->
+<div class="slide" data-section="Comparisons">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem">Head-to-Head</div>
+      <h1>Technique Showdown</h1>
+    </div>
+    <div class="grid2">
+      <div class="card card-green">
+        <h3 style="margin-bottom:.6rem">Classical ML vs Deep Learning</h3>
+        <table class="data-table">
+          <tr><th>Aspect</th><th>Classical ML</th><th>Deep Learning</th></tr>
+          <tr><td>Data needed</td><td>100 – 10k samples</td><td>10k – 10M+ samples</td></tr>
+          <tr><td>Feature engineering</td><td>Critical (manual)</td><td>Minimal (learns features)</td></tr>
+          <tr><td>Compute</td><td>CPU, seconds</td><td>GPU, hours–days</td></tr>
+          <tr><td>Interpretability</td><td>High (SHAP, FI)</td><td>Low (black box)</td></tr>
+          <tr><td>Best for</td><td>Tabular, structured</td><td>Images, text, audio</td></tr>
+          <tr><td>Examples</td><td>XGBoost, RF, SVM</td><td>CNN, Transformer, GNN</td></tr>
+        </table>
+      </div>
+      <div class="card card-gold">
+        <h3 style="margin-bottom:.6rem">API LLM vs Fine-Tuned Small Model</h3>
+        <table class="data-table">
+          <tr><th>Aspect</th><th>API LLM (GPT-4)</th><th>Fine-Tuned Small Model</th></tr>
+          <tr><td>Cost per 1M tokens</td><td>$10 – $30</td><td>$0.01 (self-hosted)</td></tr>
+          <tr><td>Latency</td><td>1–5 seconds</td><td>10–100ms</td></tr>
+          <tr><td>Customization</td><td>Prompt engineering only</td><td>Fully specialized</td></tr>
+          <tr><td>Data privacy</td><td>Sent to third party</td><td>On-premise</td></tr>
+          <tr><td>Best for</td><td>General reasoning, drafts</td><td>High-volume specific tasks</td></tr>
+          <tr><td>Size</td><td>100B–1T params</td><td>1M–7B params</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:1rem">
+      <div class="card card-blue">
+        <h3 style="margin-bottom:.6rem">Supervised vs Unsupervised vs RL</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-blue">S</span><span><strong>Supervised:</strong> Labeled data (input → known output). Classification, regression, forecasting.</span></div>
+          <div class="check-item"><span class="check-icon check-purple">U</span><span><strong>Unsupervised:</strong> No labels. Find hidden structure. Clustering, anomaly detection, PCA.</span></div>
+          <div class="check-item"><span class="check-icon check-teal">R</span><span><strong>Reinforcement Learning:</strong> Learn by trial/error with rewards. Robotics, game AI, trading.</span></div>
+          <div class="check-item"><span class="check-icon check-gold">SS</span><span><strong>Self-Supervised:</strong> Labels derived from data itself. Pre-training LLMs, contrastive learning.</span></div>
+        </div>
+      </div>
+      <div class="card card-red">
+        <h3 style="margin-bottom:.6rem">Generative Model Types</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-red">T</span><span><strong>Autoregressive (LLMs):</strong> Predict next token. GPT, LLaMA, Claude.</span></div>
+          <div class="check-item"><span class="check-icon check-pink">D</span><span><strong>Diffusion:</strong> Iterative denoising. Stable Diffusion, DALL-E, Imagen.</span></div>
+          <div class="check-item"><span class="check-icon check-warn">G</span><span><strong>GANs:</strong> Generator vs Discriminator. Faces, style transfer. Hard to train.</span></div>
+          <div class="check-item"><span class="check-icon check-blue">V</span><span><strong>VAEs:</strong> Latent space learning. Generation + representation.</span></div>
+          <div class="check-item"><span class="check-icon check-purple">F</span><span><strong>Flow Models:</strong> Invertible transformations. High-quality density estimation.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 12: TIMELINE -->
+<!-- ========================================== -->
+<div class="slide" data-section="Timeline">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem">History</div>
+      <h1>Evolution of the Field</h1>
+      <p class="subtitle">From rules to neural nets to LLMs — and what's next</p>
+    </div>
+    <div class="timeline scroll-h">
+      <div class="timeline-item">
+        <div class="timeline-year">1950s–60s</div>
+        <div class="timeline-title">Symbolic AI</div>
+        <div class="timeline-desc">Rule-based systems, logic programming, expert systems. Turing Test proposed. No learning — pure human-encoded knowledge.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1980s–90s</div>
+        <div class="timeline-title">Statistical ML</div>
+        <div class="timeline-desc">SVMs, Random Forests, Naive Bayes, k-means. The "learn from data" revolution. Data science emerges as a discipline.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1997</div>
+        <div class="timeline-title">Deep Blue beats Kasparov</div>
+        <div class="timeline-desc">IBM's chess computer wins. Not ML — brute-force search + evaluation function. Shows power of classical AI + compute.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2012</div>
+        <div class="timeline-title">Deep Learning Awakens</div>
+        <div class="timeline-desc">AlexNet wins ImageNet. GPUs + big data + ReLU make deep neural networks practical. CNNs dominate computer vision.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2014–15</div>
+        <div class="timeline-title">GANs &amp; Deep RL</div>
+        <div class="timeline-desc">GANs (Goodfellow) enable realistic image generation. DeepMind's DQN masters Atari games. AlphaGo (2016) beats Lee Sedol.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2017</div>
+        <div class="timeline-title">Attention Is All You Need</div>
+        <div class="timeline-desc">Transformer architecture. Self-attention replaces RNNs. Parallel training at scale becomes possible. The LLM era begins.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2018–20</div>
+        <div class="timeline-title">BERT &amp; GPT Era</div>
+        <div class="timeline-desc">BERT (understanding) and GPT (generation) show power of pre-training. Transfer learning goes mainstream in NLP.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2020–21</div>
+        <div class="timeline-title">Vision &amp; Multimodal</div>
+        <div class="timeline-desc">Vision Transformers (ViT), CLIP (text+image), DALL-E (text-to-image). AI starts crossing modality boundaries.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2022–23</div>
+        <div class="timeline-title">ChatGPT &amp; GenAI Boom</div>
+        <div class="timeline-desc">GPT-3.5/4, Stable Diffusion, Midjourney. Generative AI goes consumer. The "LLM for everything" hype peaks.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2024–25</div>
+        <div class="timeline-title">Agents &amp; Efficiency</div>
+        <div class="timeline-desc">Agentic AI, RAG, small models (Phi, Llama-3.2), quantization, edge deployment. Cost and speed matter again.</div>
+      </div>
+      <div class="timeline-item" style="border-color:rgba(6,182,212,.3)">
+        <div class="timeline-year" style="color:#22d3ee">2026+</div>
+        <div class="timeline-title">Multimodal + Quantum?</div>
+        <div class="timeline-desc">True multimodal reasoning, reasoning models (o1-like), physical AI/robotics, early quantum-classical hybrid ML.</div>
+      </div>
+    </div>
+    <div class="highlight-box" style="margin-top:1rem;text-align:center">
+      <strong>Pattern:</strong> Every decade, a new paradigm dominates. But <strong>old techniques don't die</strong> — they find their niche. 
+      Linear regression from the 1800s still powers more business decisions than GPT-4.
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 13: THE REALITY CHECK -->
+<!-- ========================================== -->
+<div class="slide" data-section="Reality Check" style="background:linear-gradient(135deg,#1a0a1a 0%,#0f172a 50%,#1a1a0a 100%)">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(16,185,129,.15);color:#6ee7b7;border-color:rgba(16,185,129,.3)">The Truth</div>
+      <h1>What Actually Powers the World?</h1>
+    </div>
+    <div class="grid3">
+      <div class="card card-green" style="text-align:center">
+        <div class="stat-big" style="font-size:3rem">~80%</div>
+        <div style="font-size:.95rem;font-weight:700;margin-top:.4rem">Classical ML &amp; Stats</div>
+        <p style="margin-top:.4rem;font-size:.8rem">XGBoost, SQL, linear regression, random forest, heuristics. Running on CPUs in data centers everywhere.</p>
+      </div>
+      <div class="card card-gold" style="text-align:center">
+        <div class="stat-big" style="font-size:3rem;background:linear-gradient(135deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent">~15%</div>
+        <div style="font-size:.95rem;font-weight:700;margin-top:.4rem">Deep Learning</div>
+        <p style="margin-top:.4rem;font-size:.8rem">CV models, recommender systems, speech recognition, NLP (non-LLM). Running on GPUs.</p>
+      </div>
+      <div class="card card-red" style="text-align:center">
+        <div class="stat-big" style="font-size:3rem;background:linear-gradient(135deg,#ef4444,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent">~5%</div>
+        <div style="font-size:.95rem;font-weight:700;margin-top:.4rem">LLMs / GenAI</div>
+        <p style="margin-top:.4rem;font-size:.8rem">Chatbots, content generation, coding assistants, RAG systems. Fastest-growing but smallest footprint.</p>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:1rem">
+      <div class="card">
+        <h3 style="margin-bottom:.6rem">&#127942; The Unsung Heroes</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-green">1</span><span><strong>Linear Regression:</strong> Still the #1 forecasting tool in business</span></div>
+          <div class="check-item"><span class="check-icon check-green">2</span><span><strong>SQL + Heuristics:</strong> Most "AI" dashboards are just smart queries</span></div>
+          <div class="check-item"><span class="check-icon check-green">3</span><span><strong>Excel + Pivot Tables:</strong> More decisions made here than in Jupyter</span></div>
+          <div class="check-item"><span class="check-icon check-green">4</span><span><strong>Rule Engines:</strong> Banks process billions of transactions with hardcoded rules</span></div>
+          <div class="check-item"><span class="check-icon check-green">5</span><span><strong>A/B Testing:</strong> The real driver of product improvement at tech companies</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:.6rem">&#128640; Where LLMs Actually Shine</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-red">A</span><span><strong>Draft generation:</strong> First drafts of emails, docs, code, copy</span></div>
+          <div class="check-item"><span class="check-icon check-red">B</span><span><strong>Complex reasoning:</strong> Multi-step analysis, planning, debugging</span></div>
+          <div class="check-item"><span class="check-icon check-red">C</span><span><strong>Knowledge synthesis:</strong> Summarizing 100 pages in seconds</span></div>
+          <div class="check-item"><span class="check-icon check-red">D</span><span><strong>Natural language interfaces:</strong> "Talk to your data"</span></div>
+          <div class="check-item"><span class="check-icon check-red">E</span><span><strong>Creativity:</strong> Brainstorming, variant generation, storytelling</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 14: SUMMARY / CHEAT SHEET -->
+<!-- ========================================== -->
+<div class="slide hero-bg" data-section="Summary">
+  <div class="orb orb1" style="background:#10b981;opacity:.2"></div>
+  <div class="orb orb2" style="background:#3b82f6;opacity:.2"></div>
+  <div class="container" style="position:relative;z-index:2">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(16,185,129,.15);color:#6ee7b7;border-color:rgba(16,185,129,.3)">Cheat Sheet</div>
+      <h1>Your Decision Memo</h1>
+    </div>
+    <div class="grid2">
+      <div class="card card-green">
+        <h3 style="margin-bottom:.8rem">Start Simple</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">1</span><span><strong>Tabular data</strong> → XGBoost, Random Forest, Linear Models</span></div>
+          <div class="check-item"><span class="check-icon check-yes">2</span><span><strong>Need interpretability</strong> → Linear models, SHAP, decision trees</span></div>
+          <div class="check-item"><span class="check-icon check-yes">3</span><span><strong>Speed &amp; cost critical</strong> → Classical ML on CPU</span></div>
+          <div class="check-item"><span class="check-icon check-yes">4</span><span><strong>Under 10k samples</strong> → Don't use deep learning</span></div>
+          <div class="check-item"><span class="check-icon check-yes">5</span><span><strong>Known business rules</strong> → Rule engine + heuristics</span></div>
+        </div>
+      </div>
+      <div class="card card-gold">
+        <h3 style="margin-bottom:.8rem">Go Deep</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-gold">A</span><span><strong>Images / Video</strong> → CNNs, ViTs, YOLO, SAM</span></div>
+          <div class="check-item"><span class="check-icon check-gold">B</span><span><strong>Text understanding</strong> → BERT, embeddings</span></div>
+          <div class="check-item"><span class="check-icon check-gold">C</span><span><strong>Text generation</strong> → LLMs (but watch cost!)</span></div>
+          <div class="check-item"><span class="check-icon check-gold">D</span><span><strong>Games / Robotics</strong> → Deep RL (PPO, SAC)</span></div>
+          <div class="check-item"><span class="check-icon check-gold">E</span><span><strong>Graphs / Networks</strong> → GNNs (GraphSAGE, GAT)</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:1rem">
+      <div class="card card-red">
+        <h3 style="margin-bottom:.8rem">Use LLMs When...</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-red">&#10003;</span><span>The task requires <strong>open-ended reasoning</strong></span></div>
+          <div class="check-item"><span class="check-icon check-red">&#10003;</span><span>You need to <strong>synthesize</strong> across diverse documents</span></div>
+          <div class="check-item"><span class="check-icon check-red">&#10003;</span><span><strong>Natural conversation</strong> is the interface</span></div>
+          <div class="check-item"><span class="check-icon check-red">&#10003;</span><span>Budget allows <strong>$0.01–0.10+ per query</strong></span></div>
+        </div>
+      </div>
+      <div class="card card-blue">
+        <h3 style="margin-bottom:.8rem">Avoid LLMs When...</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-blue">&#10007;</span><span>You need <strong>deterministic, exact</strong> outputs</span></div>
+          <div class="check-item"><span class="check-icon check-blue">&#10007;</span><span>Latency must be <strong>&lt;100ms</strong></span></div>
+          <div class="check-item"><span class="check-icon check-blue">&#10007;</span><span>You have <strong>clean structured data</strong> and a clear target</span></div>
+          <div class="check-item"><span class="check-icon check-blue">&#10007;</span><span>You need <strong>fully explainable</strong> decisions (finance, healthcare)</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box green" style="margin-top:1rem;text-align:center">
+      <strong style="font-size:1.05rem">"The best AI system is often a hybrid:</strong> 
+      classical ML for structured prediction, deep learning for perception, and LLMs for language — orchestrated together."
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SLIDE 15: CLOSING -->
+<!-- ========================================== -->
+<div class="slide hero-bg" data-section="Closing">
+  <div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+  <div class="container" style="text-align:center;position:relative;z-index:2">
+    <div class="badge" style="margin-bottom:1.2rem;background:rgba(139,92,246,.15);color:var(--purple);border-color:rgba(139,92,246,.3)">Final Word</div>
+    <h1 style="margin-bottom:.8rem;font-size:clamp(2.2rem,4.5vw,3.5rem)">Don't Chase the Hype.<br>Chase the Solution.</h1>
+    <p style="font-size:1rem;color:var(--text2);max-width:700px;margin:0 auto 1.5rem auto">
+      LLMs are a breakthrough. But they are one branch of a vast tree. 
+      The engineers who win are those who know the <strong>entire landscape</strong> 
+      and pick the right tool — whether that's a linear regression, a CNN, a GNN, or GPT-5.
+    </p>
+    <div style="display:flex;justify-content:center;gap:1.2rem;flex-wrap:wrap;margin-bottom:1.5rem">
+      <div class="card" style="min-width:180px;text-align:center;padding:1rem">
+        <div style="font-size:1.8rem">&#129504;</div>
+        <div style="font-weight:700;margin-top:.2rem;font-size:.9rem">Understand</div>
+        <div style="font-size:.75rem;color:var(--text3)">Know the full hierarchy</div>
+      </div>
+      <div class="card" style="min-width:180px;text-align:center;padding:1rem">
+        <div style="font-size:1.8rem">&#128736;</div>
+        <div style="font-weight:700;margin-top:.2rem;font-size:.9rem">Choose</div>
+        <div style="font-size:.75rem;color:var(--text3)">Match tool to problem</div>
+      </div>
+      <div class="card" style="min-width:180px;text-align:center;padding:1rem">
+        <div style="font-size:1.8rem">&#128640;</div>
+        <div style="font-weight:700;margin-top:.2rem;font-size:.9rem">Combine</div>
+        <div style="font-size:.75rem;color:var(--text3)">Hybrid systems win</div>
+      </div>
+    </div>
+    <p style="font-size:.8rem;color:var(--text3)">Built with &#10084; for engineers who want clarity in the AI noise.</p>
+  </div>
+</div>
+
+</div>
+
+<!-- Navigation -->
+<div id="nav">
+  <button class="nav-btn" onclick="prevSlide()">&#9664; Prev</button>
+  <div id="progress-bg"><div id="progress-fill"></div></div>
+  <span id="slide-count">1 / 15</span>
+  <button class="nav-btn" onclick="nextSlide()">Next &#9654;</button>
+</div>
+
+<div class="section-indicator"><div id="section-badge">Intro</div></div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-title" id="tooltip-title"></div>
+  <div class="tooltip-body" id="tooltip-body"></div>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+let current = 0;
+const sectionBadge = document.getElementById('section-badge');
+const progressFill = document.getElementById('progress-fill');
+const slideCount = document.getElementById('slide-count');
+
+function updateSlide() {
+  slides.forEach((s, i) => {
+    s.classList.remove('active', 'prev');
+    if (i === current) { s.classList.add('active'); s.classList.add('animate-in'); }
+    else if (i < current) s.classList.add('prev');
+  });
+  sectionBadge.textContent = slides[current].dataset.section || '';
+  progressFill.style.width = ((current + 1) / slides.length * 100) + '%';
+  slideCount.textContent = (current + 1) + ' / ' + slides.length;
+}
+
+function nextSlide() {
+  if (current < slides.length - 1) { current++; updateSlide(); }
+}
+function prevSlide() {
+  if (current > 0) { current--; updateSlide(); }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); nextSlide(); }
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prevSlide(); }
+});
+
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', e => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 50) { diff > 0 ? nextSlide() : prevSlide(); }
+});
+
+const tooltipData = {
+  ai: { title: 'Artificial Intelligence', body: 'The grand goal: machines that perceive, reason, learn, and act. Encompasses everything from chess programs to ChatGPT to robot vacuums.' },
+  ds: { title: 'Data Science', body: 'The practice of extracting insights from data. Combines statistics, programming, domain expertise, and visualization. Uses ML as one tool among many.' },
+  classical: { title: 'Classical / Symbolic AI', body: 'Rule-based systems, search algorithms, logic programming, planning, and knowledge graphs. Still widely used in scheduling, routing, and expert systems.' },
+  ml: { title: 'Machine Learning', body: 'Algorithms that improve through experience. Includes classical methods (SVM, RF, XGBoost) and neural approaches. A subset of AI.' },
+  classicalml: { title: 'Classical ML', body: 'Non-neural methods: regression, decision trees, random forests, SVM, clustering, dimensionality reduction. Fast, interpretable, works on small data.' },
+  dl: { title: 'Deep Learning', body: 'Neural networks with many layers. Revolutionized computer vision, NLP, and speech. Requires lots of data and compute. A subset of ML.' },
+  llm: { title: 'LLMs (Large Language Models)', body: 'Massive transformer networks trained on text. Excel at language tasks. A subset of Deep Learning (NLP) — NOT all of AI.' },
+  genai: { title: 'Generative AI', body: 'Models that create new content: text, images, audio, video, code. Includes LLMs, diffusion models, GANs, VAEs, and flow-based models.' },
+  cv: { title: 'Computer Vision', body: 'Teaching machines to understand images and video. CNNs, Vision Transformers, object detection (YOLO), segmentation (SAM), and image generation.' },
+  nlp: { title: 'Natural Language Processing', body: 'Teaching machines to understand and generate text. Includes embeddings, BERT (understanding), GPT (generation), translation, and retrieval.' },
+  speech: { title: 'Speech & Audio', body: 'Processing sound: speech recognition (Whisper), text-to-speech, music generation (MusicGen), and audio event detection.' },
+  rl: { title: 'Reinforcement Learning', body: 'Learning by trial and error through environment interaction. Powers game AI (AlphaZero), robotics, recommendation, and trading systems.' },
+  gnn: { title: 'Graph Neural Networks', body: 'Neural networks for graph data: social networks, molecules, knowledge graphs. GCN, GraphSAGE, GAT. Dominates drug discovery and fraud detection.' },
+  ts: { title: 'Time Series', body: 'Predicting future values from sequential data. Classical (ARIMA, Prophet), ML (XGBoost), and deep (LSTM, N-BEATS, Temporal Transformers).' },
+  robotics: { title: 'Robotics & Embodied AI', body: 'Physical AI: perception (CV), planning (search/RL), and control (mechanics). SLAM, manipulation, navigation, humanoid robots.' },
+  qml: { title: 'Quantum Machine Learning', body: 'Algorithms on quantum hardware or quantum-inspired classical methods. QAOA, VQE, quantum kernels. Promising but still experimental.' }
+};
+
+const tooltip = document.getElementById('tooltip');
+const ttTitle = document.getElementById('tooltip-title');
+const ttBody = document.getElementById('tooltip-body');
+
+function attachTooltip(sel) {
+  document.querySelectorAll(sel).forEach(el => {
+    el.addEventListener('mouseenter', e => {
+      const key = el.dataset.tip;
+      if (tooltipData[key]) {
+        ttTitle.textContent = tooltipData[key].title;
+        ttBody.textContent = tooltipData[key].body;
+        tooltip.classList.add('show');
+      }
+    });
+    el.addEventListener('mousemove', e => {
+      let left = e.clientX + 15;
+      let top = e.clientY + 15;
+      if (left + 280 > window.innerWidth) left = e.clientX - 295;
+      if (top + 120 > window.innerHeight) top = e.clientY - 130;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+    });
+    el.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+  });
+}
+
+attachTooltip('.nested-circle');
+attachTooltip('.satellite');
+attachTooltip('.tree-node');
+
+updateSlide();
+</script>
+</body>
+</html>

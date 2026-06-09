@@ -1,0 +1,78 @@
+sharepoint:
+  tenant_id: "YOUR_TENANT_ID"
+  client_id: "YOUR_CLIENT_ID"
+  client_secret: "YOUR_CLIENT_SECRET"
+  site_url: "https://yourcompany.sharepoint.com/sites/procurement"
+  document_library: "Bidding Documents"
+  # Regex patterns to identify bid folders
+  bid_folder_pattern: "^[Bb]id[_-]?\\d{4}[_-]?\\d+"
+  # File patterns
+  quote_pattern: "(?i)^L[123].*quote.*\\.pdf$"
+  email_pattern: "(?i)^L[123].*email.*\\.pdf$"
+  summary_pattern: "(?i)^.*summary.*\\.xlsx?$"
+
+extraction:
+  # Table extraction backend: "camelot", "azure_di", "auto"
+  table_backend: "auto"
+  azure_document_intelligence_endpoint: "https://your-resource.cognitiveservices.azure.com/"
+  azure_document_intelligence_key: "YOUR_KEY"
+  # OCR language
+  ocr_lang: "eng"
+  # Minimum table rows to consider valid
+  min_table_rows: 2
+  # Minimum confidence for OCR
+  min_ocr_confidence: 0.7
+
+analysis:
+  # Collusion thresholds
+  identical_price_threshold: 0.98
+  price_variance_threshold: 0.02
+  bid_rotation_entropy_threshold: 0.5
+  complementary_correlation_threshold: -0.7
+  benford_p_value_threshold: 0.05
+  
+  # Anomaly thresholds
+  z_score_threshold: 3.0
+  isolation_forest_contamination: 0.05
+  iqr_multiplier: 1.5
+  
+  # Compliance
+  required_docs_per_bid:
+    quote_pdfs: 3
+    email_pdfs: 3
+    summary_excel: 1
+
+llm:
+  provider: "azure_openai"
+  azure_openai_endpoint: "https://your-resource.openai.azure.com/"
+  azure_openai_api_key: "YOUR_KEY"
+  azure_openai_api_version: "2024-02-01"
+  deployment_name: "gpt-4o"
+  embedding_deployment: "text-embedding-3-large"
+  temperature: 0.1
+  max_tokens: 4000
+
+storage:
+  # Options: "sqlite", "postgresql"
+  database_type: "sqlite"
+  sqlite_path: "./data/bid_risk.db"
+  postgresql_connection_string: "postgresql://user:pass@localhost:5432/bid_risk"
+  
+  # Vector store
+  vector_store_path: "./data/vectors"
+  
+  # Document blob store
+  raw_documents_path: "./data/raw_docs"
+
+pipeline:
+  # Batch size for processing
+  batch_size: 10
+  # Incremental sync lookback hours
+  incremental_lookback_hours: 24
+  # Enable parallel processing
+  max_workers: 4
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  cors_origins: ["http://localhost:8501", "http://localhost:3000"]

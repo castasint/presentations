@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Native Bid Intelligence — LLM-First Architecture</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050814;--bg2:#0a0f1f;--card:#0d1321;
+  --neon-blue:#00f0ff;--neon-purple:#b829dd;--neon-pink:#ff2a6d;--neon-green:#05ffa1;--neon-gold:#ffd700;
+  --ms-blue:#0078d4;--ms-purple:#5c2d91;
+  --text:#e8ecf4;--text2:#9aa3b2;--text3:#5e6675;
+  --shadow:0 20px 60px -15px rgba(0,0,0,.7);
+}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+#deck{position:relative;width:100vw;height:100vh;overflow:hidden}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;align-items:center;padding:2.5vh 3vw;opacity:0;transform:translateY(25px) scale(.98);transition:all .6s cubic-bezier(.22,1,.36,1)}
+.slide.active{display:flex;opacity:1;transform:translateY(0) scale(1)}
+.slide.prev{display:flex;opacity:0;transform:translateY(-30px) scale(.96)}
+
+h1{font-size:clamp(1.7rem,3.8vw,3rem);font-weight:800;line-height:1.08;letter-spacing:-.02em}
+h2{font-size:clamp(1.1rem,2.2vw,1.7rem);font-weight:700;line-height:1.2}
+h3{font-size:clamp(.85rem,1.5vw,1.1rem);font-weight:600}
+p,li{font-size:clamp(.78rem,1.05vw,.92rem);line-height:1.5;color:var(--text2)}
+.subtitle{font-size:clamp(.88rem,1.3vw,1.1rem);color:var(--text3);margin-top:.4rem}
+.badge{display:inline-block;padding:.3rem .8rem;border-radius:999px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
+
+.container{width:100%;max-width:1400px;margin:0 auto}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:1.2rem;width:100%}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;width:100%}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;width:100%}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;width:100%}
+.flex{display:flex;gap:1rem;width:100%}
+.col{flex:1}
+.card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:.9rem;padding:1.2rem;box-shadow:var(--shadow);transition:transform .25s,box-shadow .25s}
+.card:hover{transform:translateY(-2px);box-shadow:0 20px 50px -10px rgba(0,0,0,.6)}
+.card-ai{border-color:rgba(0,240,255,.18);background:linear-gradient(180deg,rgba(0,240,255,.04) 0%,var(--card) 100%)}
+.card-purple{border-color:rgba(184,41,221,.18);background:linear-gradient(180deg,rgba(184,41,221,.04) 0%,var(--card) 100%)}
+.card-pink{border-color:rgba(255,42,109,.18);background:linear-gradient(180deg,rgba(255,42,109,.04) 0%,var(--card) 100%)}
+.card-green{border-color:rgba(5,255,161,.15);background:linear-gradient(180deg,rgba(5,255,161,.03) 0%,var(--card) 100%)}
+.card-gold{border-color:rgba(255,215,0,.15);background:linear-gradient(180deg,rgba(255,215,0,.03) 0%,var(--card) 100%)}
+.card-ms{border-color:rgba(0,120,212,.18);background:linear-gradient(180deg,rgba(0,120,212,.04) 0%,var(--card) 100%)}
+
+.hero-bg{background:radial-gradient(ellipse at 30% 20%,#0f1630 0%,#050814 60%,#0a0520 100%);position:relative;overflow:hidden}
+.hero-bg::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300f0ff' fill-opacity='0.015'%3E%3Cpath d='M50 50h10v10H50zM10 10h10v10H10zM30 30h10v10H30zM70 70h10v10H70z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity:.6}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.12;animation:float 12s ease-in-out infinite}
+.orb1{width:400px;height:400px;background:#b829dd;top:-120px;left:-80px}
+.orb2{width:300px;height:300px;background:#00f0ff;bottom:-100px;right:-60px;animation-delay:4s}
+.orb3{width:250px;height:250px;background:#ff2a6d;top:40%;left:50%;animation-delay:7s}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-30px)}}
+
+.stat-big{font-size:clamp(2rem,4vw,3.2rem);font-weight:800;line-height:1;background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;margin-top:.2rem}
+
+.icon-wrap{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:.7rem;font-size:1.1rem;font-weight:700}
+.icon-ai{background:rgba(0,240,255,.1);color:var(--neon-blue)}
+.icon-purple{background:rgba(184,41,221,.1);color:var(--neon-purple)}
+.icon-pink{background:rgba(255,42,109,.1);color:var(--neon-pink)}
+.icon-green{background:rgba(5,255,161,.08);color:var(--neon-green)}
+.icon-gold{background:rgba(255,215,0,.08);color:var(--neon-gold)}
+.icon-ms{background:rgba(0,120,212,.1);color:var(--ms-blue)}
+
+.checklist{display:flex;flex-direction:column;gap:.35rem}
+.check-item{display:flex;align-items:flex-start;gap:.5rem;padding:.45rem .6rem;background:rgba(255,255,255,.02);border-radius:.4rem;border:1px solid rgba(255,255,255,.04);font-size:.78rem;color:var(--text2)}
+.check-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.58rem;flex-shrink:0;margin-top:.05rem}
+.check-ai{background:rgba(0,240,255,.12);color:var(--neon-blue)}
+.check-purple{background:rgba(184,41,221,.12);color:var(--neon-purple)}
+.check-pink{background:rgba(255,42,109,.12);color:var(--neon-pink)}
+.check-green{background:rgba(5,255,161,.1);color:var(--neon-green)}
+.check-gold{background:rgba(255,215,0,.1);color:var(--neon-gold)}
+.check-ms{background:rgba(0,120,212,.12);color:var(--ms-blue)}
+
+.tag{display:inline-flex;align-items:center;padding:.14rem .48rem;border-radius:4px;font-size:.62rem;font-weight:600;margin:.1rem}
+.tag-ai{background:rgba(0,240,255,.08);color:#7dd3fc;border:1px solid rgba(0,240,255,.18)}
+.tag-purple{background:rgba(184,41,221,.08);color:#d8b4fe;border:1px solid rgba(184,41,221,.18)}
+.tag-pink{background:rgba(255,42,109,.08);color:#fda4af;border:1px solid rgba(255,42,109,.18)}
+.tag-green{background:rgba(5,255,161,.08);color:#6ee7b7;border:1px solid rgba(5,255,161,.15)}
+
+/* ===== AGENT CARDS ===== */
+.agent-card{padding:1rem;border-radius:.7rem;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;transition:all .3s}
+.agent-card:hover{border-color:rgba(0,240,255,.2);background:rgba(0,240,255,.02)}
+.agent-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.agent-extract::before{background:var(--neon-blue)}
+.agent-collusion::before{background:var(--neon-pink)}
+.agent-compliance::before{background:var(--neon-gold)}
+.agent-anomaly::before{background:var(--neon-purple)}
+.agent-narrative::before{background:var(--neon-green)}
+.agent-title{font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.3rem}
+.agent-desc{font-size:.72rem;color:var(--text3);margin-bottom:.4rem}
+.agent-tools{display:flex;gap:.3rem;flex-wrap:wrap}
+.agent-tool{padding:.12rem .4rem;border-radius:4px;font-size:.6rem;font-weight:600;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--text2)}
+
+/* ===== ARCHITECTURE ===== */
+.arch-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.55rem}
+.arch-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);font-weight:700;min-width:100px;text-align:right;flex-shrink:0}
+.arch-flow{display:flex;gap:.5rem;flex:1;align-items:center;flex-wrap:wrap}
+.arch-box{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:.5rem;padding:.5rem .7rem;font-size:.7rem;color:var(--text2);text-align:center;flex:1;min-width:110px;position:relative;transition:all .2s}
+.arch-box:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:var(--text)}
+.arch-box.ai{border-color:rgba(0,240,255,.2);background:rgba(0,240,255,.03);color:var(--neon-blue)}
+.arch-box.ai::after{content:'AI';position:absolute;top:-5px;right:-5px;padding:.1rem .3rem;border-radius:999px;font-size:.5rem;font-weight:800;background:linear-gradient(135deg,var(--neon-purple),var(--neon-pink));color:#fff}
+.arch-box.ms{border-color:rgba(0,120,212,.2);background:rgba(0,120,212,.03)}
+.arch-box.purple{border-color:rgba(184,41,221,.2);background:rgba(184,41,221,.03)}
+.arch-box.pink{border-color:rgba(255,42,109,.2);background:rgba(255,42,109,.03)}
+.arch-box.green{border-color:rgba(5,255,161,.15);background:rgba(5,255,161,.02)}
+.arch-box.gold{border-color:rgba(255,215,0,.15);background:rgba(255,215,0,.02)}
+.flow-arrow-down{text-align:center;color:var(--text3);font-size:1rem;margin:.15rem 0;animation:pulse 2.5s infinite}
+
+.flow-h{display:flex;gap:.5rem}
+.flow-step-h{flex:1;padding:.85rem .6rem;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.06);border-radius:.6rem;position:relative;text-align:center}
+.flow-step-h::after{content:'→';position:absolute;right:-.7rem;top:50%;transform:translateY(-50%);color:var(--text3);font-size:1rem;font-weight:700}
+.flow-step-h:last-child::after{display:none}
+.flow-num-h{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .35rem;font-size:.65rem;font-weight:800;color:#fff}
+.flow-num-h.ai{background:var(--neon-blue)}.flow-num-h.pink{background:var(--neon-pink)}.flow-num-h.purple{background:var(--neon-purple)}
+.flow-num-h.gold{background:var(--neon-gold)}.flow-num-h.green{background:var(--neon-green)}.flow-num-h.ms{background:var(--ms-blue)}
+
+/* ===== COSMOS ===== */
+.cosmos-entity{background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.06);border-radius:.6rem;padding:.7rem;position:relative}
+.cosmos-entity::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.cosmos-doc::before{background:var(--neon-blue)}
+.cosmos-agent::before{background:var(--neon-pink)}
+.cosmos-vector::before{background:var(--neon-purple)}
+.cosmos-title{font-size:.72rem;font-weight:700;color:var(--text);margin-bottom:.35rem}
+.cosmos-field{font-size:.65rem;color:var(--text3);padding:.1rem 0;border-bottom:1px solid rgba(255,255,255,.02);display:flex;justify-content:space-between}
+.cosmos-field:last-child{border-bottom:none}
+.cosmos-type{color:var(--neon-gold);font-size:.58rem}
+
+#nav{position:fixed;bottom:0;left:0;right:0;padding:.65rem 2rem;background:rgba(5,8,20,.93);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;z-index:1000}
+#progress-bg{flex:1;height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin:0 1.5rem;overflow:hidden}
+#progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--neon-blue),var(--neon-purple));border-radius:2px;transition:width .4s}
+.nav-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:.4rem .85rem;border-radius:.5rem;cursor:pointer;font-size:.75rem;font-weight:600;transition:all .2s}
+.nav-btn:hover{background:rgba(255,255,255,.1)}
+#slide-count{font-size:.75rem;color:var(--text3);font-variant-numeric:tabular-nums;min-width:70px;text-align:center}
+.section-indicator{position:fixed;top:1rem;right:1rem;z-index:1000}
+#section-badge{background:rgba(5,8,20,.7);backdrop-filter:blur(8px);padding:.35rem .8rem;border-radius:999px;border:1px solid rgba(255,255,255,.08);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.animate-in .card,.animate-in .flow-step-h,.animate-in .arch-box,.animate-in .agent-card,.animate-in .cosmos-entity{animation:fadeInUp .4s ease both}
+.animate-in .card:nth-child(1),.animate-in .flow-step-h:nth-child(1),.animate-in .arch-box:nth-child(1){animation-delay:.04s}
+.animate-in .card:nth-child(2),.animate-in .flow-step-h:nth-child(2),.animate-in .arch-box:nth-child(2){animation-delay:.08s}
+.animate-in .card:nth-child(3),.animate-in .flow-step-h:nth-child(3),.animate-in .arch-box:nth-child(3){animation-delay:.12s}
+.animate-in .card:nth-child(4),.animate-in .flow-step-h:nth-child(4),.animate-in .arch-box:nth-child(4){animation-delay:.16s}
+.animate-in .card:nth-child(5),.animate-in .flow-step-h:nth-child(5){animation-delay:.2s}
+.animate-in .card:nth-child(6){animation-delay:.24s}
+
+@media(max-width:900px){
+  .grid2,.grid3,.grid4,.grid5{grid-template-columns:1fr}
+  .flex{flex-direction:column}
+  .slide{padding:2vh 3vw}
+  .flow-h{flex-direction:column}
+  .flow-step-h::after{display:none}
+  .arch-row{flex-direction:column;align-items:flex-start}
+  .arch-label{text-align:left;min-width:auto}
+}
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+<!-- ==================== SLIDE 1: TITLE ==================== -->
+<div class="slide hero-bg active" data-section="Overview">
+  <div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+  <div class="container" style="text-align:center;position:relative;z-index:2">
+    <div class="badge" style="margin-bottom:1.2rem;background:rgba(0,240,255,.1);color:var(--neon-blue);border-color:rgba(0,240,255,.2)">AI-Native Architecture</div>
+    <h1 style="margin-bottom:.4rem">Bid Risk Intelligence Platform</h1>
+    <div class="subtitle">Built entirely on Large Language Models — Extraction, Reasoning, Detection,<br>Compliance, and Narrative Generation</div>
+    <div style="margin-top:2.2rem;display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap">
+      <div><div class="stat-big">100%</div><div class="stat-label">LLM-Powered Analysis</div></div>
+      <div><div class="stat-big">Multi-Agent</div><div class="stat-label">Orchestration</div></div>
+      <div><div class="stat-big">GPT-4o</div><div class="stat-label">Primary Engine</div></div>
+      <div><div class="stat-big">Cosmos DB</div><div class="stat-label">Agent Memory</div></div>
+    </div>
+    <p style="margin-top:1.8rem;font-size:.82rem;color:var(--text3)">No statistical rules · No hard-coded thresholds · AI reasons over every document</p>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 2: AI-NATIVE PHILOSOPHY ==================== -->
+<div class="slide" data-section="Philosophy">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.8rem">
+      <div class="badge" style="margin-bottom:.5rem;background:rgba(184,41,221,.1);color:var(--neon-purple);border-color:rgba(184,41,221,.2)">Design Principle</div>
+      <h1>The AI-Native Philosophy</h1>
+      <p class="subtitle">Why we replaced every traditional component with an LLM</p>
+    </div>
+    <div class="grid2">
+      <div class="card card-ai">
+        <h3 style="margin-bottom:.8rem">What "AI-Only" Means Here</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>LLM Extracts:</strong> GPT-4o Vision reads PDFs directly and outputs structured JSON — no OCR pipeline, no table parsers</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>LLM Reasons:</strong> Collusion is detected by asking the model to compare quotes and judge coordination — no Benford, no Z-score</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>LLM Validates:</strong> Compliance is checked by having the model read all 7 files and judge completeness — no rule engine</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>LLM Benchmarks:</strong> Price fairness is assessed by the model against historical bid memory — no SQL aggregates</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>LLM Narrates:</strong> Every finding explained in natural language with citations — no dashboard-only outputs</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:.8rem">Why This Approach Wins</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-purple">&#9650;</span><span><strong>Handles Any Format:</strong> Suppliers can use any table layout, any column names, any language — the LLM adapts instantly</span></div>
+          <div class="check-item"><span class="check-icon check-purple">&#9650;</span><span><strong>No Threshold Tuning:</strong> No more "is 95% similarity collusion?" — the model reasons from context, not fixed cutoffs</span></div>
+          <div class="check-item"><span class="check-icon check-purple">&#9650;</span><span><strong>Emergent Detection:</strong> LLMs spot patterns never explicitly trained — subtle linguistic cues in emails, formatting similarities across quotes</span></div>
+          <div class="check-item"><span class="check-icon check-purple">&#9650;</span><span><strong>Human-Readable:</strong> Every output is a complete explanation, not a number requiring interpretation</span></div>
+          <div class="check-item"><span class="check-icon check-purple">&#9650;</span><span><strong>Single Model Stack:</strong> One GPT-4o deployment does extraction, analysis, validation, and reporting — operational simplicity</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem;border-color:rgba(255,42,109,.15)">
+      <div style="text-align:center">
+        <div style="font-size:.85rem;font-weight:700;color:var(--neon-pink);margin-bottom:.5rem">The Trade-Off Is Acceptable</div>
+        <div style="font-size:.78rem;color:var(--text3);max-width:900px;margin:0 auto">
+          Statistical methods are deterministic and cheap. LLMs are probabilistic and cost more per document. 
+          <strong style="color:var(--text)">But for procurement risk — where a single missed collusion can cost millions — the interpretability, adaptability, and comprehensiveness of LLM reasoning outweigh the compute cost.</strong> 
+          We use deterministic caching and prompt templates to keep costs predictable.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 3: CONCEPTUAL ARCHITECTURE ==================== -->
+<div class="slide hero-bg" data-section="Architecture">
+  <div class="orb orb1" style="background:#b829dd;opacity:.1"></div>
+  <div class="orb orb2" style="background:#00f0ff;opacity:.1"></div>
+  <div class="container" style="position:relative;z-index:2">
+    <div style="text-align:center;margin-bottom:1rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(0,240,255,.1);color:var(--neon-blue);border-color:rgba(0,240,255,.2)">Conceptual View</div>
+      <h1>Conceptual Architecture — LLM-First</h1>
+      <p class="subtitle">Every intelligence layer is an LLM. Infrastructure is just plumbing.</p>
+    </div>
+
+    <div style="text-align:center;margin-bottom:.3rem">
+      <div style="display:inline-block;padding:.5rem 1.2rem;background:linear-gradient(135deg,#0f1a30,#0a1430);border-radius:.5rem;border:1px solid rgba(0,120,212,.2)">
+        <div style="font-size:.85rem;font-weight:700;color:var(--text)">&#9729; SharePoint Online — Bid Document Library</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.15rem">7 files per bid folder · thousands of folders · years of history</div>
+      </div>
+    </div>
+    <div class="flow-arrow-down">&#8681;</div>
+
+    <div class="arch-row">
+      <div class="arch-label" style="color:var(--ms-blue)">Orchestrate</div>
+      <div class="arch-flow">
+        <div class="arch-box ms"><strong>Power Automate</strong><br><span style="font-size:.6rem;color:var(--text3)">Trigger + fetch files</span></div>
+        <div class="arch-box ms"><strong>Azure Blob</strong><br><span style="font-size:.6rem;color:var(--text3)">Staging container</span></div>
+        <div class="arch-box ms"><strong>Azure Functions</strong><br><span style="font-size:.6rem;color:var(--text3)">Agent orchestrator</span></div>
+      </div>
+    </div>
+    <div class="flow-arrow-down">&#8681;</div>
+
+    <div class="arch-row">
+      <div class="arch-label" style="color:var(--neon-blue)">Extract</div>
+      <div class="arch-flow">
+        <div class="arch-box ai" style="position:relative"><strong>GPT-4o Vision</strong><br><span style="font-size:.6rem;color:var(--text3)">Reads PDF → structured JSON</span></div>
+        <div class="arch-box ai" style="position:relative"><strong>Schema Resolver</strong><br><span style="font-size:.6rem;color:var(--text3)">LLM normalizes any table</span></div>
+      </div>
+    </div>
+    <div class="flow-arrow-down">&#8681;</div>
+
+    <div class="arch-row">
+      <div class="arch-label" style="color:var(--neon-pink)">Analyze</div>
+      <div class="arch-flow">
+        <div class="arch-box ai pink" style="position:relative"><strong>Collusion Agent</strong><br><span style="font-size:.6rem;color:var(--text3)">LLM compares L1/L2/L3</span></div>
+        <div class="arch-box ai purple" style="position:relative"><strong>Anomaly Agent</strong><br><span style="font-size:.6rem;color:var(--text3)">LLM judges price fairness</span></div>
+        <div class="arch-box ai gold" style="position:relative"><strong>Compliance Agent</strong><br><span style="font-size:.6rem;color:var(--text3)">LLM validates all 7 files</span></div>
+        <div class="arch-box ai green" style="position:relative"><strong>Narrative Agent</strong><br><span style="font-size:.6rem;color:var(--text3)">LLM writes findings</span></div>
+      </div>
+    </div>
+    <div class="flow-arrow-down">&#8681;</div>
+
+    <div class="arch-row">
+      <div class="arch-label" style="color:var(--neon-purple)">Memory</div>
+      <div class="arch-flow">
+        <div class="arch-box purple"><strong>Cosmos DB — Documents</strong><br><span style="font-size:.6rem;color:var(--text3)">Bids, quotes, line items</span></div>
+        <div class="arch-box purple"><strong>Cosmos DB — Agent State</strong><br><span style="font-size:.6rem;color:var(--text3)">Agent memory + reasoning chains</span></div>
+        <div class="arch-box purple"><strong>Cosmos DB — Vector</strong><br><span style="font-size:.6rem;color:var(--text3)">Embeddings for RAG context</span></div>
+      </div>
+    </div>
+    <div class="flow-arrow-down">&#8681;</div>
+
+    <div class="arch-row">
+      <div class="arch-label" style="color:var(--neon-green)">Consume</div>
+      <div class="arch-flow">
+        <div class="arch-box green"><strong>Power Apps</strong><br><span style="font-size:.6rem;color:var(--text3)">AI-generated dashboards</span></div>
+        <div class="arch-box green"><strong>Copilot</strong><br><span style="font-size:.6rem;color:var(--text3)">Talk to your bids</span></div>
+        <div class="arch-box green"><strong>Teams Alerts</strong><br><span style="font-size:.6rem;color:var(--text3)">AI-authored notifications</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 4: MULTI-AGENT SYSTEM ==================== -->
+<div class="slide" data-section="Agents">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(0,240,255,.1);color:var(--neon-blue);border-color:rgba(0,240,255,.2)">The Intelligence Core</div>
+      <h1>The Multi-Agent System</h1>
+      <p class="subtitle">Five specialized LLM agents, one orchestrator, shared memory</p>
+    </div>
+    <div class="grid3">
+      <div class="agent-card agent-extract">
+        <div class="agent-title">&#128220; Extraction Agent</div>
+        <div class="agent-desc">Takes raw PDFs and outputs structured JSON. Handles any table layout, merged cells, multi-page quotes, and scanned documents via GPT-4o Vision.</div>
+        <div class="agent-tools">
+          <span class="agent-tool">GPT-4o Vision</span>
+          <span class="agent-tool">JSON Mode</span>
+          <span class="agent-tool">Function Calling</span>
+        </div>
+      </div>
+      <div class="agent-card agent-collusion">
+        <div class="agent-title">&#128373;&#65039; Collusion Agent</div>
+        <div class="agent-desc">Reads all 3 supplier quotes for a bid and judges whether prices, terms, and formatting suggest coordination. Reasons from first principles, not formulas.</div>
+        <div class="agent-tools">
+          <span class="agent-tool">Chain-of-Thought</span>
+          <span class="agent-tool">Few-Shot Prompting</span>
+          <span class="agent-tool">Cosmos Memory</span>
+        </div>
+      </div>
+      <div class="agent-card agent-anomaly">
+        <div class="agent-title">&#128302; Anomaly Agent</div>
+        <div class="agent-desc">Retrieves historical prices for the same item from Cosmos DB and judges if current quotes are fair, inflated, or suspiciously uniform.</div>
+        <div class="agent-tools">
+          <span class="agent-tool">Retrieval Augmented</span>
+          <span class="agent-tool">Time-Series Context</span>
+          <span class="agent-tool">Category Benchmark</span>
+        </div>
+      </div>
+      <div class="agent-card agent-compliance">
+        <div class="agent-title">&#9878;&#65039; Compliance Agent</div>
+        <div class="agent-desc">Reads all 7 files in a bid folder and judges completeness, approval validity, deadline adherence, and cross-document consistency.</div>
+        <div class="agent-tools">
+          <span class="agent-tool">Multi-Document</span>
+          <span class="agent-tool">Policy Grounding</span>
+          <span class="agent-tool">Confidence Score</span>
+        </div>
+      </div>
+      <div class="agent-card agent-narrative">
+        <div class="agent-title">&#128172; Narrative Agent</div>
+        <div class="agent-desc">Synthesizes outputs from all other agents into a unified risk report. Writes in the tone of a senior procurement auditor with evidence citations.</div>
+        <div class="agent-tools">
+          <span class="agent-tool">Synthesis</span>
+          <span class="agent-tool">Citation Generation</span>
+          <span class="agent-tool">Severity Rating</span>
+        </div>
+      </div>
+      <div class="agent-card" style="border-color:rgba(0,120,212,.2)">
+        <div class="agent-title" style="color:var(--ms-blue)">&#127918; Orchestrator</div>
+        <div class="agent-desc">Azure Function that routes tasks between agents, manages conversation state, handles retries, and writes final output to Cosmos DB.</div>
+        <div class="agent-tools">
+          <span class="agent-tool">Azure Functions</span>
+          <span class="agent-tool">Event Grid</span>
+          <span class="agent-tool">State Machine</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <h3 style="margin-bottom:.6rem;text-align:center">Agent Communication Pattern</h3>
+      <div style="display:flex;align-items:center;gap:.4rem;justify-content:center;flex-wrap:wrap">
+        <div class="arch-box ai" style="min-width:100px"><strong>Orchestrator</strong><br><span style="font-size:.6rem">Routes task</span></div>
+        <div style="color:var(--text3)">→</div>
+        <div class="arch-box ai pink" style="min-width:100px"><strong>Agent</strong><br><span style="font-size:.6rem">Reasons + acts</span></div>
+        <div style="color:var(--text3)">→</div>
+        <div class="arch-box purple" style="min-width:100px"><strong>Cosmos DB</strong><br><span style="font-size:.6rem">Reads context</span></div>
+        <div style="color:var(--text3)">→</div>
+        <div class="arch-box ai" style="min-width:100px"><strong>LLM API</strong><br><span style="font-size:.6rem">Generates output</span></div>
+        <div style="color:var(--text3)">→</div>
+        <div class="arch-box purple" style="min-width:100px"><strong>Cosmos DB</strong><br><span style="font-size:.6rem">Writes result</span></div>
+        <div style="color:var(--text3)">→</div>
+        <div class="arch-box ai" style="min-width:100px"><strong>Orchestrator</strong><br><span style="font-size:.6rem">Next task</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 5: FLOW 1 — INGEST & EXTRACT ==================== -->
+<div class="slide" data-section="Flow 1">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(0,240,255,.1);color:var(--neon-blue);border-color:rgba(0,240,255,.2)">Flow 1 of 3</div>
+      <h1>Ingestion & AI Extraction</h1>
+      <p class="subtitle">LLM reads PDFs directly — no traditional OCR, no table parsers</p>
+    </div>
+    <div class="flow-h" style="margin-bottom:1.2rem">
+      <div class="flow-step-h">
+        <div class="flow-num-h ms">1</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Trigger</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">Power Automate detects new bid folder in SharePoint</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h ms">2</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Fetch</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">Download 7 files to Azure Blob staging container</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h ai">3</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Extract</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">GPT-4o Vision reads each PDF image, outputs structured JSON</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h ai">4</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Normalize</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">Schema Resolver LLM maps any columns to unified schema</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h purple">5</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Store</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">Write documents + vectors to Cosmos DB</div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card card-ai">
+        <h3 style="margin-bottom:.6rem">GPT-4o Vision — The Universal Parser</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-ai">1</span><span><strong>Image Input:</strong> PDF pages converted to images → fed to GPT-4o Vision</span></div>
+          <div class="check-item"><span class="check-icon check-ai">2</span><span><strong>JSON Output:</strong> Prompt constrains model to emit valid JSON with item_code, description, qty, unit_price, total</span></div>
+          <div class="check-item"><span class="check-icon check-ai">3</span><span><strong>Multi-Table:</strong> Model identifies cover sheet, terms page, and item tables — returns only item tables</span></div>
+          <div class="check-item"><span class="check-icon check-ai">4</span><span><strong>Currency Handling:</strong> Model normalizes currencies to standard codes (USD, EUR, CNY) automatically</span></div>
+          <div class="check-item"><span class="check-icon check-ai">5</span><span><strong>Confidence:</strong> Each extraction tagged with model confidence; low-confidence items flagged for human review</span></div>
+        </div>
+      </div>
+      <div class="card card-purple">
+        <h3 style="margin-bottom:.6rem">Schema Resolver — Flexible Mapping</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-purple">A</span><span><strong>Header Classification:</strong> LLM reads extracted column names and maps "Amt", "Value", "Cost" → unit_price</span></div>
+          <div class="check-item"><span class="check-icon check-purple">B</span><span><strong>Type Inference:</strong> LLM detects whether a column is quantity, price, date, or text description</span></div>
+          <div class="check-item"><span class="check-icon check-purple">C</span><span><strong>Custom Fields:</strong> Unmapped columns stored as JSONB in Cosmos DB — no data loss, future flexibility</span></div>
+          <div class="check-item"><span class="check-icon check-purple">D</span><span><strong>Cross-Supplier Alignment:</strong> Ensures L1, L2, L3 quotes use consistent item_codes for comparison</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 6: FLOW 2 — AI ANALYSIS ==================== -->
+<div class="slide" data-section="Flow 2">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(255,42,109,.1);color:var(--neon-pink);border-color:rgba(255,42,109,.2)">Flow 2 of 3</div>
+      <h1>AI Analysis Engine</h1>
+      <p class="subtitle">Four LLM agents reason over the data — no statistical formulas, no hard rules</p>
+    </div>
+    <div class="flow-h" style="margin-bottom:1.2rem">
+      <div class="flow-step-h">
+        <div class="flow-num-h pink">1</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Collusion Agent</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">Compares L1/L2/L3 quotes. Judges coordination from price similarity, term patterns, and formatting.</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h purple">2</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Anomaly Agent</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">Retrieves historical context from Cosmos DB. Judges if prices are fair, inflated, or suspiciously close.</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h gold">3</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Compliance Agent</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">Reads all 7 files. Validates structure, approvals, deadlines, and cross-document consistency.</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h green">4</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Narrative Agent</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">Synthesizes all agent outputs into a unified risk report with severity and citations.</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h purple">5</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Write</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">All scores and narratives persisted to Cosmos DB. Event Grid triggers consumers.</div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card card-pink">
+        <h3 style="margin-bottom:.6rem">Collusion Agent — How It Thinks</h3>
+        <div style="font-size:.72rem;color:var(--text3);margin-bottom:.5rem;padding:.6rem;background:rgba(255,42,109,.04);border-radius:.4rem;border-left:3px solid var(--neon-pink)">
+          <em>"I see three quotes for Bid 2024-089. Supplier A and B both priced Item X at exactly $12,450. Their delivery terms are identical: '45 days FOB Shanghai.' Both use the same font, same header layout, and both omit warranty clauses that Supplier C included. The probability of independent bids being this similar is extremely low. I rate collusion risk: HIGH."</em>
+        </div>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-pink">&#9679;</span><span>Reasons over price vectors, terms text, and formatting cues simultaneously</span></div>
+          <div class="check-item"><span class="check-icon check-pink">&#9679;</span><span>No fixed threshold — judges from context and historical patterns</span></div>
+          <div class="check-item"><span class="check-icon check-pink">&#9679;</span><span>Chain-of-thought prompt forces model to explain its reasoning step by step</span></div>
+        </div>
+      </div>
+      <div class="card card-purple">
+        <h3 style="margin-bottom:.6rem">Anomaly Agent — How It Thinks</h3>
+        <div style="font-size:.72rem;color:var(--text3);margin-bottom:.5rem;padding:.6rem;background:rgba(184,41,221,.04);border-radius:.4rem;border-left:3px solid var(--neon-purple)">
+          <em>"Retrieving 18 historical bids for 'server rack 42U.' Prices ranged from $1,200 to $1,850 with a typical cluster around $1,400. Supplier D quoted $2,900 — more than double the historical high. No justification in terms (standard delivery, no special features). I flag this as anomalous and recommend requesting a price breakdown."</em>
+        </div>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-purple">&#9679;</span><span>Retrieves relevant historical bids from Cosmos DB via semantic search</span></div>
+          <div class="check-item"><span class="check-icon check-purple">&#9679;</span><span>Judges price fairness against remembered market context, not just averages</span></div>
+          <div class="check-item"><span class="check-icon check-purple">&#9679;</span><span>Flags both extreme outliers AND suspiciously uniform quotes</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:1rem">
+      <div class="card card-gold">
+        <h3 style="margin-bottom:.6rem">Compliance Agent — How It Thinks</h3>
+        <div style="font-size:.72rem;color:var(--text3);margin-bottom:.5rem;padding:.6rem;background:rgba(255,215,0,.04);border-radius:.4rem;border-left:3px solid var(--neon-gold)">
+          <em>"I count 6 files in this folder, not 7. The L2 email PDF is missing. The Excel summary lists a total of $145,000 but the sum of extracted quote lines is $142,300 — a $2,700 discrepancy. The approval email from the procurement manager is dated 2 days after the bid deadline. I flag: MISSING_DOC, SUMMARY_MISMATCH, LATE_APPROVAL."</em>
+        </div>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-gold">&#9679;</span><span>Counts documents by type, names, and content — not just file extensions</span></div>
+          <div class="check-item"><span class="check-icon check-gold">&#9679;</span><span>Cross-checks Excel totals against extracted PDF line items</span></div>
+          <div class="check-item"><span class="check-icon check-gold">&#9679;</span><span>Reads email body text to identify approver names and dates</span></div>
+        </div>
+      </div>
+      <div class="card card-green">
+        <h3 style="margin-bottom:.6rem">Narrative Agent — The Synthesizer</h3>
+        <div style="font-size:.72rem;color:var(--text3);margin-bottom:.5rem;padding:.6rem;background:rgba(5,255,161,.04);border-radius:.4rem;border-left:3px solid var(--neon-green)">
+          <em>"This bid presents a CRITICAL risk profile. The Collusion Agent identified 94% price similarity between Suppliers A and B, with identical delivery terms. The Anomaly Agent found both quotes 40% above historical benchmarks. The Compliance Agent noted a missing L2 email. Combined, these signals strongly suggest coordinated bidding. Recommend immediate investigation before award."</em>
+        </div>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-green">&#9679;</span><span>Aggregates all agent outputs into a single coherent risk story</span></div>
+          <div class="check-item"><span class="check-icon check-green">&#9679;</span><span>Assigns overall severity by weighing multiple signals</span></div>
+          <div class="check-item"><span class="check-icon check-green">&#9679;</span><span>Generates citations linking every claim to source document pages</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 7: FLOW 3 — CONSUMPTION ==================== -->
+<div class="slide" data-section="Flow 3">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(5,255,161,.1);color:var(--neon-green);border-color:rgba(5,255,161,.2)">Flow 3 of 3</div>
+      <h1>AI-Powered Consumption</h1>
+      <p class="subtitle">Every user interaction goes through the LLM — dashboards are just conversation surfaces</p>
+    </div>
+    <div class="flow-h" style="margin-bottom:1.2rem">
+      <div class="flow-step-h">
+        <div class="flow-num-h green">1</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Ask</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">User asks Copilot: "Show me high-risk bids this month"</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h ai">2</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Retrieve</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">Existing RAG retrieves relevant bid docs + Cosmos DB fetches risk scores</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h ai">3</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Reason</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">GPT-4o synthesizes retrieved data into a contextual, cited answer</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h green">4</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Render</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">Power Apps / Copilot renders answer with charts, badges, and drill-downs</div>
+      </div>
+      <div class="flow-step-h">
+        <div class="flow-num-h green">5</div>
+        <div style="font-weight:700;font-size:.8rem;color:var(--text)">Act</div>
+        <div style="font-size:.65rem;color:var(--text3);margin-top:.2rem">User approves, escalates, or requests more detail — loop continues</div>
+      </div>
+    </div>
+    <div class="grid3">
+      <div class="card card-green" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:.4rem">&#128172;</div>
+        <h3>Conversational BI</h3>
+        <p style="margin-top:.4rem">No pre-built dashboards. Users ask questions in natural language. The LLM queries Cosmos DB, interprets results, and explains them. "Why did Supplier X's prices jump 40% in Q3?"</p>
+        <div style="margin-top:.8rem"><span class="tag tag-green">Copilot</span></div>
+      </div>
+      <div class="card card-ai" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:.4rem">&#128220;</div>
+        <h3>Auto-Generated Reports</h3>
+        <p style="margin-top:.4rem">The Narrative Agent generates full audit reports on demand. Not templates — each report is uniquely written based on the specific bid's risk profile, citing exact documents and pages.</p>
+        <div style="margin-top:.8rem"><span class="tag tag-ai">GPT-4o</span></div>
+      </div>
+      <div class="card card-purple" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:.4rem">&#128276;</div>
+        <h3>Intelligent Alerts</h3>
+        <p style="margin-top:.4rem">Alerts are not "Risk Score: 0.85." They are paragraphs: "Bid 2024-112 shows strong collusion signals. Suppliers A and B quoted identical prices on 8 of 10 line items..." Sent via Teams with one-tap review.</p>
+        <div style="margin-top:.8rem"><span class="tag tag-purple">Power Automate</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 8: PROMPT ENGINEERING ==================== -->
+<div class="slide" data-section="Prompts">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(0,240,255,.1);color:var(--neon-blue);border-color:rgba(0,240,255,.2)">The Secret Sauce</div>
+      <h1>Prompt Architecture & Engineering</h1>
+      <p class="subtitle">How we make LLMs reliable for procurement risk detection</p>
+    </div>
+    <div class="grid2">
+      <div class="card card-ai">
+        <h3 style="margin-bottom:.6rem">Extraction Prompt Pattern</h3>
+        <div style="padding:.7rem;background:rgba(0,240,255,.04);border-radius:.5rem;border:1px solid rgba(0,240,255,.1);font-size:.72rem;color:var(--text3);font-family:monospace;line-height:1.5">
+You are a procurement document parser. Given the attached PDF page images,<br>
+extract all line items into this exact JSON schema:<br><br>
+{<br>
+&nbsp;&nbsp;"items": [{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"item_code": "string",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"description": "string",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"quantity": number,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"unit_price": number,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"currency": "USD|EUR|CNY",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"confidence": "high|medium|low"<br>
+&nbsp;&nbsp;}],<br>
+&nbsp;&nbsp;"supplier_name": "string",<br>
+&nbsp;&nbsp;"total_amount": number<br>
+}<br><br>
+Rules:<br>
+- If a column header is ambiguous, infer from context.<br>
+- If a cell is unreadable, set confidence to "low".<br>
+- Do not hallucinate values. If unsure, omit the field.
+        </div>
+      </div>
+      <div class="card card-pink">
+        <h3 style="margin-bottom:.6rem">Collusion Prompt Pattern</h3>
+        <div style="padding:.7rem;background:rgba(255,42,109,.04);border-radius:.5rem;border:1px solid rgba(255,42,109,.1);font-size:.72rem;color:var(--text3);font-family:monospace;line-height:1.5">
+You are a forensic procurement analyst. I will give you 3 supplier quotes<br>
+for the same bid. Analyze them for signs of collusion or bid rigging.<br><br>
+Consider:<br>
+1. Price similarity across line items<br>
+2. Identical or near-identical terms and conditions<br>
+3. Suspicious formatting similarities (fonts, layout)<br>
+4. Unusual patterns (one supplier bids high on all items except one)<br>
+5. Missing information that all others include<br><br>
+Output a JSON with:<br>
+- "collusion_risk": "none|low|medium|high|critical"<br>
+- "reasoning": "detailed paragraph explaining your analysis"<br>
+- "evidence": ["specific observation 1", "observation 2"]
+        </div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:1rem">
+      <div class="card card-gold">
+        <h3 style="margin-bottom:.6rem">Reliability Techniques</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-gold">1</span><span><strong>JSON Mode:</strong> Forces GPT-4o to emit parseable structured output — no regex extraction from prose</span></div>
+          <div class="check-item"><span class="check-icon check-gold">2</span><span><strong>Few-Shot Examples:</strong> Prompt includes 2-3 examples of correct extractions and collusion judgments</span></div>
+          <div class="check-item"><span class="check-icon check-gold">3</span><span><strong>Chain-of-Thought:</strong> Model must explain reasoning before giving final score — catches hallucinations</span></div>
+          <div class="check-item"><span class="check-icon check-gold">4</span><span><strong>Self-Consistency:</strong> Run same prompt 3× with temperature=0.7; majority vote on final classification</span></div>
+        </div>
+      </div>
+      <div class="card card-purple">
+        <h3 style="margin-bottom:.6rem">Cost & Latency Controls</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-purple">A</span><span><strong>Prompt Caching:</strong> Static prompt prefixes (schema, examples) cached via Azure OpenAI prompt caching</span></div>
+          <div class="check-item"><span class="check-icon check-purple">B</span><span><strong>Batch Processing:</strong> Multiple PDF pages sent in single API call; parallel agent execution</span></div>
+          <div class="check-item"><span class="check-icon check-purple">C</span><span><strong>Tiered Model:</strong> GPT-4o-mini for extraction (cheaper), GPT-4o for collusion reasoning (higher quality)</span></div>
+          <div class="check-item"><span class="check-icon check-purple">D</span><span><strong>Result Caching:</strong> Cosmos DB caches extraction results by file hash — identical files never reprocessed</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 9: COSMOS DB AS AGENT MEMORY ==================== -->
+<div class="slide" data-section="Cosmos DB">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(184,41,221,.1);color:var(--neon-purple);border-color:rgba(184,41,221,.2)">Memory Layer</div>
+      <h1>Cosmos DB — The Agent's Brain</h1>
+      <p class="subtitle">Not just a database. The persistent memory and state for every LLM agent.</p>
+    </div>
+    <div class="grid3">
+      <div class="cosmos-entity cosmos-doc">
+        <div class="cosmos-title">&#128196; Document Memory (Core SQL)</div>
+        <div class="cosmos-field">bid <span class="cosmos-type">object</span></div>
+        <div class="cosmos-field">  bid_id <span class="cosmos-type">string PK</span></div>
+        <div class="cosmos-field">  folder_path <span class="cosmos-type">string</span></div>
+        <div class="cosmos-field">quote_document <span class="cosmos-type">object</span></div>
+        <div class="cosmos-field">  extracted_json <span class="cosmos-type">JSON (LLM output)</span></div>
+        <div class="cosmos-field">  extraction_confidence <span class="cosmos-type">float</span></div>
+        <div class="cosmos-field">quote_line <span class="cosmos-type">object</span></div>
+        <div class="cosmos-field">  unit_price <span class="cosmos-type">decimal</span></div>
+        <div class="cosmos-field">  custom_fields <span class="cosmos-type">JSONB</span></div>
+      </div>
+      <div class="cosmos-entity cosmos-agent">
+        <div class="cosmos-title">&#129302; Agent State Memory</div>
+        <div class="cosmos-field">agent_run <span class="cosmos-type">object</span></div>
+        <div class="cosmos-field">  run_id <span class="cosmos-type">string PK</span></div>
+        <div class="cosmos-field">  bid_id <span class="cosmos-type">string FK</span></div>
+        <div class="cosmos-field">  agent_name <span class="cosmos-type">enum</span></div>
+        <div class="cosmos-field">  prompt_hash <span class="cosmos-type">string</span></div>
+        <div class="cosmos-field">  llm_response <span class="cosmos-type">JSON</span></div>
+        <div class="cosmos-field">  reasoning_chain <span class="cosmos-type">text[]</span></div>
+        <div class="cosmos-field">  confidence <span class="cosmos-type">float</span></div>
+        <div class="cosmos-field">  tokens_used <span class="cosmos-type">int</span></div>
+        <div class="cosmos-field">  cost_usd <span class="cosmos-type">decimal</span></div>
+      </div>
+      <div class="cosmos-entity cosmos-vector">
+        <div class="cosmos-title">&#128300; Vector Memory</div>
+        <div class="cosmos-field">document_chunk <span class="cosmos-type">object</span></div>
+        <div class="cosmos-field">  chunk_id <span class="cosmos-type">string PK</span></div>
+        <div class="cosmos-field">  content <span class="cosmos-type">text</span></div>
+        <div class="cosmos-field">  embedding <span class="cosmos-type">vector[1536]</span></div>
+        <div class="cosmos-field">  metadata <span class="cosmos-type">JSON</span></div>
+        <div class="cosmos-field">risk_narrative <span class="cosmos-type">object</span></div>
+        <div class="cosmos-field">  narrative_text <span class="cosmos-type">text</span></div>
+        <div class="cosmos-field">  embedding <span class="cosmos-type">vector[1536]</span></div>
+        <div class="cosmos-field">supplier_profile <span class="cosmos-type">object</span></div>
+        <div class="cosmos-field">  profile_text <span class="cosmos-type">text</span></div>
+        <div class="cosmos-field">  embedding <span class="cosmos-type">vector[1536]</span></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <h3 style="margin-bottom:.6rem;text-align:center">Why Cosmos DB for AI-Native Architecture?</h3>
+      <div class="grid4">
+        <div style="padding:.8rem;text-align:center;background:rgba(0,240,255,.04);border:1px solid rgba(0,240,255,.1);border-radius:.5rem">
+          <div style="font-size:.8rem;font-weight:700;color:var(--neon-blue)">Single Digit Latency</div>
+          <div style="font-size:.7rem;color:var(--text3);margin-top:.2rem">Agents read/write state in &lt;10ms — no slow SQL joins during reasoning</div>
+        </div>
+        <div style="padding:.8rem;text-align:center;background:rgba(184,41,221,.04);border:1px solid rgba(184,41,221,.1);border-radius:.5rem">
+          <div style="font-size:.8rem;font-weight:700;color:var(--neon-purple)">Schema Flexibility</div>
+          <div style="font-size:.7rem;color:var(--text3);margin-top:.2rem">LLM outputs evolve? Just store new JSON fields — no migrations</div>
+        </div>
+        <div style="padding:.8rem;text-align:center;background:rgba(255,42,109,.04);border:1px solid rgba(255,42,109,.1);border-radius:.5rem">
+          <div style="font-size:.8rem;font-weight:700;color:var(--neon-pink)">Integrated Vector Search</div>
+          <div style="font-size:.7rem;color:var(--text3);margin-top:.2rem">Same database stores embeddings + documents — no separate vector DB</div>
+        </div>
+        <div style="padding:.8rem;text-align:center;background:rgba(5,255,161,.04);border:1px solid rgba(5,255,161,.1);border-radius:.5rem">
+          <div style="font-size:.8rem;font-weight:700;color:var(--neon-green)">Change Feed</div>
+          <div style="font-size:.7rem;color:var(--text3);margin-top:.2rem">Every agent write triggers real-time consumers via Event Grid</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 10: POWER PLATFORM AS INTERFACE ==================== -->
+<div class="slide" data-section="Power Platform">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(0,120,212,.1);color:var(--ms-blue);border-color:rgba(0,120,212,.2)">Human-in-the-Loop</div>
+      <h1>Power Platform — The Agent Interface</h1>
+      <p class="subtitle">Low-code layer that lets humans talk to, supervise, and act on AI agents</p>
+    </div>
+    <div class="grid3">
+      <div class="card card-ms" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:.4rem">&#128172;</div>
+        <h3>Copilot Plugin</h3>
+        <p style="margin-top:.4rem">Users chat with bids naturally. "Why is this bid flagged?" Copilot calls the Narrative Agent via API and returns a human answer with source citations. No training required.</p>
+        <div style="margin-top:.8rem"><span class="tag tag-ai">AI-Native</span></div>
+      </div>
+      <div class="card card-ms" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:.4rem">&#128200;</div>
+        <h3>Power BI — AI-Generated Dashboards</h3>
+        <p style="margin-top:.4rem">Not static charts. The LLM generates insight cards: "3 bids this week show critical collusion risk. Click to see why." Power BI renders agent outputs as dynamic visualizations.</p>
+        <div style="margin-top:.8rem"><span class="tag tag-purple">Dynamic</span></div>
+      </div>
+      <div class="card card-ms" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:.4rem">&#128270;</div>
+        <h3>Power Apps — Agent Control Center</h3>
+        <p style="margin-top:.4rem">Canvas app showing all agent runs per bid. See each agent's reasoning chain, confidence score, and token cost. Override agent decisions with one tap. Full audit trail.</p>
+        <div style="margin-top:.8rem"><span class="tag tag-pink">Supervised</span></div>
+      </div>
+      <div class="card card-ms" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:.4rem">&#128276;</div>
+        <h3>Teams — AI Alert Cards</h3>
+        <p style="margin-top:.4rem">Adaptive cards written by the Narrative Agent. Not "Risk: 0.87" — full paragraphs with evidence, severity badge, and action buttons (Review / Escalate / Dismiss).</p>
+        <div style="margin-top:.8rem"><span class="tag tag-green">Actionable</span></div>
+      </div>
+      <div class="card card-ms" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:.4rem">&#128221;</div>
+        <h3>Power Automate — Agent Orchestration</h3>
+        <p style="margin-top:.4rem">Flows trigger agent pipelines, handle retries, route approvals, and manage human-in-the-loop checkpoints. Dataverse stores agent configuration and watermark state.</p>
+        <div style="margin-top:.8rem"><span class="tag tag-ai">Orchestrator</span></div>
+      </div>
+      <div class="card card-ms" style="text-align:center">
+        <div style="font-size:2rem;margin-bottom:.4rem">&#128300;</div>
+        <h3>Dataverse — Agent Configuration</h3>
+        <p style="margin-top:.4rem">Admins edit prompts, thresholds, and approval chains via Dataverse tables — no code deployment. Agent behavior changes instantly by updating configuration rows.</p>
+        <div style="margin-top:.8rem"><span class="tag tag-purple">Configurable</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 11: LLM SELECTION ==================== -->
+<div class="slide" data-section="LLM Choice">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(0,240,255,.1);color:var(--neon-blue);border-color:rgba(0,240,255,.2)">Model Selection</div>
+      <h1>Which LLM Powers the Agents?</h1>
+      <p class="subtitle">The engine choice for an AI-native procurement platform</p>
+    </div>
+    <div class="grid3">
+      <div class="card card-ai" style="position:relative">
+        <div style="position:absolute;top:-8px;right:-8px;padding:.2rem .5rem;border-radius:999px;font-size:.58rem;font-weight:800;background:linear-gradient(135deg,var(--neon-purple),var(--neon-pink));color:#fff">Recommended</div>
+        <div style="text-align:center;margin-bottom:.6rem">
+          <div style="font-size:1.7rem;font-weight:800;color:var(--neon-blue)">Azure OpenAI GPT-4o</div>
+          <div style="font-size:.75rem;color:var(--text3)">Primary Engine + Vision</div>
+        </div>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-ai">&#10003;</span><span><strong>Vision + Text Unified:</strong> One model reads PDF images, extracts tables, and writes narratives</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10003;</span><span><strong>JSON Mode:</strong> Reliable structured output for extraction and scoring agents</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10003;</span><span><strong>Tenant-Native:</strong> Private endpoints inside your Azure subscription — zero data exit</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10003;</span><span><strong>Power Platform Native:</strong> First-class connector for Copilot, Power Apps, Power Automate</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10003;</span><span><strong>Function Calling:</strong> Agents can invoke tools (query Cosmos DB, call APIs) natively</span></div>
+        </div>
+        <div style="margin-top:.8rem;text-align:center"><span class="tag tag-ai">Best for AI-Native</span></div>
+      </div>
+      <div class="card card-purple">
+        <div style="text-align:center;margin-bottom:.6rem">
+          <div style="font-size:1.7rem;font-weight:800;color:var(--neon-purple)">Anthropic Claude 3.5</div>
+          <div style="font-size:.75rem;color:var(--text3)">Deep Reasoning Specialist</div>
+        </div>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-purple">&#9733;</span><span><strong>200K Context:</strong> Can ingest entire bid folders (all 7 docs + historical context) in one prompt</span></div>
+          <div class="check-item"><span class="check-icon check-purple">&#9733;</span><span><strong>Superior Reasoning:</strong> Better at multi-step logical deduction for complex collusion cases</span></div>
+          <div class="check-item"><span class="check-icon check-purple">&#9733;</span><span><strong>Lower Hallucination:</strong> More likely to say "I don't know" than fabricate evidence</span></div>
+          <div class="check-item"><span class="check-icon check-warn">!</span><span><strong>Azure Marketplace:</strong> Available on Azure but requires separate provisioning and connector</span></div>
+          <div class="check-item"><span class="check-icon check-warn">!</span><span><strong>No Vision:</strong> Claude Sonnet vision lags GPT-4o for dense table extraction</span></div>
+        </div>
+        <div style="margin-top:.8rem;text-align:center"><span class="tag tag-purple">High-Stakes Supplement</span></div>
+      </div>
+      <div class="card">
+        <div style="text-align:center;margin-bottom:.6rem">
+          <div style="font-size:1.7rem;font-weight:800;color:var(--text2)">GPT-4o-mini / Phi-4</div>
+          <div style="font-size:.75rem;color:var(--text3)">Cost-Optimized Tier</div>
+        </div>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-green">&#10003;</span><span><strong>10× Cheaper:</strong> GPT-4o-mini handles extraction and simple compliance at fraction of cost</span></div>
+          <div class="check-item"><span class="check-icon check-green">&#10003;</span><span><strong>Fast:</strong> Lower latency for high-volume batch processing of historical bids</span></div>
+          <div class="check-item"><span class="check-icon check-warn">!</span><span><strong>Capability Gap:</strong> Struggles with complex multi-table PDFs and nuanced collusion reasoning</span></div>
+          <div class="check-item"><span class="check-icon check-warn">!</span><span><strong>No Vision:</strong> Cannot process scanned PDFs — requires pre-OCR</span></div>
+          <div class="check-item"><span class="check-icon check-no">X</span><span><strong>Not for Critical:</strong> Never use for final collusion judgment or audit narratives</span></div>
+        </div>
+        <div style="margin-top:.8rem;text-align:center"><span class="tag" style="background:rgba(255,255,255,.04);color:var(--text3);border:1px solid rgba(255,255,255,.08)">Tier-2 Agent Only</span></div>
+      </div>
+    </div>
+    <div class="card card-green" style="margin-top:1rem">
+      <h3 style="margin-bottom:.6rem;text-align:center">Recommended Stack: Tiered Model Strategy</h3>
+      <div style="display:flex;gap:1rem;align-items:center;justify-content:center;flex-wrap:wrap">
+        <div style="padding:1rem;text-align:center;background:rgba(0,240,255,.05);border:1px solid rgba(0,240,255,.12);border-radius:.6rem;min-width:200px">
+          <div style="font-size:.9rem;font-weight:700;color:var(--neon-blue)">GPT-4o-mini</div>
+          <div style="font-size:.75rem;color:var(--text3);margin-top:.2rem">Extraction Agent<br>Compliance Agent (simple)<br>~70% of token volume</div>
+        </div>
+        <div style="font-size:1.5rem;color:var(--text3)">+</div>
+        <div style="padding:1rem;text-align:center;background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.18);border-radius:.6rem;min-width:200px">
+          <div style="font-size:.9rem;font-weight:700;color:var(--neon-blue)">GPT-4o</div>
+          <div style="font-size:.75rem;color:var(--text3);margin-top:.2rem">Collusion Agent<br>Anomaly Agent<br>Narrative Agent<br>~25% of token volume</div>
+        </div>
+        <div style="font-size:1.5rem;color:var(--text3)">+</div>
+        <div style="padding:1rem;text-align:center;background:rgba(184,41,221,.06);border:1px solid rgba(184,41,221,.15);border-radius:.6rem;min-width:200px">
+          <div style="font-size:.9rem;font-weight:700;color:var(--neon-purple)">Claude 3.5 Opus</div>
+          <div style="font-size:.75rem;color:var(--text3);margin-top:.2rem">Critical audit narratives<br>Complex multi-bid reasoning<br>~5% of token volume</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 12: SECURITY ==================== -->
+<div class="slide" data-section="Security">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(5,255,161,.1);color:var(--neon-green);border-color:rgba(5,255,161,.2)">Trust</div>
+      <h1>Security in an AI-Native World</h1>
+      <p class="subtitle">Governance for autonomous LLM agents handling sensitive procurement data</p>
+    </div>
+    <div class="grid3">
+      <div class="card card-green">
+        <h3 style="margin-bottom:.6rem">Data Boundary</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-green">&#10003;</span><span><strong>Private Endpoints:</strong> Azure OpenAI, Cosmos DB, Blob — no public internet exposure</span></div>
+          <div class="check-item"><span class="check-icon check-green">&#10003;</span><span><strong>No Training:</strong> Your bid data is never used to train foundation models (Azure OpenAI enterprise promise)</span></div>
+          <div class="check-item"><span class="check-icon check-green">&#10003;</span><span><strong>Content Filtering:</strong> Azure OpenAI built-in filters block prompt injection and jailbreaks</span></div>
+          <div class="check-item"><span class="check-icon check-green">&#10003;</span><span><strong>PII Redaction:</strong> Supplier addresses, phones redacted before LLM processing via Presidio</span></div>
+        </div>
+      </div>
+      <div class="card card-ai">
+        <h3 style="margin-bottom:.6rem">Agent Governance</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>Human-in-the-Loop:</strong> CRITICAL severity flags require human approval before any procurement action</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>Confidence Gates:</strong> Agent outputs below 0.8 confidence automatically routed to human review queue</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>Prompt Versioning:</strong> All prompts versioned in Dataverse — rollback to previous behavior instantly</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>Cost Caps:</strong> Daily token budget per agent; auto-shutdown if exceeded</span></div>
+        </div>
+      </div>
+      <div class="card card-purple">
+        <h3 style="margin-bottom:.6rem">Audit & Explainability</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-purple">&#9733;</span><span><strong>Full Trace:</strong> Every agent decision stored with prompt, response, reasoning chain, and cost</span></div>
+          <div class="check-item"><span class="check-icon check-purple">&#9733;</span><span><strong>Reproducible:</strong> Same prompt + same document hash = deterministic re-run for audit verification</span></div>
+          <div class="check-item"><span class="check-icon check-purple">&#9733;</span><span><strong>Immutable Logs:</strong> Agent state history written to append-only Blob with WORM policy</span></div>
+          <div class="check-item"><span class="check-icon check-purple">&#9733;</span><span><strong>Model Cards:</strong> Documented known limitations of each LLM agent for legal defensibility</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem">
+      <h3 style="margin-bottom:.6rem;text-align:center">The "Never Trust, Always Verify" Principle</h3>
+      <div style="text-align:center;font-size:.8rem;color:var(--text3);max-width:900px;margin:0 auto">
+        LLM agents are powerful but probabilistic. <strong style="color:var(--text)">We never let an agent block a bid, award a contract, or delete a record autonomously.</strong> 
+        Agents recommend. Humans decide. The platform is designed as an augmented intelligence system — the LLM does the reading and reasoning at scale, 
+        the human does the judgment and accountability.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 13: ROADMAP ==================== -->
+<div class="slide" data-section="Roadmap">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div class="badge" style="margin-bottom:.4rem;background:rgba(0,240,255,.1);color:var(--neon-blue);border-color:rgba(0,240,255,.2)">Delivery</div>
+      <h1>AI-Native Implementation Roadmap</h1>
+      <p class="subtitle">8 weeks from prompt to production agents</p>
+    </div>
+    <div style="display:flex;gap:.5rem;margin-bottom:1rem">
+      <div class="flow-step-h" style="background:rgba(0,120,212,.05);border-color:rgba(0,120,212,.12)">
+        <div class="flow-num-h ms">W1</div>
+        <div style="font-weight:700;font-size:.78rem;color:var(--text)">Foundation</div>
+        <div style="font-size:.65rem;color:var(--text2);margin-top:.25rem;text-align:left">
+          &#9679; Cosmos DB provision<br>
+          &#9679; SharePoint connector<br>
+          &#9679; Blob staging<br>
+          &#9679; Azure OpenAI deploy
+        </div>
+      </div>
+      <div class="flow-step-h" style="background:rgba(0,240,255,.05);border-color:rgba(0,240,255,.12)">
+        <div class="flow-num-h ai">W2-3</div>
+        <div style="font-weight:700;font-size:.78rem;color:var(--text)">Extraction Agent</div>
+        <div style="font-size:.65rem;color:var(--text2);margin-top:.25rem;text-align:left">
+          &#9679; GPT-4o Vision prompts<br>
+          &#9679; JSON schema design<br>
+          &#9679; Schema Resolver agent<br>
+          &#9679; Cosmos DB writes
+        </div>
+      </div>
+      <div class="flow-step-h" style="background:rgba(255,42,109,.05);border-color:rgba(255,42,109,.12)">
+        <div class="flow-num-h pink">W4-5</div>
+        <div style="font-weight:700;font-size:.78rem;color:var(--text)">Analysis Agents</div>
+        <div style="font-size:.65rem;color:var(--text2);margin-top:.25rem;text-align:left">
+          &#9679; Collusion Agent prompt<br>
+          &#9679; Anomaly Agent prompt<br>
+          &#9679; Compliance Agent prompt<br>
+          &#9679; Self-consistency logic
+        </div>
+      </div>
+      <div class="flow-step-h" style="background:rgba(184,41,221,.05);border-color:rgba(184,41,221,.12)">
+        <div class="flow-num-h purple">W6</div>
+        <div style="font-weight:700;font-size:.78rem;color:var(--text)">RAG + Narrative</div>
+        <div style="font-size:.65rem;color:var(--text2);margin-top:.25rem;text-align:left">
+          &#9679; Extend existing RAG<br>
+          &#9679; Bid document index<br>
+          &#9679; Narrative Agent prompt<br>
+          &#9679; Citation generation
+        </div>
+      </div>
+      <div class="flow-step-h" style="background:rgba(0,120,212,.05);border-color:rgba(0,120,212,.12)">
+        <div class="flow-num-h ms">W7</div>
+        <div style="font-weight:700;font-size:.78rem;color:var(--text)">Power Platform</div>
+        <div style="font-size:.65rem;color:var(--text2);margin-top:.25rem;text-align:left">
+          &#9679; Copilot plugin<br>
+          &#9679; Power Apps canvas<br>
+          &#9679; Teams alert cards<br>
+          &#9679; Power BI dynamic
+        </div>
+      </div>
+      <div class="flow-step-h" style="background:rgba(5,255,161,.05);border-color:rgba(5,255,161,.12)">
+        <div class="flow-num-h green">W8</div>
+        <div style="font-weight:700;font-size:.78rem;color:var(--text)">Harden & Launch</div>
+        <div style="font-size:.65rem;color:var(--text2);margin-top:.25rem;text-align:left">
+          &#9679; Security review<br>
+          &#9679; Cost monitoring<br>
+          &#9679; Human-in-loop gates<br>
+          &#9679; Production cutover
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:.6rem">Key Decisions</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>Model:</strong> GPT-4o for vision + reasoning. GPT-4o-mini for extraction. Claude 3.5 for critical audits only.</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>Prompt Storage:</strong> Versioned in Dataverse — business users can tweak agent behavior without developers.</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>Cost Control:</strong> Daily caps per agent, result caching by file hash, and tiered model routing.</span></div>
+        </div>
+      </div>
+      <div class="card card-green">
+        <h3 style="margin-bottom:.6rem">Success Criteria</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-green">&#10003;</span><span><strong>Extraction:</strong> > 90% accuracy on clean PDFs, > 75% on scanned — verified by human spot-check</span></div>
+          <div class="check-item"><span class="check-icon check-green">&#10003;</span><span><strong>Collusion:</strong> > 80% recall on known collusion cases with < 15% false positive rate</span></div>
+          <div class="check-item"><span class="check-icon check-green">&#10003;</span><span><strong>Cost:</strong> &lt; $2 per bid folder end-to-end (5 agents × average token usage)</span></div>
+          <div class="check-item"><span class="check-icon check-green">&#10003;</span><span><strong>Speed:</strong> &lt; 3 minutes per bid folder from trigger to final narrative</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 14: SUMMARY ==================== -->
+<div class="slide hero-bg" data-section="Summary">
+  <div class="orb orb1" style="background:#b829dd;opacity:.1"></div>
+  <div class="orb orb2" style="background:#00f0ff;opacity:.1"></div>
+  <div class="container" style="position:relative;z-index:2">
+    <div style="text-align:center;margin-bottom:1.8rem">
+      <div class="badge" style="margin-bottom:.5rem">Executive Summary</div>
+      <h1>AI-Native Bid Risk Intelligence</h1>
+      <p class="subtitle">An autonomous multi-agent platform built entirely on Large Language Models</p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:.8rem">The Architecture</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem">
+          <div class="check-item" style="font-size:.75rem"><span class="check-icon check-ai">&#10024;</span><span><strong>GPT-4o Vision</strong> reads any PDF</span></div>
+          <div class="check-item" style="font-size:.75rem"><span class="check-icon check-ai">&#10024;</span><span><strong>5 LLM Agents</strong> reason independently</span></div>
+          <div class="check-item" style="font-size:.75rem"><span class="check-icon check-ai">&#10024;</span><span><strong>Cosmos DB</strong> stores agent memory</span></div>
+          <div class="check-item" style="font-size:.75rem"><span class="check-icon check-ai">&#10024;</span><span><strong>Existing RAG</strong> extended for Q&A</span></div>
+          <div class="check-item" style="font-size:.75rem"><span class="check-icon check-ai">&#10024;</span><span><strong>Power Platform</strong> is the interface</span></div>
+          <div class="check-item" style="font-size:.75rem"><span class="check-icon check-ai">&#10024;</span><span><strong>Zero statistical rules</strong> — pure reasoning</span></div>
+          <div class="check-item" style="font-size:.75rem"><span class="check-icon check-ai">&#10024;</span><span><strong>Human-in-the-loop</strong> for critical flags</span></div>
+          <div class="check-item" style="font-size:.75rem"><span class="check-icon check-ai">&#10024;</span><span><strong>Tenant boundary</strong> — no data exit</span></div>
+        </div>
+      </div>
+      <div class="card card-ai">
+        <h3 style="margin-bottom:.8rem">The Outcome</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>Universal Extraction:</strong> Any supplier format, any table layout, any language — handled by one model</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>Emergent Detection:</strong> LLM spots collusion patterns no human analyst or formula would catch</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>Conversational Intelligence:</strong> Ask your bid history anything. Get cited, contextual answers.</span></div>
+          <div class="check-item"><span class="check-icon check-ai">&#10024;</span><span><strong>Explainable by Design:</strong> Every judgment comes with a paragraph of reasoning, not a black-box score</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem;text-align:center">
+      <div style="display:inline-block;padding:.9rem 2rem;background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple));border-radius:.8rem;color:#fff;font-weight:700;font-size:1rem;box-shadow:0 10px 30px -10px rgba(0,240,255,.3)">
+        From rigid ETL pipelines to autonomous reasoning agents
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ===== NAVIGATION ===== -->
+<div id="nav">
+  <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">&#9664; Prev</button>
+  <div id="progress-bg"><div id="progress-fill"></div></div>
+  <div id="slide-count">1 / 14</div>
+  <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next &#9654;</button>
+</div>
+<div class="section-indicator"><div id="section-badge">Overview</div></div>
+
+<script>
+const slides=document.querySelectorAll('.slide');
+let current=0;
+function updateSlide(){
+  slides.forEach((s,i)=>{
+    s.classList.remove('active','prev');
+    if(i===current){s.classList.add('active');s.classList.add('animate-in');}
+    else if(i<current){s.classList.add('prev');s.classList.remove('animate-in');}
+    else{s.classList.remove('animate-in');}
+  });
+  document.getElementById('slide-count').textContent=(current+1)+' / '+slides.length;
+  document.getElementById('progress-fill').style.width=((current+1)/slides.length*100)+'%';
+  document.getElementById('section-badge').textContent=slides[current].dataset.section;
+}
+function changeSlide(dir){
+  current+=dir;
+  if(current<0)current=slides.length-1;
+  if(current>=slides.length)current=0;
+  updateSlide();
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown')changeSlide(1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp')changeSlide(-1);
+  if(e.key==='Home'){current=0;updateSlide();}
+  if(e.key==='End'){current=slides.length-1;updateSlide();}
+});
+updateSlide();
+</script>
+</body>
+</html>

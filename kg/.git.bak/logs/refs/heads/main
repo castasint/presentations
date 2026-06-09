@@ -1,0 +1,10 @@
+0000000000000000000000000000000000000000 503b8783cd2b55b0631133a7a20817e1a3151acb hanuma <arrayarchitect007@gmail.com> 1780888292 +0530	commit (initial): Add design spec for KG + vector search agentic AI LinkedIn carousel
+503b8783cd2b55b0631133a7a20817e1a3151acb 6a63829c14f96565dbe37101d351c3fb6f8208e0 hanuma <arrayarchitect007@gmail.com> 1780888363 +0530	commit: Add implementation plan for KG agentic AI carousel
+6a63829c14f96565dbe37101d351c3fb6f8208e0 4916dbcbe765bc5a8e91db02809dfb408dfd2a61 castasint <castasstring@gmail.com> 1780888533 +0530	commit: content: lock final copy for all 15 carousel slides
+4916dbcbe765bc5a8e91db02809dfb408dfd2a61 7e1a1c6e40c888949cda2f6d6a70a7bf7a497123 hanuma <arrayarchitect007@gmail.com> 1780888633 +0530	commit: content: add binding citation ledger with verification
+7e1a1c6e40c888949cda2f6d6a70a7bf7a497123 66dda43e894a75b18143d8b3dea5f1910465d8a5 hanuma <arrayarchitect007@gmail.com> 1780888796 +0530	commit: content: lock bold visual tokens and per-slide archetypes
+66dda43e894a75b18143d8b3dea5f1910465d8a5 b16585ee59e5b6cd708ee3974a027d52ecfd187c hanuma <arrayarchitect007@gmail.com> 1780888882 +0530	commit: content: add LinkedIn caption for the carousel
+b16585ee59e5b6cd708ee3974a027d52ecfd187c baf3d853f0d57c8ff8dd4690078320605e169a2d hanuma <arrayarchitect007@gmail.com> 1780889707 +0530	commit: build: 15-slide Electric carousel in Figma + visual QA log
+baf3d853f0d57c8ff8dd4690078320605e169a2d ec602b95f5b45a6725c901f9baf558af6a0016a4 hanuma <arrayarchitect007@gmail.com> 1780891978 +0530	commit: feat: rebuild as 40-slide vendor-neutral Pattern Atlas with clean diagrams
+ec602b95f5b45a6725c901f9baf558af6a0016a4 8cebe05e76f1e4c690ab9c34df192af490b35091 hanuma <arrayarchitect007@gmail.com> 1780893559 +0530	commit: design: v3 UI/UX refresh — mono technical labels, SVG icons, refined palette
+8cebe05e76f1e4c690ab9c34df192af490b35091 509ed4cea1d373ab3c4535ac0891812de978820d hanuma <arrayarchitect007@gmail.com> 1780942704 +0530	commit: design: A+ polish — balanced cards, cover motif, divider descriptions

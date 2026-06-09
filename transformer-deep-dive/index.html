@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern AI Architectures: Transformers, MoE & Efficient Fine-Tuning</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e17;--bg2:#111827;--card:#1a2332;
+  --accent:#3b82f6;--accent2:#06b6d4;--gold:#f59e0b;
+  --green:#10b981;--red:#ef4444;--rose:#f43f5e;--purple:#8b5cf6;--teal:#14b8a6;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --grad-hero:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#312e81 100%);
+  --grad-red:linear-gradient(135deg,#450a0a 0%,#7f1d1d 100%);
+  --grad-green:linear-gradient(135deg,#064e3b 0%,#065f46 100%);
+  --grad-gold:linear-gradient(135deg,#451a03 0%,#92400e 100%);
+  --grad-blue:linear-gradient(135deg,#0c4a6e 0%,#075985 100%);
+  --grad-purple:linear-gradient(135deg,#2e1065 0%,#5b21b6 100%);
+  --shadow:0 25px 50px -12px rgba(0,0,0,.5);
+}
+html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+#deck{position:relative;width:100vw;height:100vh;overflow:hidden}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;align-items:center;padding:3vh 4vw;opacity:0;transform:translateY(30px) scale(.98);transition:all .6s cubic-bezier(.22,1,.36,1)}
+.slide.active{display:flex;opacity:1;transform:translateY(0) scale(1)}
+.slide.prev{display:flex;opacity:0;transform:translateY(-40px) scale(.95)}
+h1{font-size:clamp(2.2rem,5vw,4rem);font-weight:800;line-height:1.1;letter-spacing:-.02em}
+h2{font-size:clamp(1.4rem,3vw,2.2rem);font-weight:700;line-height:1.2}
+h3{font-size:clamp(1rem,2vw,1.4rem);font-weight:600}
+p,li{font-size:clamp(.9rem,1.3vw,1.1rem);line-height:1.6;color:var(--text2)}
+.subtitle{font-size:clamp(1rem,2vw,1.4rem);color:var(--text3);font-weight:400;margin-top:.5rem}
+.badge{display:inline-block;padding:.35rem .9rem;border-radius:999px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+.container{width:100%;max-width:1400px;margin:0 auto}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;width:100%}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;width:100%}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;width:100%}
+.flex{display:flex;gap:1.5rem;width:100%}
+.col{flex:1}
+.card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:1rem;padding:1.5rem;box-shadow:var(--shadow);transition:transform .3s,box-shadow .3s}
+.card:hover{transform:translateY(-4px);box-shadow:0 30px 60px -12px rgba(0,0,0,.6)}
+.card-gold{border-color:rgba(245,158,11,.25);background:linear-gradient(180deg,rgba(245,158,11,.08) 0%,var(--card) 100%)}
+.card-green{border-color:rgba(16,185,129,.25);background:linear-gradient(180deg,rgba(16,185,129,.08) 0%,var(--card) 100%)}
+.card-red{border-color:rgba(239,68,68,.25);background:linear-gradient(180deg,rgba(239,68,68,.08) 0%,var(--card) 100%)}
+.card-blue{border-color:rgba(59,130,246,.25);background:linear-gradient(180deg,rgba(59,130,246,.08) 0%,var(--card) 100%)}
+.card-purple{border-color:rgba(139,92,246,.25);background:linear-gradient(180deg,rgba(139,92,246,.08) 0%,var(--card) 100%)}
+.card-teal{border-color:rgba(20,184,166,.25);background:linear-gradient(180deg,rgba(20,184,166,.08) 0%,var(--card) 100%)}
+.hero-bg{background:var(--grad-hero);position:relative;overflow:hidden}
+.hero-bg::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity:.4}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;animation:float 8s ease-in-out infinite}
+.orb1{width:400px;height:400px;background:#4f46e5;top:-100px;right:-100px;animation-delay:0s}
+.orb2{width:300px;height:300px;background:#06b6d4;bottom:-80px;left:-80px;animation-delay:2s}
+.orb3{width:250px;height:250px;background:#8b5cf6;top:40%;left:40%;animation-delay:4s}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-30px)}}
+.section-red{background:var(--grad-red)}
+.section-green{background:var(--grad-green)}
+.section-gold{background:var(--grad-gold)}
+.section-blue{background:var(--grad-blue)}
+.section-purple{background:var(--grad-purple)}
+.section-dark{background:var(--bg2)}
+.bar-chart{display:flex;align-items:flex-end;gap:.5rem;height:200px;padding-top:1rem}
+.bar{flex:1;border-radius:6px 6px 0 0;position:relative;transition:all .4s;min-width:30px}
+.bar:hover{filter:brightness(1.2)}
+.bar-label{position:absolute;bottom:-1.5rem;left:50%;transform:translateX(-50%);font-size:.7rem;white-space:nowrap;color:var(--text3)}
+.bar-value{position:absolute;top:-1.4rem;left:50%;transform:translateX(-50%);font-size:.75rem;font-weight:700;color:var(--text)}
+.stat-big{font-size:clamp(3rem,7vw,5rem);font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.85rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:.25rem}
+.timeline{display:flex;gap:1rem;overflow-x:auto;padding-bottom:1rem}
+.timeline-item{flex:0 0 220px;padding:1.2rem;border-radius:.8rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);position:relative}
+.timeline-item::after{content:'';position:absolute;top:1.5rem;right:-1rem;width:2rem;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.timeline-item:last-child::after{display:none}
+.timeline-year{font-size:.8rem;color:var(--accent);font-weight:700;margin-bottom:.25rem}
+.timeline-title{font-size:.9rem;font-weight:600;margin-bottom:.25rem}
+.timeline-desc{font-size:.75rem;color:var(--text3)}
+.icon-wrap{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;font-size:1.5rem}
+.icon-green{background:rgba(16,185,129,.15);color:var(--green)}
+.icon-red{background:rgba(239,68,68,.15);color:var(--red)}
+.icon-gold{background:rgba(245,158,11,.15);color:var(--gold)}
+.icon-blue{background:rgba(59,130,246,.15);color:var(--accent)}
+.icon-purple{background:rgba(139,92,246,.15);color:var(--purple)}
+.icon-teal{background:rgba(20,184,166,.15);color:var(--teal)}
+.data-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.data-table th{background:rgba(255,255,255,.06);padding:.7rem .8rem;text-align:left;font-weight:600;color:var(--text);border-bottom:1px solid rgba(255,255,255,.1)}
+.data-table td{padding:.6rem .8rem;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text2)}
+.data-table tr:hover td{background:rgba(255,255,255,.02)}
+#nav{position:fixed;bottom:0;left:0;right:0;padding:.8rem 2rem;background:rgba(10,14,23,.9);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;z-index:1000}
+#progress-bg{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin:0 1.5rem;overflow:hidden}
+#progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s}
+.nav-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:var(--text);padding:.5rem 1rem;border-radius:.5rem;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s}
+.nav-btn:hover{background:rgba(255,255,255,.15)}
+#slide-count{font-size:.8rem;color:var(--text3);font-variant-numeric:tabular-nums;min-width:80px;text-align:center}
+.section-indicator{position:fixed;top:1rem;right:1rem;z-index:1000}
+#section-badge{background:rgba(10,14,23,.7);backdrop-filter:blur(8px);padding:.4rem .9rem;border-radius:999px;border:1px solid rgba(255,255,255,.1);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.checklist{display:flex;flex-direction:column;gap:.5rem}
+.check-item{display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;background:rgba(255,255,255,.03);border-radius:.5rem;border:1px solid rgba(255,255,255,.06)}
+.check-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0}
+.check-yes{background:rgba(16,185,129,.2);color:var(--green)}
+.check-no{background:rgba(239,68,68,.2);color:var(--red)}
+.check-warn{background:rgba(245,158,11,.2);color:var(--gold)}
+.check-blue{background:rgba(59,130,246,.2);color:var(--accent)}
+.tag{display:inline-flex;align-items:center;padding:.2rem .6rem;border-radius:4px;font-size:.7rem;font-weight:600;margin:.15rem}
+.tag-red{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25)}
+.tag-green{background:rgba(16,185,129,.15);color:#6ee7b7;border:1px solid rgba(16,185,129,.25)}
+.tag-gold{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.25)}
+.tag-blue{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.25)}
+.tag-purple{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.25)}
+.tag-teal{background:rgba(20,184,166,.15);color:#5eead4;border:1px solid rgba(20,184,166,.25)}
+.formula-box{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:.8rem;padding:1rem;font-family:'Courier New',monospace;font-size:.9rem;color:var(--text);text-align:center;margin:1rem 0}
+.formula-box .var{color:var(--accent2);font-weight:700}
+.formula-box .op{color:var(--gold)}
+.arch-layer{display:flex;align-items:center;justify-content:center;margin:.25rem 0;padding:.5rem 1rem;border-radius:.5rem;font-size:.8rem;font-weight:600;color:#fff}
+.layer-input{background:linear-gradient(90deg,#1565c0,#1976d2)}
+.layer-attn{background:linear-gradient(90deg,#c62828,#d32f2f)}
+.layer-norm{background:linear-gradient(90deg,#455a64,#546e7a)}
+.layer-ffn{background:linear-gradient(90deg,#ef6c00,#f57c00)}
+.layer-output{background:linear-gradient(90deg,#2e7d32,#388e3c)}
+.layer-patch{background:linear-gradient(90deg,#6a1b9a,#7b1fa2)}
+.layer-moe{background:linear-gradient(90deg,#00695c,#00796b)}
+.arch-arrow{color:var(--text3);text-align:center;font-size:1.2rem;margin:.1rem 0}
+.arch-diagram{display:flex;flex-direction:column;align-items:center;gap:.2em;max-width:420px;margin:0 auto}
+@media(max-width:900px){
+  .grid2,.grid3,.grid4{grid-template-columns:1fr}
+  .flex{flex-direction:column}
+  .slide{padding:2vh 3vw}
+  .timeline{flex-direction:column}
+  .timeline-item{flex:1 1 auto}
+  .timeline-item::after{display:none}
+}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.animate-in .card,.animate-in .timeline-item,.animate-in .check-item{animation:fadeInUp .5s ease both}
+.animate-in .card:nth-child(1){animation-delay:.05s}.animate-in .card:nth-child(2){animation-delay:.1s}
+.animate-in .card:nth-child(3){animation-delay:.15s}.animate-in .card:nth-child(4){animation-delay:.2s}
+.scroll-h{overflow-x:auto;overflow-y:hidden;padding-bottom:.5rem}
+.scroll-h::-webkit-scrollbar{height:6px}
+.scroll-h::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:3px}
+.scroll-h::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}
+@media print{
+  .slide{position:relative;display:none!important;page-break-after:always;height:auto;min-height:100vh}
+  .slide.active{display:flex!important}
+  #nav,.section-indicator{display:none}
+}
+.highlight-box{padding:1.2rem;border-radius:.8rem;border-left:4px solid var(--accent);background:rgba(59,130,246,.06);margin:1rem 0}
+.highlight-box.green{border-color:var(--green);background:rgba(16,185,129,.06)}
+.highlight-box.red{border-color:var(--red);background:rgba(239,68,68,.06)}
+.highlight-box.gold{border-color:var(--gold);background:rgba(245,158,11,.06)}
+.highlight-box.purple{border-color:var(--purple);background:rgba(139,92,246,.06)}
+.highlight-box.teal{border-color:var(--teal);background:rgba(20,184,166,.06)}
+.paper-ref{font-size:.7rem;color:var(--text3);margin-top:.5rem;font-style:italic}
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+<!-- SLIDE 1: TITLE -->
+<div class="slide hero-bg active" data-section="Intro">
+  <div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+  <div class="container" style="text-align:center;position:relative;z-index:2">
+    <div class="badge" style="margin-bottom:1.5rem;background:rgba(139,92,246,.15);color:var(--purple);border-color:rgba(139,92,246,.3)">Deep Technical Dive</div>
+    <h1 style="margin-bottom:.5rem">Modern AI Architectures</h1>
+    <div class="subtitle">Transformers, Vision Transformers, Mixture of Experts &amp; Parameter-Efficient Fine-Tuning</div>
+    <div style="margin-top:2.5rem;display:flex;justify-content:center;gap:2rem;flex-wrap:wrap">
+      <div><div class="stat-big">2017</div><div class="stat-label">Attention Is All You Need</div></div>
+      <div><div class="stat-big">175B+</div><div class="stat-label">Parameters Scaled</div></div>
+      <div><div class="stat-big">0.1%</div><div class="stat-label">LoRA Trainable Params</div></div>
+    </div>
+    <p style="margin-top:2rem;font-size:.85rem;color:var(--text3)">From Self-Attention to QLoRA: The Building Blocks of Modern AI</p>
+  </div>
+</div>
+
+<!-- SLIDE 2: AGENDA -->
+<div class="slide" data-section="Agenda">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:2rem">
+      <div class="badge" style="margin-bottom:.5rem">Roadmap</div>
+      <h1>What We'll Cover</h1>
+    </div>
+    <div class="grid3">
+      <div class="card card-blue" style="text-align:center">
+        <div class="icon-wrap icon-blue" style="margin:0 auto 1rem">01</div>
+        <h3>The Transformer</h3>
+        <p style="margin-top:.5rem">Self-attention, multi-head attention, positional encoding, encoder-decoder architecture</p>
+      </div>
+      <div class="card card-purple" style="text-align:center">
+        <div class="icon-wrap icon-purple" style="margin:0 auto 1rem">02</div>
+        <h3>Vision Transformer</h3>
+        <p style="margin-top:.5rem">Image patches, patch embeddings, CLS token, position embeddings for images</p>
+      </div>
+      <div class="card card-teal" style="text-align:center">
+        <div class="icon-wrap icon-teal" style="margin:0 auto 1rem">03</div>
+        <h3>Mixture of Experts</h3>
+        <p style="margin-top:.5rem">Sparse activation, gating networks, routing, conditional computation for scale</p>
+      </div>
+      <div class="card card-gold" style="text-align:center">
+        <div class="icon-wrap icon-gold" style="margin:0 auto 1rem">04</div>
+        <h3>LoRA &amp; Variants</h3>
+        <p style="margin-top:.5rem">Low-Rank Adaptation, AdaLoRA, DoRA - efficient fine-tuning without full retraining</p>
+      </div>
+      <div class="card card-green" style="text-align:center">
+        <div class="icon-wrap icon-green" style="margin:0 auto 1rem">05</div>
+        <h3>QLoRA &amp; Quantization</h3>
+        <p style="margin-top:.5rem">4-bit quantization, double quantization, normal float, memory-efficient training</p>
+      </div>
+      <div class="card card-red" style="text-align:center">
+        <div class="icon-wrap icon-red" style="margin:0 auto 1rem">06</div>
+        <h3>Other PEFT Methods</h3>
+        <p style="margin-top:.5rem">Prefix tuning, P-Tuning v2, adapters, prompt tuning, IA3 - the full landscape</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: TRANSFORMER SECTION -->
+<div class="slide hero-bg" data-section="Transformers">
+  <div class="orb orb1" style="background:#3b82f6;opacity:.25"></div>
+  <div class="orb orb2" style="background:#06b6d4;opacity:.25"></div>
+  <div class="container" style="text-align:center;position:relative;z-index:2">
+    <div style="font-size:5rem;color:rgba(59,130,246,.3);font-weight:900;line-height:1">I</div>
+    <h1 style="margin-top:.5rem">The Transformer Architecture</h1>
+    <div class="subtitle">"Attention Is All You Need" - Vaswani et al., NeurIPS 2017</div>
+    <p style="margin-top:1.5rem;color:var(--text3)">The architecture that changed everything. No recurrence. No convolution. Just attention.</p>
+  </div>
+</div>
+
+<!-- SLIDE 4: BEFORE TRANSFORMERS -->
+<div class="slide" data-section="Transformers">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Historical Context</div>
+      <h1>Before Transformers</h1>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:1rem;display:flex;align-items:center;gap:.5rem"><span style="font-size:1.4rem">&#128190;</span> RNNs &amp; LSTMs</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Sequential processing:</strong> Tokens processed one-by-one</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Vanishing gradients:</strong> Hard to learn long-range dependencies</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Slow training:</strong> No parallelization across sequence</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Bottleneck:</strong> All info compressed into single hidden state</span></div>
+        </div>
+        <p class="paper-ref">Hochreiter &amp; Schmidhuber (1997). Long Short-Term Memory.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:1rem;display:flex;align-items:center;gap:.5rem"><span style="font-size:1.4rem">&#9889;</span> Seq2Seq + Attention</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Attention mechanism:</strong> Bahdanau et al. (2015)</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Decoder could "look back" at encoder states</span></div>
+          <div class="check-item"><span class="check-icon check-warn">~</span><span>Still used RNNs in encoder and decoder</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span>Attention was an <strong>add-on</strong>, not the core</span></div>
+        </div>
+        <p class="paper-ref">Bahdanau et al. (2015). Neural Machine Translation by Jointly Learning to Align and Translate.</p>
+      </div>
+    </div>
+    <div class="highlight-box" style="margin-top:1.5rem">
+      <strong style="color:var(--accent2)">The Key Question:</strong> What if we removed the RNN entirely and built a model <strong>entirely</strong> on attention mechanisms?
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: TRANSFORMER OVERVIEW -->
+<div class="slide" data-section="Transformers">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Architecture</div>
+      <h1>Transformer: High-Level View</h1>
+    </div>
+    <div class="grid2">
+      <div class="card card-blue">
+        <h3 style="text-align:center;color:var(--accent);margin-bottom:1rem">Encoder Stack (xN)</h3>
+        <div class="arch-diagram">
+          <div class="arch-layer layer-input">Input Embeddings + Positional Encoding</div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-layer layer-attn">Multi-Head Self-Attention</div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-layer layer-norm">Add &amp; LayerNorm</div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-layer layer-ffn">Feed-Forward Network</div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-layer layer-norm">Add &amp; LayerNorm</div>
+        </div>
+        <p style="text-align:center;margin-top:.5rem;font-size:.8rem;color:var(--text3)">Outputs contextualized representations</p>
+      </div>
+      <div class="card card-gold">
+        <h3 style="text-align:center;color:var(--gold);margin-bottom:1rem">Decoder Stack (xN)</h3>
+        <div class="arch-diagram">
+          <div class="arch-layer layer-input">Output Embeddings + Positional Encoding</div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-layer layer-attn">Masked Multi-Head Self-Attention</div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-layer layer-norm">Add &amp; LayerNorm</div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-layer layer-attn" style="background:linear-gradient(90deg,#7b1fa2,#8e24aa)">Cross-Attention (Encoder-Decoder)</div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-layer layer-ffn">Feed-Forward Network</div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-layer layer-norm">Add &amp; LayerNorm</div>
+        </div>
+        <p style="text-align:center;margin-top:.5rem;font-size:.8rem;color:var(--text3)">Autoregressive generation</p>
+      </div>
+    </div>
+    <div class="grid3" style="margin-top:1.5rem">
+      <div class="card" style="text-align:center;padding:1rem">
+        <div style="font-size:2rem;font-weight:800;color:var(--accent)">6</div>
+        <div style="font-size:.8rem;color:var(--text3)">Layers (Base)</div>
+      </div>
+      <div class="card" style="text-align:center;padding:1rem">
+        <div style="font-size:2rem;font-weight:800;color:var(--gold)">512</div>
+        <div style="font-size:.8rem;color:var(--text3)">Model Dimension (d_model)</div>
+      </div>
+      <div class="card" style="text-align:center;padding:1rem">
+        <div style="font-size:2rem;font-weight:800;color:var(--green)">65M</div>
+        <div style="font-size:.8rem;color:var(--text3)">Parameters (Base)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: SELF-ATTENTION -->
+<div class="slide" data-section="Transformers">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Core Mechanism</div>
+      <h1>Self-Attention: The Heart of the Transformer</h1>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:1rem">The Intuition</h3>
+        <p style="margin-bottom:1rem">For each token, compute a weighted sum of <strong>all other tokens</strong> in the sequence. The weights determine "how much to attend to each other token."</p>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-blue">Q</span><span><strong>Query:</strong> What am I looking for?</span></div>
+          <div class="check-item"><span class="check-icon check-blue">K</span><span><strong>Key:</strong> What do I contain?</span></div>
+          <div class="check-item"><span class="check-icon check-blue">V</span><span><strong>Value:</strong> What information do I provide?</span></div>
+        </div>
+        <p style="margin-top:1rem;font-size:.85rem">Each token creates three vectors by projecting its embedding through learned weight matrices W^Q, W^K, W^V.</p>
+      </div>
+      <div class="card card-purple">
+        <h3 style="margin-bottom:1rem;text-align:center">Scaled Dot-Product Attention</h3>
+        <div class="formula-box">
+          Attention(<span class="var">Q</span>, <span class="var">K</span>, <span class="var">V</span>) <span class="op">=</span> softmax(<span class="var">QK</span><sup>T</sup> <span class="op">/</span> <span class="var">sqrt(d_k)</span>) <span class="op">*</span> <span class="var">V</span>
+        </div>
+        <div class="checklist" style="margin-top:1rem">
+          <div class="check-item"><span class="check-icon check-yes">1</span><span>Compute similarity scores: <strong>QK^T</strong> (nxn matrix)</span></div>
+          <div class="check-item"><span class="check-icon check-yes">2</span><span>Scale by <strong>sqrt(d_k)</strong> to prevent softmax saturation</span></div>
+          <div class="check-item"><span class="check-icon check-yes">3</span><span>Apply <strong>softmax</strong> to get attention weights (row-wise)</span></div>
+          <div class="check-item"><span class="check-icon check-yes">4</span><span>Weighted sum with <strong>V</strong> to get output</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box purple" style="margin-top:1.5rem">
+      <strong style="color:var(--purple)">Why scale by sqrt(d_k)?</strong> For large d_k, dot products grow in magnitude, pushing softmax into regions with extremely small gradients. Scaling stabilizes training.
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: ATTENTION VISUAL -->
+<div class="slide" data-section="Transformers">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Visual Intuition</div>
+      <h1>Self-Attention in Action</h1>
+      <p class="subtitle">Sentence: "The cat sat on the mat and looked at the bird"</p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:1rem">Attention Weights Heatmap</h3>
+        <div style="display:flex;flex-direction:column;gap:2px;font-size:.7rem">
+          <div style="display:flex;gap:2px;align-items:center"><span style="width:40px;text-align:right;padding-right:4px">The</span><div style="flex:1;height:20px;background:linear-gradient(90deg,#3b82f6 10%,transparent 10%)"></div></div>
+          <div style="display:flex;gap:2px;align-items:center"><span style="width:40px;text-align:right;padding-right:4px">cat</span><div style="flex:1;height:20px;background:linear-gradient(90deg,#3b82f6 5%,#8b5cf6 60%,transparent 60%)"></div></div>
+          <div style="display:flex;gap:2px;align-items:center"><span style="width:40px;text-align:right;padding-right:4px">sat</span><div style="flex:1;height:20px;background:linear-gradient(90deg,transparent 30%,#ef4444 70%,transparent 70%)"></div></div>
+          <div style="display:flex;gap:2px;align-items:center"><span style="width:40px;text-align:right;padding-right:4px">on</span><div style="flex:1;height:20px;background:linear-gradient(90deg,transparent 50%,#10b981 80%,transparent 80%)"></div></div>
+          <div style="display:flex;gap:2px;align-items:center"><span style="width:40px;text-align:right;padding-right:4px">the</span><div style="flex:1;height:20px;background:linear-gradient(90deg,#3b82f6 10%,transparent 10%)"></div></div>
+          <div style="display:flex;gap:2px;align-items:center"><span style="width:40px;text-align:right;padding-right:4px">mat</span><div style="flex:1;height:20px;background:linear-gradient(90deg,transparent 50%,#10b981 85%,transparent 85%)"></div></div>
+        </div>
+        <p style="margin-top:.5rem;font-size:.75rem;color:var(--text3)">Color intensity = attention weight. "cat" strongly attends to itself. "sat" attends to "cat" (subject). "on" attends to "mat" (object).</p>
+      </div>
+      <div class="card card-blue">
+        <h3 style="margin-bottom:1rem">Key Properties</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Global receptive field:</strong> Every token sees every other token in one layer</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Parallelizable:</strong> All attention computations happen simultaneously</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Path length O(1):</strong> Any two tokens are directly connected</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Quadratic complexity:</strong> O(n^2) in sequence length</span></div>
+        </div>
+        <div class="highlight-box" style="margin-top:1rem">
+          <strong>Complexity:</strong> O(n^2 * d) time and O(n^2) memory. This is the fundamental bottleneck for long sequences.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: MULTI-HEAD ATTENTION -->
+<div class="slide" data-section="Transformers">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Architecture</div>
+      <h1>Multi-Head Attention</h1>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:1rem">The Idea</h3>
+        <p style="margin-bottom:1rem">Instead of one attention function, run <strong>h parallel attention heads</strong>. Each head can learn different types of relationships.</p>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-blue">H1</span><span><strong>Syntactic:</strong> Subject-verb agreement</span></div>
+          <div class="check-item"><span class="check-icon check-purple">H2</span><span><strong>Semantic:</strong> Word meaning relationships</span></div>
+          <div class="check-item"><span class="check-icon check-green">H3</span><span><strong>Long-range:</strong> Coreference resolution</span></div>
+          <div class="check-item"><span class="check-icon check-gold">H4</span><span><strong>Positional:</strong> Adjacent word patterns</span></div>
+        </div>
+        <p class="paper-ref">Vaswani et al. (2017). Attention Is All You Need. NeurIPS.</p>
+      </div>
+      <div class="card card-purple">
+        <h3 style="margin-bottom:1rem;text-align:center">Mathematics</h3>
+        <div class="formula-box">
+          MultiHead(<span class="var">Q</span>, <span class="var">K</span>, <span class="var">V</span>) <span class="op">=</span> Concat(<span class="var">head</span><sub>1</sub>, ..., <span class="var">head</span><sub>h</sub>) <span class="var">W</span><sup>O</sup>
+        </div>
+        <div style="text-align:center;margin:.5rem 0;font-size:.85rem;color:var(--text3)">where</div>
+        <div class="formula-box" style="font-size:.8rem">
+          <span class="var">head</span><sub>i</sub> <span class="op">=</span> Attention(<span class="var">QW</span><sub>i</sub><sup>Q</sup>, <span class="var">KW</span><sub>i</sub><sup>K</sup>, <span class="var">VW</span><sub>i</sub><sup>V</sup>)
+        </div>
+        <div class="grid2" style="margin-top:1rem;gap:1rem">
+          <div style="text-align:center;padding:.5rem;background:rgba(255,255,255,.03);border-radius:.5rem">
+            <div style="font-size:1.5rem;font-weight:800;color:var(--accent)">8</div>
+            <div style="font-size:.7rem;color:var(--text3)">Heads (Base)</div>
+          </div>
+          <div style="text-align:center;padding:.5rem;background:rgba(255,255,255,.03);border-radius:.5rem">
+            <div style="font-size:1.5rem;font-weight:800;color:var(--purple)">64</div>
+            <div style="font-size:.7rem;color:var(--text3)">d_k per head</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 9: POSITIONAL ENCODING -->
+<div class="slide" data-section="Transformers">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Position Information</div>
+      <h1>Positional Encoding</h1>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:1rem">The Problem</h3>
+        <p style="margin-bottom:1rem">Self-attention is <strong>permutation-invariant</strong>. Without positional information, the model cannot distinguish between "The cat sat" and "sat cat The".</p>
+        <h3 style="margin-bottom:1rem;color:var(--gold)">Original Solution: Sinusoidal</h3>
+        <div class="formula-box" style="font-size:.8rem;text-align:left;padding:1rem">
+          PE<sub>(pos, 2i)</sub> <span class="op">=</span> sin(pos / 10000<sup>2i/d</sup>)<br>
+          PE<sub>(pos, 2i+1)</sub> <span class="op">=</span> cos(pos / 10000<sup>2i/d</sup>)
+        </div>
+        <p style="margin-top:1rem;font-size:.85rem">These functions create unique, bounded encodings with a linear relationship between relative positions.</p>
+      </div>
+      <div class="card card-green">
+        <h3 style="margin-bottom:1rem">Modern Variants</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-blue">A</span><span><strong>Learned Positional Embeddings:</strong> Simple lookup table, trained end-to-end. Used in BERT, GPT.</span></div>
+          <div class="check-item"><span class="check-icon check-purple">B</span><span><strong>RoPE (Rotary):</strong> Rotates query/key vectors by position-dependent angles. Used in LLaMA, PaLM.</span></div>
+          <div class="check-item"><span class="check-icon check-teal">C</span><span><strong>ALiBi:</strong> Adds linear biases to attention scores instead of embeddings. Better extrapolation.</span></div>
+          <div class="check-item"><span class="check-icon check-gold">D</span><span><strong>Relative Positional Encodings:</strong> Encode distance between tokens, not absolute position.</span></div>
+        </div>
+        <div class="highlight-box green" style="margin-top:1rem">
+          <strong>RoPE is now dominant in LLMs</strong> because it naturally generalizes to longer sequences than seen during training.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 10: FFN, RESIDUALS, LAYER NORM -->
+<div class="slide" data-section="Transformers">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Building Blocks</div>
+      <h1>FFN, Residuals &amp; LayerNorm</h1>
+    </div>
+    <div class="grid3">
+      <div class="card card-blue">
+        <div class="icon-wrap icon-blue" style="margin:0 auto 1rem">FFN</div>
+        <h3 style="text-align:center">Feed-Forward Network</h3>
+        <div class="formula-box" style="font-size:.8rem">
+          FFN(<span class="var">x</span>) <span class="op">=</span> max(0, <span class="var">xW</span><sub>1</sub> <span class="op">+</span> <span class="var">b</span><sub>1</sub>)<span class="var">W</span><sub>2</sub> <span class="op">+</span> <span class="var">b</span><sub>2</sub>
+        </div>
+        <ul style="margin-top:1rem;font-size:.85rem">
+          <li>Applied <strong>position-wise</strong></li>
+          <li>Inner dim: 4x model dim (d_ff = 2048)</li>
+          <li>~2/3 of total parameters</li>
+          <li>Modern: GELU or SwiGLU activation</li>
+        </ul>
+      </div>
+      <div class="card card-purple">
+        <div class="icon-wrap icon-purple" style="margin:0 auto 1rem">Res</div>
+        <h3 style="text-align:center">Residual Connections</h3>
+        <div class="formula-box" style="font-size:.8rem">
+          output <span class="op">=</span> <span class="var">x</span> <span class="op">+</span> Sublayer(<span class="var">x</span>)
+        </div>
+        <ul style="margin-top:1rem;font-size:.85rem">
+          <li>Enable gradient flow in deep stacks</li>
+          <li>Transformer base: 6 layers</li>
+          <li>Modern LLMs: 96+ layers</li>
+          <li>Without residuals: training fails</li>
+        </ul>
+      </div>
+      <div class="card card-teal">
+        <div class="icon-wrap icon-teal" style="margin:0 auto 1rem">LN</div>
+        <h3 style="text-align:center">Layer Normalization</h3>
+        <div class="formula-box" style="font-size:.8rem">
+          LN(<span class="var">x</span>) <span class="op">=</span> gamma <span class="op">*</span> (<span class="var">x</span> <span class="op">-</span> mu) / sqrt(sigma^2 <span class="op">+</span> eps) <span class="op">+</span> beta
+        </div>
+        <ul style="margin-top:1rem;font-size:.85rem">
+          <li>Normalizes across feature dimension</li>
+          <li>Stabilizes training</li>
+          <li><strong>Pre-Norm</strong> (modern): LN first</li>
+          <li><strong>Post-Norm</strong> (original): LN after</li>
+        </ul>
+      </div>
+    </div>
+    <div class="highlight-box" style="margin-top:1.5rem;text-align:center">
+      <strong>Pre-Norm vs Post-Norm:</strong> Pre-Norm (LN -> Sublayer -> Add) is now standard because it enables training much deeper networks without instability.
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: TRANSFORMER FAMILIES -->
+<div class="slide" data-section="Transformers">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Evolution</div>
+      <h1>The Three Transformer Families</h1>
+    </div>
+    <div class="grid3">
+      <div class="card card-blue">
+        <div class="icon-wrap icon-blue" style="margin:0 auto 1rem">Enc</div>
+        <h3 style="text-align:center">Encoder-Only</h3>
+        <p style="text-align:center;margin:.5rem 0"><strong>BERT, RoBERTa, DeBERTa</strong></p>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Bidirectional attention</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>See full context</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Best for: understanding</span></div>
+        </div>
+        <div style="margin-top:.8rem;text-align:center">
+          <span class="tag tag-blue">Classification</span>
+          <span class="tag tag-blue">NER</span>
+          <span class="tag tag-blue">QA</span>
+        </div>
+      </div>
+      <div class="card card-gold">
+        <div class="icon-wrap icon-gold" style="margin:0 auto 1rem">Dec</div>
+        <h3 style="text-align:center">Decoder-Only</h3>
+        <p style="text-align:center;margin:.5rem 0"><strong>GPT, LLaMA, Claude, PaLM</strong></p>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Causal (masked) attention</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Left-to-right generation</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Best for: generation</span></div>
+        </div>
+        <div style="margin-top:.8rem;text-align:center">
+          <span class="tag tag-gold">Text Gen</span>
+          <span class="tag tag-gold">Code</span>
+          <span class="tag tag-gold">Chat</span>
+        </div>
+      </div>
+      <div class="card card-green">
+        <div class="icon-wrap icon-green" style="margin:0 auto 1rem">EncDec</div>
+        <h3 style="text-align:center">Encoder-Decoder</h3>
+        <p style="text-align:center;margin:.5rem 0"><strong>T5, BART, UL2</strong></p>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Full encoder + masked decoder</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Cross-attention</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Unified text-to-text</span></div>
+        </div>
+        <div style="margin-top:.8rem;text-align:center">
+          <span class="tag tag-green">Translation</span>
+          <span class="tag tag-green">Summarization</span>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box gold" style="margin-top:1.5rem;text-align:center">
+      <strong>Current winner:</strong> Decoder-only models dominate LLMs today because scaling autoregressive language modeling leads to emergent abilities. GPT-3 (2020) proved this at scale.
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 12: VIT SECTION -->
+<div class="slide hero-bg" data-section="Vision Transformer">
+  <div class="orb orb1" style="background:#8b5cf6;opacity:.25"></div>
+  <div class="orb orb2" style="background:#ec4899;opacity:.25"></div>
+  <div class="container" style="text-align:center;position:relative;z-index:2">
+    <div style="font-size:5rem;color:rgba(139,92,246,.3);font-weight:900;line-height:1">II</div>
+    <h1 style="margin-top:.5rem">Vision Transformer (ViT)</h1>
+    <div class="subtitle">Applying Transformers to Computer Vision</div>
+    <p style="margin-top:1.5rem;color:var(--text3)">"An Image is Worth 16x16 Words" - Dosovitskiy et al., ICLR 2021</p>
+  </div>
+</div>
+
+<!-- SLIDE 13: VIT INTUITION -->
+<div class="slide" data-section="Vision Transformer">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Core Idea</div>
+      <h1>Treat Images as Sequences</h1>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:1rem">The Insight</h3>
+        <p style="margin-bottom:1rem">What if we chop an image into fixed-size <strong>patches</strong>, flatten them, and treat each patch as a "token" in a sequence? Then we can apply a standard Transformer encoder!</p>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-purple">1</span><span><strong>Split</strong> image into patches (e.g., 16x16)</span></div>
+          <div class="check-item"><span class="check-icon check-purple">2</span><span><strong>Flatten</strong> each patch to a vector</span></div>
+          <div class="check-item"><span class="check-icon check-purple">3</span><span><strong>Embed</strong> via linear projection + position</span></div>
+          <div class="check-item"><span class="check-icon check-purple">4</span><span><strong>Feed</strong> into standard Transformer encoder</span></div>
+          <div class="check-item"><span class="check-icon check-purple">5</span><span><strong>Classify</strong> using a special [CLS] token</span></div>
+        </div>
+      </div>
+      <div class="card card-purple">
+        <h3 style="margin-bottom:1rem;text-align:center">Image -> Patch Sequence</h3>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:200px;margin:0 auto;padding:1rem;background:rgba(0,0,0,.2);border-radius:.5rem">
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#06b6d4,#3b82f6);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#10b981,#06b6d4);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#f59e0b,#10b981);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#ef4444,#f59e0b);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#ec4899,#ef4444);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#8b5cf6,#ec4899);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#06b6d4,#3b82f6);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#10b981,#06b6d4);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#f59e0b,#10b981);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#ef4444,#f59e0b);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#ec4899,#ef4444);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#8b5cf6,#ec4899);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:4px"></div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#06b6d4,#3b82f6);border-radius:4px"></div>
+        </div>
+        <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text3)">224x224 image -> 14x14 = 196 patches of 16x16 pixels each</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14: VIT ARCHITECTURE -->
+<div class="slide" data-section="Vision Transformer">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Architecture</div>
+      <h1>ViT Architecture Details</h1>
+    </div>
+    <div class="grid2">
+      <div class="card card-purple">
+        <h3 style="margin-bottom:1rem;text-align:center">ViT Forward Pass</h3>
+        <div class="arch-diagram">
+          <div class="arch-layer layer-input">Input Image (H x W x C)</div>
+          <div class="arch-arrow">&#8595; Split into N patches</div>
+          <div class="arch-layer layer-patch">Patch Flattening (N x P^2C)</div>
+          <div class="arch-arrow">&#8595; Linear Projection</div>
+          <div class="arch-layer layer-input">Patch Embeddings + [CLS] + Position</div>
+          <div class="arch-arrow">&#8595; Transformer Encoder xL</div>
+          <div class="arch-layer layer-attn">Self-Attention + MLP (repeated)</div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-layer layer-output">[CLS] Token Representation</div>
+          <div class="arch-arrow">&#8595; MLP Head</div>
+          <div class="arch-layer layer-output">Classification Logits</div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:1rem">
+          <h3 style="margin-bottom:.5rem">Patch Embedding</h3>
+          <div class="formula-box" style="font-size:.8rem">
+            <span class="var">z</span><sub>0</sub> <span class="op">=</span> [<span class="var">x</span><sub>class</sub>; <span class="var">x</span><sup>1</sup><sub>p</sub><span class="var">E</span>; ...; <span class="var">x</span><sup>N</sup><sub>p</sub><span class="var">E</span>] <span class="op">+</span> <span class="var">E</span><sub>pos</sub>
+          </div>
+          <p style="margin-top:.5rem;font-size:.8rem;color:var(--text3)">E in R^(P^2*C x D) is the patch embedding matrix. E_pos in R^((N+1) x D) adds position info.</p>
+        </div>
+        <div class="card card-green">
+          <h3 style="margin-bottom:.5rem">Inductive Bias</h3>
+          <p style="font-size:.9rem;margin-bottom:.5rem">ViT has <strong>much less</strong> image-specific inductive bias than CNNs:</p>
+          <div class="checklist">
+            <div class="check-item"><span class="check-icon check-no">!</span><span>No translation equivariance (unlike convolutions)</span></div>
+            <div class="check-item"><span class="check-icon check-no">!</span><span>No local receptive fields</span></div>
+            <div class="check-item"><span class="check-icon check-yes">Y</span><span>Must learn spatial relationships from data</span></div>
+            <div class="check-item"><span class="check-icon check-yes">Y</span><span>Works great with <strong>large datasets</strong></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 15: VIT VARIANTS -->
+<div class="slide" data-section="Vision Transformer">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Evolution</div>
+      <h1>ViT Variants &amp; Improvements</h1>
+    </div>
+    <div class="grid2">
+      <div class="card card-blue">
+        <h3 style="margin-bottom:.8rem">Hybrid Approaches</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-blue">CNN</span><span><strong>CNN + Transformer:</strong> Use ResNet feature maps as "patches"</span></div>
+          <div class="check-item"><span class="check-icon check-blue">H</span><span><strong>DeiT:</strong> Data-efficient training with distillation token</span></div>
+          <div class="check-item"><span class="check-icon check-blue">S</span><span><strong>Swin:</strong> Hierarchical windowed attention (local + shifted)</span></div>
+          <div class="check-item"><span class="check-icon check-blue">P</span><span><strong>PVT:</strong> Pyramid Vision Transformer, multi-scale features</span></div>
+        </div>
+      </div>
+      <div class="card card-purple">
+        <h3 style="margin-bottom:.8rem">Efficiency Improvements</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-purple">T</span><span><strong>Token Pruning:</strong> Drop unimportant patches dynamically</span></div>
+          <div class="check-item"><span class="check-icon check-purple">P</span><span><strong>Pooling:</strong> Multi-scale token merging (e.g., TokenMerger)</span></div>
+          <div class="check-item"><span class="check-icon check-purple">M</span><span><strong>MobileViT:</strong> Combine MobileNet blocks with transformers</span></div>
+          <div class="check-item"><span class="check-icon check-purple">E</span><span><strong>EfficientViT:</strong> Memory-efficient attention for edge devices</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1.5rem">
+      <h3 style="margin-bottom:1rem;text-align:center">Model Comparison (ImageNet-1K)</h3>
+      <table class="data-table">
+        <tr><th>Model</th><th>Params</th><th>Top-1 Acc</th><th>FLOPs</th><th>Key Idea</th></tr>
+        <tr><td>ResNet-152</td><td>60M</td><td>78.3%</td><td>11.6G</td><td>CNN baseline</td></tr>
+        <tr><td><strong>ViT-Base/16</strong></td><td>86M</td><td>77.9%</td><td>17.6G</td><td>Pure transformer</td></tr>
+        <tr><td><strong>ViT-Huge/14</strong></td><td>632M</td><td>88.6%</td><td>167G</td><td>Scale + JFT pretraining</td></tr>
+        <tr><td><strong>DeiT-B</strong></td><td>86M</td><td>83.1%</td><td>17.6G</td><td>Distillation</td></tr>
+        <tr><td><strong>Swin-B</strong></td><td>88M</td><td>83.5%</td><td>15.4G</td><td>Hierarchical windows</td></tr>
+        <tr><td><strong>ConvNeXt-B</strong></td><td>89M</td><td>83.8%</td><td>15.4G</td><td>CNN meets transformer</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 16: MOE SECTION -->
+<div class="slide hero-bg" data-section="Mixture of Experts">
+  <div class="orb orb1" style="background:#14b8a6;opacity:.25"></div>
+  <div class="orb orb2" style="background:#06b6d4;opacity:.25"></div>
+  <div class="container" style="text-align:center;position:relative;z-index:2">
+    <div style="font-size:5rem;color:rgba(20,184,166,.3);font-weight:900;line-height:1">III</div>
+    <h1 style="margin-top:.5rem">Mixture of Experts (MoE)</h1>
+    <div class="subtitle">Conditional Computation for Massive Scale</div>
+    <p style="margin-top:1.5rem;color:var(--text3)">Scale parameters without scaling compute. Activate only what you need.</p>
+  </div>
+</div>
+
+<!-- SLIDE 17: MOE INTUITION -->
+<div class="slide" data-section="Mixture of Experts">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Core Idea</div>
+      <h1>Why MoE? The Scaling Problem</h1>
+    </div>
+    <div class="grid2">
+      <div class="card card-red">
+        <h3 style="margin-bottom:1rem">Dense Models Hit Limits</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Compute cost:</strong> Every parameter is used for every input</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Training time:</strong> Proportional to total parameters x data</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Inference cost:</strong> Full model must be loaded and run</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Memory wall:</strong> Hardware cannot keep up with model size</span></div>
+        </div>
+        <p style="margin-top:1rem;font-size:.85rem;color:var(--text3)">GPT-4 is rumored to be ~1.8T parameters. Running all of them for every token is incredibly expensive.</p>
+      </div>
+      <div class="card card-green">
+        <h3 style="margin-bottom:1rem">MoE Solution: Conditional Compute</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Sparsely activate</strong> parameters per input</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Scale <strong>total params</strong> without scaling FLOPs</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Different "experts" learn different specializations</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Gating network <strong>routes</strong> each token to top-k experts</span></div>
+        </div>
+        <div class="highlight-box green" style="margin-top:1rem">
+          <strong>Key insight:</strong> A 1T parameter MoE with top-2 routing uses roughly the same FLOPs as a 100B dense model - but with 10x the capacity.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 18: MOE ARCHITECTURE -->
+<div class="slide" data-section="Mixture of Experts">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Architecture</div>
+      <h1>MoE Layer: How It Works</h1>
+    </div>
+    <div class="grid2">
+      <div class="card card-teal">
+        <h3 style="margin-bottom:1rem;text-align:center">Sparsely-Gated MoE Layer</h3>
+        <div class="arch-diagram">
+          <div class="arch-layer layer-input">Input Token x</div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-layer layer-norm" style="background:linear-gradient(90deg,#f59e0b,#d97706)">Gating Network</div>
+          <div class="arch-arrow">&#8595; softmax -> top-k</div>
+          <div style="display:flex;gap:.5rem;width:100%;justify-content:center">
+            <div class="arch-layer layer-moe" style="flex:1;font-size:.7rem">Expert 1</div>
+            <div class="arch-layer layer-moe" style="flex:1;font-size:.7rem">Expert 2</div>
+            <div class="arch-layer layer-moe" style="flex:1;font-size:.7rem">Expert 3</div>
+            <div style="display:flex;align-items:center;color:var(--text3);font-size:.8rem">...</div>
+            <div class="arch-layer layer-moe" style="flex:1;font-size:.7rem">Expert N</div>
+          </div>
+          <div class="arch-arrow">&#8595; weighted sum</div>
+          <div class="arch-layer layer-output">Output y</div>
+        </div>
+        <p style="text-align:center;margin-top:.5rem;font-size:.8rem;color:var(--text3)">Only top-k experts are activated per token</p>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:1rem">
+          <h3 style="margin-bottom:.5rem">Gating Function</h3>
+          <div class="formula-box" style="font-size:.8rem">
+            <span class="var">G</span>(<span class="var">x</span>) <span class="op">=</span> TopK(<span class="var">softmax</span>(<span class="var">W_g</span> * <span class="var">x</span>), <span class="var">k</span>)
+          </div>
+          <p style="margin-top:.5rem;font-size:.85rem">The gating network outputs a probability distribution over N experts. We keep only the top-k values and set the rest to 0.</p>
+        </div>
+        <div class="card card-green">
+          <h3 style="margin-bottom:.5rem">Load Balancing</h3>
+          <p style="font-size:.85rem;margin-bottom:.5rem">Without constraints, the gating network may route everything to a few "popular" experts.</p>
+          <div class="checklist">
+            <div class="check-item"><span class="check-icon check-yes">A</span><span><strong>Auxiliary loss:</strong> Encourage uniform expert usage</span></div>
+            <div class="check-item"><span class="check-icon check-yes">B</span><span><strong>Capacity factor:</strong> Limit tokens per expert</span></div>
+            <div class="check-item"><span class="check-icon check-yes">C</span><span><strong>Expert choice:</strong> Tokens pick experts, not vice versa</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 19: MOE FORMULAS -->
+<div class="slide" data-section="Mixture of Experts">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Mathematics</div>
+      <h1>MoE: Formulas &amp; Real-World Models</h1>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:1rem">MoE Layer Output</h3>
+        <div class="formula-box">
+          <span class="var">y</span> <span class="op">=</span> <span class="var">x</span> <span class="op">+</span> Sum<sub><span class="var">i</span> in TopK</sub> <span class="var">G</span>(<span class="var">x</span>)<sub><span class="var">i</span></sub> * <span class="var">E</span><sub><span class="var">i</span></sub>(<span class="var">x</span>)
+        </div>
+        <p style="margin-top:1rem;font-size:.85rem">Where E_i is the i-th expert (typically an FFN). The residual connection is preserved.</p>
+        <h3 style="margin-top:1.5rem;margin-bottom:.5rem;color:var(--gold)">Auxiliary Load Balancing Loss</h3>
+        <div class="formula-box" style="font-size:.8rem">
+          <span class="var">L</span><sub>aux</sub> <span class="op">=</span> <span class="var">alpha</span> * N * Sum<sub><span class="var">i</span>=1</sub><sup><span class="var">N</span></sup> <span class="var">f</span><sub><span class="var">i</span></sub> * <span class="var">P</span><sub><span class="var">i</span></sub>
+        </div>
+        <p style="margin-top:.5rem;font-size:.8rem;color:var(--text3)">f_i = fraction of tokens routed to expert i. P_i = mean routing probability to expert i. Minimized when both are 1/N.</p>
+      </div>
+      <div class="card card-teal">
+        <h3 style="margin-bottom:1rem">Notable MoE Models</h3>
+        <table class="data-table">
+          <tr><th>Model</th><th>Total Params</th><th>Active Params</th><th>Experts</th></tr>
+          <tr><td>GShard (Google)</td><td>600B</td><td>~60B</td><td>2,048</td></tr>
+          <tr><td>Switch Transformer</td><td>1.6T</td><td>~200B</td><td>2,048</td></tr>
+          <tr><td>GLaM (Google)</td><td>1.2T</td><td>~96B</td><td>64</td></tr>
+          <tr><td>Mixtral 8x7B</td><td>47B</td><td>13B</td><td>8</td></tr>
+          <tr><td>Mixtral 8x22B</td><td>141B</td><td>39B</td><td>8</td></tr>
+          <tr><td>DBRX (Databricks)</td><td>132B</td><td>36B</td><td>16</td></tr>
+          <tr><td>Qwen-MoE</td><td>57B</td><td>~14B</td><td>64</td></tr>
+          <tr><td>GPT-4 (rumored)</td><td>~1.8T</td><td>~200B</td><td>8x220B</td></tr>
+        </table>
+        <p style="margin-top:.5rem;font-size:.75rem;color:var(--text3)">Mixtral 8x7B outperforms LLaMA-2 70B with 5x faster inference!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 20: MOE CHALLENGES -->
+<div class="slide" data-section="Mixture of Experts">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Trade-offs</div>
+      <h1>MoE Challenges &amp; Solutions</h1>
+    </div>
+    <div class="grid2">
+      <div class="card card-red">
+        <h3 style="margin-bottom:1rem">Challenges</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Training instability:</strong> Gating can collapse to few experts</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Communication overhead:</strong> All-to-all token routing</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Memory fragmentation:</strong> Each device holds some experts</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Load imbalance:</strong> Some experts overflow, others idle</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Fine-tuning difficulty:</strong> Overfitting on small datasets</span></div>
+        </div>
+      </div>
+      <div class="card card-green">
+        <h3 style="margin-bottom:1rem">Solutions &amp; Mitigations</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">A</span><span><strong>Noisy Top-K Gating:</strong> Add noise before softmax for exploration</span></div>
+          <div class="check-item"><span class="check-icon check-yes">B</span><span><strong>Expert Choice Routing:</strong> Experts choose tokens, not vice versa</span></div>
+          <div class="check-item"><span class="check-icon check-yes">C</span><span><strong>EP (Expert Parallelism):</strong> Distribute experts across devices</span></div>
+          <div class="check-item"><span class="check-icon check-yes">D</span><span><strong>Capacity factor:</strong> Drop tokens beyond expert capacity</span></div>
+          <div class="check-item"><span class="check-icon check-yes">E</span><span><strong>Router z-loss:</strong> Penalize extreme gating logits</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="highlight-box teal" style="margin-top:1.5rem">
+      <strong style="color:var(--teal)">Mixtral's breakthrough:</strong> By using only 8 experts (not 1000s), Mixtral made MoE practical for consumer GPUs. It matches 70B dense models with ~4x faster inference.
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 21: LORA SECTION -->
+<div class="slide hero-bg" data-section="LoRA">
+  <div class="orb orb1" style="background:#f59e0b;opacity:.25"></div>
+  <div class="orb orb2" style="background:#ef4444;opacity:.25"></div>
+  <div class="container" style="text-align:center;position:relative;z-index:2">
+    <div style="font-size:5rem;color:rgba(245,158,11,.3);font-weight:900;line-height:1">IV</div>
+    <h1 style="margin-top:.5rem">LoRA &amp; Parameter-Efficient Fine-Tuning</h1>
+    <div class="subtitle">Fine-Tune Giants Without Breaking the Bank</div>
+    <p style="margin-top:1.5rem;color:var(--text3)">Train 0.1% of parameters. Achieve 99% of full fine-tune quality.</p>
+  </div>
+</div>
+
+<!-- SLIDE 22: THE FINE-TUNING PROBLEM -->
+<div class="slide" data-section="LoRA">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Motivation</div>
+      <h1>The Fine-Tuning Problem</h1>
+    </div>
+    <div class="grid2">
+      <div class="card card-red">
+        <h3 style="margin-bottom:1rem">Full Fine-Tuning Is Expensive</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>LLaMA-3 70B:</strong> 140GB in FP16 just to load</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Optimizer states:</strong> Adam needs 2x params (momentum + variance)</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Gradients:</strong> Another 140GB for backward pass</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Storage:</strong> Each task needs a full model copy</span></div>
+        </div>
+        <div class="highlight-box red" style="margin-top:1rem">
+          <strong>Total memory for full fine-tuning LLaMA-3 70B with Adam:</strong> ~420GB+ - requiring multiple A100 GPUs.
+        </div>
+      </div>
+      <div class="card card-green">
+        <h3 style="margin-bottom:1rem">PEFT to the Rescue</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Fewer trainable params:</strong> 0.1% - 1% of total</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Less memory:</strong> No optimizer state for frozen weights</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Faster training:</strong> Less backward computation</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Storage efficient:</strong> Small adapters per task</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>No inference latency:</strong> Merge adapters into base model</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 23: LORA -->
+<div class="slide" data-section="LoRA">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">LoRA</div>
+      <h1>LoRA: Low-Rank Adaptation</h1>
+      <p class="paper-ref">Hu et al. (2021). LoRA: Low-Rank Adaptation of Large Language Models. ICLR.</p>
+    </div>
+    <div class="grid2">
+      <div class="card card-gold">
+        <h3 style="margin-bottom:1rem">The Core Hypothesis</h3>
+        <p style="margin-bottom:1rem">The weight updates during fine-tuning have a <strong>low "intrinsic rank"</strong>. Instead of updating the full matrix W in R^(d x k), we learn a low-rank decomposition.</p>
+        <div class="formula-box">
+          <span class="var">W'</span> <span class="op">=</span> <span class="var">W</span><sub>0</sub> <span class="op">+</span> <span class="var">delta W</span> <span class="op">=</span> <span class="var">W</span><sub>0</sub> <span class="op">+</span> <span class="var">BA</span>
+        </div>
+        <p style="margin-top:1rem;font-size:.85rem">W_0 is frozen. B in R^(d x r), A in R^(r x k) are trainable. Rank r much less than min(d,k).</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:1rem">Why It Works</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-gold">1</span><span><strong>Over-parameterization:</strong> Pretrained models live in a low-dim manifold</span></div>
+          <div class="check-item"><span class="check-icon check-gold">2</span><span><strong>A is initialized</strong> with random Gaussian</span></div>
+          <div class="check-item"><span class="check-icon check-gold">3</span><span><strong>B is initialized to zero</strong> -> delta W = 0 at start</span></div>
+          <div class="check-item"><span class="check-icon check-gold">4</span><span><strong>Scaling:</strong> h = W_0 x + (alpha/r) * BAx</span></div>
+        </div>
+        <div class="highlight-box gold" style="margin-top:1rem">
+          <strong>Alpha is a tunable hyperparameter.</strong> Typically alpha = 2r. At inference, W' can be merged back into W_0 with zero overhead.
+        </div>
+      </div>
+    </div>
+    <div class="grid3" style="margin-top:1.5rem">
+      <div class="card" style="text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:var(--gold)">4-64</div>
+        <div style="font-size:.8rem;color:var(--text3)">Typical Rank (r)</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:var(--accent)">0.1%</div>
+        <div style="font-size:.8rem;color:var(--text3)">Trainable Parameters</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:2rem;font-weight:800;color:var(--green)">~100%</div>
+        <div style="font-size:.8rem;color:var(--text3)">Full Fine-Tune Quality</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 24: LORA VISUAL -->
+<div class="slide" data-section="LoRA">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Visual</div>
+      <h1>LoRA: The Low-Rank Decomposition</h1>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:1rem;text-align:center">Original Weight Matrix</h3>
+        <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-width:240px;margin:0 auto">
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+          <div style="aspect-ratio:1;background:#3b82f6;border-radius:2px"></div>
+        </div>
+        <p style="text-align:center;margin-top:.5rem;font-size:.8rem;color:var(--text3)">W in R^(d x k) - frozen</p>
+      </div>
+      <div>
+        <div class="card card-gold" style="margin-bottom:1rem">
+          <h3 style="margin-bottom:1rem;text-align:center">LoRA Decomposition</h3>
+          <div style="display:flex;align-items:center;justify-content:center;gap:1rem">
+            <div>
+              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:2px;width:60px">
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+              </div>
+              <p style="text-align:center;margin-top:.3rem;font-size:.6rem">B in R^(d x r)</p>
+            </div>
+            <div style="font-size:1.5rem;color:var(--text3)">x</div>
+            <div>
+              <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;width:120px">
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+                <div style="aspect-ratio:1;background:#f59e0b;border-radius:2px"></div>
+              </div>
+              <p style="text-align:center;margin-top:.3rem;font-size:.6rem">A in R^(r x k)</p>
+            </div>
+          </div>
+          <p style="text-align:center;margin-top:1rem;font-size:.85rem">Total params: <strong>d*r + r*k</strong> vs. <strong>d*k</strong> original</p>
+        </div>
+        <div class="card card-green">
+          <h3 style="margin-bottom:.5rem">Typical Savings</h3>
+          <p style="font-size:.85rem">For a 4096x4096 weight matrix with rank r=16:</p>
+          <div style="display:flex;justify-content:space-around;margin-top:1rem">
+            <div style="text-align:center">
+              <div style="font-size:1.5rem;font-weight:800;color:var(--red)">16.7M</div>
+              <div style="font-size:.7rem;color:var(--text3)">Original params</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:1.5rem;font-weight:800;color:var(--green)">131K</div>
+              <div style="font-size:.7rem;color:var(--text3)">LoRA params</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:1.5rem;font-weight:800;color:var(--gold)">127x</div>
+              <div style="font-size:.7rem;color:var(--text3)">Reduction</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 25: LORA BEST PRACTICES -->
+<div class="slide" data-section="LoRA">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Practical Guide</div>
+      <h1>LoRA: Best Practices</h1>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:1rem">Where to Apply LoRA</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Q and V projections:</strong> Minimal config, good results</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>Q, K, V, O:</strong> Standard config (attention only)</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span><strong>All linear layers:</strong> Best quality, more params</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>Embeddings:</strong> Usually not needed</span></div>
+          <div class="check-item"><span class="check-icon check-no">!</span><span><strong>LayerNorm:</strong> Sometimes fine-tuned (not LoRA'd)</span></div>
+        </div>
+      </div>
+      <div class="card card-gold">
+        <h3 style="margin-bottom:1rem">Hyperparameters</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-gold">r</span><span><strong>Rank:</strong> Start with 8-16. Increase for complex tasks.</span></div>
+          <div class="check-item"><span class="check-icon check-gold">a</span><span><strong>Alpha:</strong> Typically alpha = 2r. Controls adaptation strength.</span></div>
+          <div class="check-item"><span class="check-icon check-gold">lr</span><span><strong>Learning rate:</strong> 1e-4 to 1e-3 (higher than full fine-tune)</span></div>
+          <div class="check-item"><span class="check-icon check-gold">DO</span><span><strong>Dropout:</strong> 0.05-0.1 on LoRA layers only</span></div>
+          <div class="check-item"><span class="check-icon check-gold">T</span><span><strong>Target modules:</strong> q_proj, v_proj minimum</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:1.5rem">
+      <div class="card card-blue">
+        <h3 style="margin-bottom:.5rem">AdaLoRA</h3>
+        <p style="font-size:.85rem">Dynamically allocates rank budget across layers based on importance. More efficient than fixed-rank LoRA.</p>
+        <p class="paper-ref">Zhang et al. (2023). AdaLoRA: Adaptive Budget Allocation for Parameter-Efficient Fine-Tuning. ICLR.</p>
+      </div>
+      <div class="card card-purple">
+        <h3 style="margin-bottom:.5rem">DoRA</h3>
+        <p style="font-size:.85rem">Weight-Decomposed LoRA. Decomposes pre-trained weights into magnitude and direction, only applying LoRA to direction.</p>
+        <p class="paper-ref">Liu et al. (2024). DoRA: Weight-Decomposed Low-Rank Adaptation.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SLIDE 26: QLORA SECTION -->
+<div class="slide hero-bg" data-section="QLoRA">
+  <div class="orb orb1" style="background:#10b981;opacity:.25"></div>
+  <div class="orb orb2" style="background:#06b6d4;opacity:.25"></div>
+  <div class="container" style="text-align:center;position:relative;z-index:2">
+    <div style="font-size:5rem;color:rgba(16,185,129,.3);font-weight:900;line-height:1">V</div>
+    <h1 style="margin-top:.5rem">QLoRA: Quantized LoRA</h1>
+    <div class="subtitle">Fine-Tune 65B Models on a Single 48GB GPU</div>
+    <p style="margin-top:1.5rem;color:var(--text3)">4-bit quantization + double quantization + paged optimizers = extreme efficiency</p>
+  </div>
+</div>
+
+<!-- SLIDE 27: QUANTIZATION -->
+<div class="slide" data-section="QLoRA">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Foundation</div>
+      <h1>Quantization: Storing Weights in Fewer Bits</h1>
+    </div>
+    <div class="grid3">
+      <div class="card">
+        <h3 style="text-align:center;margin-bottom:1rem">FP16 (Standard)</h3>
+        <div style="text-align:center;margin:1rem 0">
+          <div style="font-size:3rem;font-weight:800;color:var(--accent)">16</div>
+          <div style="font-size:.8rem;color:var(--text3)">bits per parameter</div>
+        </div>
+        <ul style="font-size:.85rem">
+          <li>5 bits exponent</li>
+          <li>10 bits mantissa</li>
+          <li>1 sign bit</li>
+          <li>Dynamic range: ~10^(+-5)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="text-align:center;margin-bottom:1rem">INT8 Quantization</h3>
+        <div style="text-align:center;margin:1rem 0">
+          <div style="font-size:3rem;font-weight:800;color:var(--purple)">8</div>
+          <div style="font-size:.8rem;color:var(--text3)">bits per parameter</div>
+        </div>
+        <ul style="font-size:.85rem">
+          <li>Linear mapping: w_q = round(w / s + z)</li>
+          <li>Requires scale (s) and zero-point (z)</li>
+          <li>2x memory reduction</li>
+          <li>Minimal accuracy loss</li>
+        </ul>
+      </div>
+      <div class="card card-green">
+        <h3 style="text-align:center;margin-bottom:1rem">NF4 (QLoRA)</h3>
+        <div style="text-align:center;margin:1rem 0">
+          <div style="font-size:3rem;font-weight:800;color:var(--green)">4</div>
+          <div style="font-size:.8rem;color:var(--text3)">bits per parameter</div>
+        </div>
+        <ul style="font-size:.85rem">
+          <li><strong>Normal Float 4:</strong> Optimal for normally-distributed weights</li>
+          <li>Quantile-based quantization</li>
+          <li>4x memory reduction vs FP16</li>
+          <li>Block-wise (64) for stability</li>
+        </ul>
+      </div>
+    </div>
+    <div class="highlight-box green" style="margin-top:1.5rem">
+      <strong style="color:var(--green)">Normal Float (NF):</strong> Instead of uniformly spaced values, NF uses quantiles of a normal distribution. Since neural network weights are approximately normal, this minimizes quantization error.
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 28: QLORA DETAILS -->
+<div class="slide" data-section="QLoRA">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">QLoRA</div>
+      <h1>QLoRA: The Three Innovations</h1>
+      <p class="paper-ref">Dettmers et al. (2023). QLoRA: Efficient Finetuning of Quantized LLMs. NeurIPS.</p>
+    </div>
+    <div class="grid3">
+      <div class="card card-green">
+        <div class="icon-wrap icon-green" style="margin:0 auto 1rem">4b</div>
+        <h3 style="text-align:center">4-bit Normal Float</h3>
+        <p style="font-size:.85rem;margin-top:.5rem">Base model weights stored in <strong>NF4</strong> (4-bit). During forward pass, dequantize on-the-fly to BF16 for computation.</p>
+        <div class="formula-box" style="font-size:.75rem;margin-top:1rem">
+          <span class="var">W</span><sup>dequant</sup> <span class="op">=</span> dequant(<span class="var">W</span><sup>NF4</sup>)
+        </div>
+      </div>
+      <div class="card card-blue">
+        <div class="icon-wrap icon-blue" style="margin:0 auto 1rem">DQ</div>
+        <h3 style="text-align:center">Double Quantization</h3>
+        <p style="font-size:.85rem;margin-top:.5rem">Quantize the <strong>quantization constants</strong> themselves! Block constants (32-bit) are quantized to 8-bit. Extra 0.4 bits/param saved.</p>
+        <div class="formula-box" style="font-size:.75rem;margin-top:1rem">
+          <span class="var">c</span><sub>2</sub><sup>FP8</sup> <span class="op">=</span> quant(<span class="var">c</span><sub>1</sub><sup>FP32</sup>)
+        </div>
+      </div>
+      <div class="card card-purple">
+        <div class="icon-wrap icon-purple" style="margin:0 auto 1rem">Pg</div>
+        <h3 style="text-align:center">Paged Optimizers</h3>
+        <p style="font-size:.85rem;margin-top:.5rem">Use <strong>NVIDIA unified memory</strong> to page optimizer states to CPU RAM when GPU OOM. Automatic page fault handling.</p>
+        <div class="formula-box" style="font-size:.75rem;margin-top:1rem">
+          <span class="var">GPU</span> <span class="op">&lt;-&gt;</span> <span class="var">CPU</span> <span class="op">via</span> <span class="var">cudaMallocManaged</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1.5rem">
+      <h3 style="margin-bottom:1rem;text-align:center">Memory Breakdown: Fine-Tuning LLaMA-65B</h3>
+      <div class="grid3">
+        <div style="text-align:center;padding:1rem;background:rgba(239,68,68,.1);border-radius:.5rem">
+          <div style="font-size:2rem;font-weight:800;color:var(--red)">&gt;780GB</div>
+          <div style="font-size:.8rem;color:var(--text3)">Full Fine-Tune (FP16 + Adam)</div>
+        </div>
+        <div style="text-align:center;padding:1rem;background:rgba(245,158,11,.1);border-radius:.5rem">
+          <div style="font-size:2rem;font-weight:800;color:var(--gold)">~160GB</div>
+          <div style="font-size:.8rem;color:var(--text3)">LoRA (FP16 base + adapters)</div>
+        </div>
+        <div style="text-align:center;padding:1rem;background:rgba(16,185,129,.1);border-radius:.5rem">
+          <div style="font-size:2rem;font-weight:800;color:var(--green)">~48GB</div>
+          <div style="font-size:.8rem;color:var(--text3)">QLoRA (NF4 + adapters)</div>
+        </div>
+      </div>
+      <p style="text-align:center;margin-top:1rem;font-size:.85rem;color:var(--text3)">QLoRA achieves <strong>16x memory reduction</strong> vs full fine-tuning with &lt;1% accuracy degradation on MMLU.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 29: QLORA CODE -->
+<div class="slide" data-section="QLoRA">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Implementation</div>
+      <h1>QLoRA in Practice (Hugging Face)</h1>
+    </div>
+    <div class="grid2">
+      <div class="card" style="background:#0d1117;font-family:'Courier New',monospace;font-size:.8rem;color:#e6edf3;overflow:auto">
+        <pre style="margin:0;white-space:pre-wrap"><code style="color:#ff7b72">from</code> transformers <code style="color:#ff7b72">import</code> (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    BitsAndBytesConfig
+)
+<code style="color:#ff7b72">from</code> peft <code style="color:#ff7b72">import</code> (
+    LoraConfig,
+    get_peft_model,
+    prepare_model_for_kbit_training
+)
+
+<code style="color:#8b949e"># 1. Configure 4-bit quantization</code>
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=<code style="color:#79c0ff">True</code>,
+    bnb_4bit_quant_type=<code style="color:#a5d6ff">"nf4"</code>,
+    bnb_4bit_compute_dtype=<code style="color:#79c0ff">torch.bfloat16</code>,
+    bnb_4bit_use_double_quant=<code style="color:#79c0ff">True</code>,
+)
+
+<code style="color:#8b949e"># 2. Load model in 4-bit</code>
+model = AutoModelForCausalLM.from_pretrained(
+    <code style="color:#a5d6ff">"meta-llama/Llama-2-70b"</code>,
+    quantization_config=bnb_config,
+    device_map=<code style="color:#a5d6ff">"auto"</code>,
+)
+
+<code style="color:#8b949e"># 3. Prepare for training</code>
+model = prepare_model_for_kbit_training(model)
+</code></pre>
+      </div>
+      <div class="card" style="background:#0d1117;font-family:'Courier New',monospace;font-size:.8rem;color:#e6edf3;overflow:auto">
+        <pre style="margin:0;white-space:pre-wrap"><code style="color:#8b949e"># 4. Configure LoRA</code>
+lora_config = LoraConfig(
+    r=<code style="color:#79c0ff">16</code>,
+    lora_alpha=<code style="color:#79c0ff">32</code>,
+    target_modules=[<code style="color:#a5d6ff">"q_proj"</code>,
+                    <code style="color:#a5d6ff">"v_proj"</code>,
+                    <code style="color:#a5d6ff">"k_proj"</code>,
+                    <code style="color:#a5d6ff">"o_proj"</code>],
+    lora_dropout=<code style="color:#79c0ff">0.05</code>,
+    bias=<code style="color:#a5d6ff">"none"</code>,
+    task_type=<code style="color:#a5d6ff">"CAUSAL_LM"</code>,
+)
+
+<code style="color:#8b949e"># 5. Apply LoRA to quantized model</code>
+model = get_peft_model(model, lora_config)
+
+<code style="color:#8b949e"># 6. Train!</code>
+<code style="color:#8b949e"># Only LoRA params are trainable</code>
+model.print_trainable_parameters()
+<code style="color:#8b949e"># Output: trainable params: 41M</code>
+<code style="color:#8b949e">#         all params: 68.9B</code>
+<code style="color:#8b949e">#         % trainable: 0.06%</code>
+
+<code style="color:#8b949e"># 7. Merge for inference (zero overhead)</code>
+model = model.merge_and_unload()
+</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 30: OTHER PEFT -->
+<div class="slide" data-section="Other PEFT">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Landscape</div>
+      <h1>Other PEFT Methods</h1>
+    </div>
+    <div class="grid3">
+      <div class="card card-blue">
+        <h3 style="margin-bottom:.5rem">Prefix Tuning</h3>
+        <p style="font-size:.85rem;margin-bottom:.5rem">Prepend trainable "prefix" vectors to keys and values in every layer.</p>
+        <div class="formula-box" style="font-size:.75rem">
+          <span class="var">[P_x, K, V]</span>
+        </div>
+        <p style="font-size:.75rem;margin-top:.5rem;color:var(--text3)">Li &amp; Liang (2021). 0.1% params. Good for generation.</p>
+      </div>
+      <div class="card card-purple">
+        <h3 style="margin-bottom:.5rem">P-Tuning v2</h3>
+        <p style="font-size:.85rem;margin-bottom:.5rem">Continuous prompts at <strong>every layer</strong>, not just input. Much better than v1.</p>
+        <div class="formula-box" style="font-size:.75rem">
+          <span class="var">h_i</span> <span class="op">=</span> f(<span class="var">h_(i-1)</span>, <span class="var">p_i</span>)
+        </div>
+        <p style="font-size:.75rem;margin-top:.5rem;color:var(--text3)">Liu et al. (2022). NLU tasks. 0.1-0.5% params.</p>
+      </div>
+      <div class="card card-teal">
+        <h3 style="margin-bottom:.5rem">Adapters</h3>
+        <p style="font-size:.85rem;margin-bottom:.5rem">Insert small bottleneck FFNs after attention and FFN layers.</p>
+        <div class="formula-box" style="font-size:.75rem">
+          <span class="var">h</span> <span class="op">-&gt;</span> <span class="var">h</span> <span class="op">+</span> <span class="var">W_up</span>(<span class="var">ReLU</span>(<span class="var">W_down h</span>))
+        </div>
+        <p style="font-size:.75rem;margin-top:.5rem;color:var(--text3)">Houlsby et al. (2019). ~3% params. Task composition.</p>
+      </div>
+      <div class="card card-gold">
+        <h3 style="margin-bottom:.5rem">Prompt Tuning</h3>
+        <p style="font-size:.85rem;margin-bottom:.5rem">Learn soft prompt tokens prepended to input. Only embeddings trainable.</p>
+        <div class="formula-box" style="font-size:.75rem">
+          <span class="var">[p_1, ..., p_t, x]</span>
+        </div>
+        <p style="font-size:.75rem;margin-top:.5rem;color:var(--text3)">Lester et al. (2021). ~0.01% params. Needs scale.</p>
+      </div>
+      <div class="card card-red">
+        <h3 style="margin-bottom:.5rem">IA3</h3>
+        <p style="font-size:.85rem;margin-bottom:.5rem">Learn element-wise scaling vectors for keys, values, and FFN activations.</p>
+        <div class="formula-box" style="font-size:.75rem">
+          <span class="var">k</span> <span class="op">-&gt;</span> <span class="var">l_k</span> <span class="op">*</span> <span class="var">k</span>
+        </div>
+        <p style="font-size:.75rem;margin-top:.5rem;color:var(--text3)">Liu et al. (2022). Similar params to LoRA. Often better.</p>
+      </div>
+      <div class="card card-green">
+        <h3 style="margin-bottom:.5rem">(Q)LoRA</h3>
+        <p style="font-size:.85rem;margin-bottom:.5rem">Low-rank decomposition of weight updates. The current gold standard.</p>
+        <div class="formula-box" style="font-size:.75rem">
+          <span class="var">W'</span> <span class="op">=</span> <span class="var">W</span> <span class="op">+</span> <span class="var">BA</span>
+        </div>
+        <p style="font-size:.75rem;margin-top:.5rem;color:var(--text3)">Hu et al. (2021). Most popular. Best quality/params tradeoff.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 31: PEFT COMPARISON -->
+<div class="slide" data-section="Other PEFT">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Comparison</div>
+      <h1>PEFT Method Comparison</h1>
+    </div>
+    <div class="card">
+      <table class="data-table">
+        <tr><th>Method</th><th>Trainable %</th><th>Modifies Weights?</th><th>Inference Overhead?</th><th>Best For</th></tr>
+        <tr><td>Full Fine-tune</td><td>100%</td><td>Yes</td><td>No</td><td>Large datasets, final model</td></tr>
+        <tr><td><strong>LoRA</strong></td><td>~0.1-1%</td><td>No (additive)</td><td>No (mergable)</td><td><strong>General purpose, best tradeoff</strong></td></tr>
+        <tr><td><strong>QLoRA</strong></td><td>~0.1%</td><td>No</td><td>No</td><td><strong>Consumer GPU, large models</strong></td></tr>
+        <tr><td>Prefix Tuning</td><td>~0.1%</td><td>No</td><td>Yes (longer KV cache)</td><td>Generation tasks</td></tr>
+        <tr><td>P-Tuning v2</td><td>~0.3%</td><td>No</td><td>Yes</td><td>NLU, understanding</td></tr>
+        <tr><td>Adapters</td><td>~3%</td><td>No (bypass)</td><td>Yes (extra layers)</td><td>Multi-task, composition</td></tr>
+        <tr><td>Prompt Tuning</td><td>~0.01%</td><td>No</td><td>Yes</td><td>Very large models only</td></tr>
+        <tr><td>IA3</td><td>~0.1%</td><td>No (multiplicative)</td><td>No (mergable)</td><td>When LoRA underperforms</td></tr>
+      </table>
+    </div>
+    <div class="highlight-box" style="margin-top:1.5rem">
+      <strong>Recommendation:</strong> Start with <strong>QLoRA</strong> for any model &gt;13B parameters. Use rank 16-64, target all linear layers for best results. If you have plenty of GPU memory, use standard LoRA in BF16 for slightly better stability.
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 32: SUMMARY -->
+<div class="slide hero-bg" data-section="Summary">
+  <div class="orb orb1" style="background:#8b5cf6;opacity:.2"></div>
+  <div class="orb orb2" style="background:#06b6d4;opacity:.2"></div>
+  <div class="orb orb3" style="background:#f59e0b;opacity:.2"></div>
+  <div class="container" style="text-align:center;position:relative;z-index:2">
+    <div class="badge" style="margin-bottom:1.5rem">Key Takeaways</div>
+    <h1 style="margin-bottom:1rem">What We Learned</h1>
+    <div class="grid2" style="text-align:left;margin-top:1rem">
+      <div class="card card-blue">
+        <h3 style="margin-bottom:.8rem">&#128308; Transformers</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Self-attention enables global context in O(1) steps</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Decoder-only models dominate modern LLMs</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Positional encoding is critical for order</span></div>
+        </div>
+      </div>
+      <div class="card card-purple">
+        <h3 style="margin-bottom:.8rem">&#128302; Vision Transformers</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Images -> patches -> sequence -> standard transformer</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Less inductive bias, more data-hungry</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Swin, DeiT improve efficiency and data efficiency</span></div>
+        </div>
+      </div>
+      <div class="card card-teal">
+        <h3 style="margin-bottom:.8rem">&#9889; Mixture of Experts</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Scale parameters without scaling compute</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Top-k routing + load balancing is key</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Mixtral proved MoE works at consumer scale</span></div>
+        </div>
+      </div>
+      <div class="card card-gold">
+        <h3 style="margin-bottom:.8rem">&#127919; LoRA / QLoRA</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>Low-rank updates capture fine-tuning signal</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>QLoRA enables 65B training on single GPU</span></div>
+          <div class="check-item"><span class="check-icon check-yes">Y</span><span>PEFT is now the default for most use cases</span></div>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:2rem;font-size:.9rem;color:var(--text3)">The modern AI stack: Pretrain at scale -> Quantize for serving -> PEFT for adaptation</p>
+  </div>
+</div>
+
+<!-- SLIDE 33: REFERENCES -->
+<div class="slide" data-section="References">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="badge" style="margin-bottom:.5rem">Further Reading</div>
+      <h1>Key Papers</h1>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-bottom:1rem">Transformers &amp; Attention</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-blue">1</span><span>Vaswani et al. (2017). Attention Is All You Need. NeurIPS.</span></div>
+          <div class="check-item"><span class="check-icon check-blue">2</span><span>Bahdanau et al. (2015). Neural Machine Translation by Jointly Learning to Align and Translate. ICLR.</span></div>
+          <div class="check-item"><span class="check-icon check-blue">3</span><span>Devlin et al. (2018). BERT: Pre-training of Deep Bidirectional Transformers. NAACL.</span></div>
+          <div class="check-item"><span class="check-icon check-blue">4</span><span>Brown et al. (2020). Language Models are Few-Shot Learners. NeurIPS.</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:1rem">Vision Transformers</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-purple">5</span><span>Dosovitskiy et al. (2021). An Image is Worth 16x16 Words. ICLR.</span></div>
+          <div class="check-item"><span class="check-icon check-purple">6</span><span>Touvron et al. (2021). Training data-efficient image transformers. ICLR.</span></div>
+          <div class="check-item"><span class="check-icon check-purple">7</span><span>Liu et al. (2021). Swin Transformer. ICCV.</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:1rem">Mixture of Experts</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-teal">8</span><span>Shazeer et al. (2017). Outrageously Large Neural Networks. ICLR.</span></div>
+          <div class="check-item"><span class="check-icon check-teal">9</span><span>Fedus et al. (2022). Switch Transformers. JMLR.</span></div>
+          <div class="check-item"><span class="check-icon check-teal">10</span><span>Jiang et al. (2024). Mixtral of Experts. arXiv.</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:1rem">PEFT &amp; Quantization</h3>
+        <div class="checklist">
+          <div class="check-item"><span class="check-icon check-gold">11</span><span>Hu et al. (2021). LoRA: Low-Rank Adaptation of Large Language Models. ICLR.</span></div>
+          <div class="check-item"><span class="check-icon check-gold">12</span><span>Dettmers et al. (2023). QLoRA: Efficient Finetuning of Quantized LLMs. NeurIPS.</span></div>
+          <div class="check-item"><span class="check-icon check-gold">13</span><span>Liu et al. (2024). DoRA: Weight-Decomposed Low-Rank Adaptation. arXiv.</span></div>
+          <div class="check-item"><span class="check-icon check-gold">14</span><span>Houlsby et al. (2019). Parameter-Efficient Transfer Learning for NLP. ICML.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div> <!-- end deck -->
+
+<div class="section-indicator"><div id="section-badge">Intro</div></div>
+
+<div id="nav">
+  <button class="nav-btn" id="btn-prev">&#9664; Prev</button>
+  <div id="progress-bg"><div id="progress-fill"></div></div>
+  <div id="slide-count">1 / 33</div>
+  <button class="nav-btn" id="btn-next">Next &#9654;</button>
+</div>
+
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+  const total = slides.length;
+  const sectionBadge = document.getElementById('section-badge');
+  const progressFill = document.getElementById('progress-fill');
+  const slideCount = document.getElementById('slide-count');
+
+  function update(){
+    slides.forEach((s,i)=>{
+      s.classList.remove('active','prev');
+      if(i===current) s.classList.add('active');
+      else if(i<current) s.classList.add('prev');
+    });
+    const section = slides[current].dataset.section || 'Slide';
+    sectionBadge.textContent = section;
+    progressFill.style.width = ((current+1)/total*100)+'%';
+    slideCount.textContent = (current+1)+' / '+total;
+  }
+
+  function go(n){
+    if(n<0) n=0;
+    if(n>=total) n=total-1;
+    current=n;
+    update();
+  }
+
+  document.getElementById('btn-prev').addEventListener('click',()=>go(current-1));
+  document.getElementById('btn-next').addEventListener('click',()=>go(current+1));
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='Enter'){e.preventDefault();go(current+1);}
+    else if(e.key==='ArrowLeft'){e.preventDefault();go(current-1);}
+    else if(e.key==='Home'){e.preventDefault();go(0);}
+    else if(e.key==='End'){e.preventDefault();go(total-1);}
+  });
+
+  update();
+})();
+</script>
+
+</body>
+</html>

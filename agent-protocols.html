@@ -1,0 +1,3423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Agent Protocol Stack — Deep Dive · MCP · A2A · AG-UI · A2UI · ACP · ANP</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0a0e1a; --bg2:#111726; --ink:#e8edf6; --muted:#94a3b8; --line:rgba(255,255,255,.10);
+  --mcp:#f59e0b; --a2a:#3b82f6; --agui:#10b981; --acp:#a855f7; --anp:#06b6d4;
+  --mcp2:#b45309; --a2a2:#1d4ed8; --agui2:#047857; --acp2:#7e22ce; --anp2:#0e7490;
+}
+
+/* ---------- base ---------- */
+.reveal{font-family:'Inter',system-ui,sans-serif;font-size:30px;color:var(--ink);font-weight:400;}
+.reveal .slides{text-align:left;}
+.reveal section{height:100%;}
+.reveal h1,.reveal h2,.reveal h3,.reveal h4{font-family:'Inter',sans-serif;font-weight:800;color:#fff;letter-spacing:-.02em;text-transform:none;line-height:1.08;margin:0 0 .35em;}
+.reveal h1{font-size:2.55em;}
+.reveal h2{font-size:1.5em;}
+.reveal h3{font-size:1.02em;}
+.reveal h4{font-size:.8em;}
+.reveal p,.reveal li{line-height:1.5;}
+.reveal a{color:var(--a2a);text-decoration:none;}
+.reveal strong{color:#fff;font-weight:700;}
+.reveal em{color:var(--ink);font-style:italic;}
+.reveal .slide-background-content{background:radial-gradient(1200px 700px at 80% -10%,rgba(59,130,246,.10),transparent 60%),radial-gradient(900px 600px at -10% 110%,rgba(245,158,11,.08),transparent 55%),linear-gradient(160deg,#0a0e1a 0%,#0d1322 60%,#0a0e1a 100%);}
+.reveal .controls{color:var(--muted);}
+.reveal .progress{color:var(--a2a);height:5px;}
+.reveal .slide-number{font-size:14px;color:var(--muted);background:transparent;}
+
+/* ---------- helpers ---------- */
+.muted{color:var(--muted);}
+.small{font-size:.72em;}
+.tiny{font-size:.6em;}
+.xtiny{font-size:.5em;}
+.center{text-align:center;}
+.kicker{display:inline-block;font-size:.5em;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:.6em;border:1px solid var(--line);padding:.45em 1em;border-radius:999px;}
+.grad{background:linear-gradient(100deg,var(--mcp),var(--a2a) 35%,var(--agui) 60%,var(--acp) 80%,var(--anp));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.rule{height:4px;width:120px;border-radius:4px;background:linear-gradient(90deg,var(--mcp),var(--a2a),var(--agui),var(--acp),var(--anp));margin:.4em 0 .7em;}
+.rule.mcp{background:var(--mcp);}.rule.a2a{background:var(--a2a);}.rule.agui{background:var(--agui);}.rule.acp{background:var(--acp);}.rule.anp{background:var(--anp);}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:.4em;font-size:.62em;font-weight:700;padding:.3em .8em;border-radius:999px;border:1px solid var(--line);}
+.dot{width:.7em;height:.7em;border-radius:50%;display:inline-block;}
+.c-mcp{color:var(--mcp);border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08);}
+.c-a2a{color:var(--a2a);border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.08);}
+.c-agui{color:var(--agui);border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.08);}
+.c-acp{color:var(--acp);border-color:rgba(168,85,247,.4);background:rgba(168,85,247,.08);}
+.c-anp{color:var(--anp);border-color:rgba(6,182,212,.4);background:rgba(6,182,212,.08);}
+
+/* layout */
+.grid{display:grid;gap:20px;}
+.g2{grid-template-columns:1fr 1fr;}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g4{grid-template-columns:repeat(4,1fr);}
+.g5{grid-template-columns:repeat(5,1fr);}
+.g23{grid-template-columns:2fr 3fr;}
+.g32{grid-template-columns:3fr 2fr;}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:18px;padding:20px 22px;}
+.card h3{font-size:.9em;margin-bottom:.35em;}
+.card p,.card li{font-size:.66em;color:var(--muted);line-height:1.45;}
+.card.top{border-top:3px solid var(--a2a);}
+.card.t-mcp{border-top:3px solid var(--mcp);}
+.card.t-a2a{border-top:3px solid var(--a2a);}
+.card.t-agui{border-top:3px solid var(--agui);}
+.card.t-acp{border-top:3px solid var(--acp);}
+.card.t-anp{border-top:3px solid var(--anp);}
+.card.lft{border-top:none;border-left:3px solid var(--a2a);}
+.lead{font-size:.84em;color:var(--ink);}
+
+ul.clean{list-style:none;margin:0;padding:0;}
+ul.clean li{padding-left:1.4em;position:relative;margin:.4em 0;font-size:.74em;}
+ul.clean li::before{content:"→";position:absolute;left:0;color:var(--a2a);font-weight:700;}
+ul.clean.mcp li::before{color:var(--mcp);}
+ul.clean.agui li::before{color:var(--agui);}
+ul.clean.acp li::before{color:var(--acp);}
+ul.clean.anp li::before{color:var(--anp);}
+ul.check{list-style:none;margin:0;padding:0;}
+ul.check li{padding-left:1.5em;position:relative;margin:.4em 0;font-size:.74em;}
+ul.check li::before{content:"✓";position:absolute;left:0;color:#22c55e;font-weight:800;}
+ul.cross{list-style:none;margin:0;padding:0;}
+ul.cross li{padding-left:1.5em;position:relative;margin:.4em 0;font-size:.74em;}
+ul.cross li::before{content:"✕";position:absolute;left:0;color:#ef4444;font-weight:800;}
+
+/* numbered steps */
+.steps{counter-reset:step;list-style:none;margin:0;padding:0;}
+.steps li{counter-increment:step;position:relative;padding-left:2.4em;margin:.55em 0;font-size:.72em;}
+.steps li::before{content:counter(step);position:absolute;left:0;top:-.05em;width:1.5em;height:1.5em;border-radius:50%;background:rgba(59,130,246,.18);color:var(--a2a);font-weight:800;font-size:.85em;display:flex;align-items:center;justify-content:center;border:1px solid rgba(59,130,246,.4);}
+
+/* spec / definition list */
+dl.spec{margin:0;font-size:.7em;}
+dl.spec div{display:grid;grid-template-columns:9em 1fr;gap:14px;padding:8px 0;border-bottom:1px solid var(--line);}
+dl.spec dt{color:#fff;font-weight:700;}
+dl.spec dd{margin:0;color:var(--muted);}
+
+/* tables */
+.reveal table{font-size:.5em;border-collapse:collapse;width:100%;}
+.reveal table th{background:rgba(255,255,255,.07);color:#fff;font-weight:700;text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);}
+.reveal table td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--ink);vertical-align:top;}
+.reveal table tr:hover td{background:rgba(255,255,255,.03);}
+.reveal table td.lbl{font-weight:700;color:#fff;}
+
+/* code */
+.reveal pre{width:100%;box-shadow:0 18px 50px rgba(0,0,0,.5);border:1px solid var(--line);border-radius:14px;font-size:.46em;margin:8px 0;}
+.reveal pre code{padding:16px 18px;border-radius:14px;font-family:'JetBrains Mono',monospace;max-height:520px;}
+.reveal pre.tall code{max-height:600px;}
+
+/* flow nodes */
+.flow{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;}
+.node{border:1px solid var(--line);border-radius:14px;padding:12px 16px;text-align:center;background:rgba(255,255,255,.04);min-width:110px;}
+.node .t{font-size:.66em;font-weight:700;color:#fff;}
+.node .s{font-size:.52em;color:var(--muted);}
+.arrow{color:var(--muted);font-size:1.05em;}
+.arrow .lab{display:block;font-size:.4em;color:var(--a2a);font-weight:700;}
+
+/* stack diagram */
+.stack{display:flex;flex-direction:column;gap:9px;}
+.layer{display:flex;align-items:center;gap:18px;border-radius:14px;padding:13px 20px;border:1px solid var(--line);background:rgba(255,255,255,.03);}
+.layer .badge{font-size:.58em;font-weight:800;letter-spacing:.04em;padding:.5em 1em;border-radius:10px;min-width:140px;text-align:center;color:#0a0e1a;}
+.layer .desc{font-size:.66em;}
+.layer .desc b{color:#fff;}
+.b-agui{background:var(--agui);}.b-a2a{background:var(--a2a);}.b-mcp{background:var(--mcp);}.b-anp{background:var(--anp);}.b-acp{background:var(--acp);}
+
+/* callouts */
+.callout{border-radius:14px;padding:14px 18px;font-size:.68em;border:1px solid var(--line);background:rgba(255,255,255,.03);}
+.callout.good{border-left:4px solid #22c55e;background:rgba(34,197,94,.07);}
+.callout.bad{border-left:4px solid #ef4444;background:rgba(239,68,68,.07);}
+.callout.warn{border-left:4px solid var(--mcp);background:rgba(245,158,11,.07);}
+.callout.info{border-left:4px solid var(--a2a);background:rgba(59,130,246,.07);}
+.callout b{color:#fff;}
+
+/* timeline */
+.timeline{position:relative;padding-left:24px;}
+.timeline::before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:linear-gradient(var(--mcp),var(--a2a),var(--agui),var(--anp));}
+.timeline .tl{position:relative;margin:.5em 0;font-size:.68em;}
+.timeline .tl::before{content:"";position:absolute;left:-22px;top:.35em;width:11px;height:11px;border-radius:50%;background:var(--a2a);border:2px solid var(--bg);}
+.timeline .tl b{color:#fff;}
+.timeline .tl .when{color:var(--a2a);font-weight:700;margin-right:.5em;}
+
+/* metrics */
+.metric{font-size:2.1em;font-weight:900;line-height:1;}
+.metric.m-mcp{color:var(--mcp);}.metric.m-a2a{color:var(--a2a);}.metric.m-agui{color:var(--agui);}.metric.m-anp{color:var(--anp);}.metric.m-acp{color:var(--acp);}
+
+/* section divider */
+section.divider{text-align:left;}
+.divider .secnum{font-size:7em;font-weight:900;line-height:.9;opacity:.13;letter-spacing:-.04em;}
+.divider .sectitle{font-size:2.6em;font-weight:900;margin-top:-.25em;}
+.divider .secsub{font-size:.9em;color:var(--muted);max-width:22em;margin-top:.5em;}
+.divider .toc{margin-top:1em;display:flex;flex-direction:column;gap:6px;font-size:.62em;color:var(--muted);}
+.divider .toc span{color:#fff;font-weight:600;}
+
+/* score dots */
+.score{font-weight:800;letter-spacing:1px;}
+.s5{color:#22c55e;}.s4{color:#84cc16;}.s3{color:#eab308;}.s2{color:#f97316;}.s1{color:#ef4444;}
+
+.usecase-num{font-size:1.4em;font-weight:900;color:var(--a2a);opacity:.5;}
+
+/* protocol header bar used on deep-dive slides */
+.phead{display:flex;justify-content:space-between;align-items:baseline;}
+.phead .meta{font-size:.6em;color:var(--muted);text-align:right;line-height:1.4;}
+
+.footer{position:absolute;bottom:12px;left:60px;right:90px;display:flex;justify-content:space-between;font-size:.4em;color:var(--muted);border-top:1px solid var(--line);padding-top:7px;}
+</style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+<!-- ===================== INTRO ===================== -->
+
+<!-- 1 · TITLE -->
+<section data-auto-animate>
+  <span class="kicker">Enterprise Architecture Briefing · 2026 · Deep Dive Edition</span>
+  <h1 style="font-size:2.7em;">The <span class="grad">Agent Protocol</span> Stack</h1>
+  <div class="rule" style="width:280px;height:6px;"></div>
+  <p class="lead" style="max-width:21em;">A floor-to-ocean-depth tour of the protocols turning isolated models into a governed, interoperable enterprise agent fabric — <strong>MCP</strong>, <strong>A2A</strong>, <strong>AG-UI</strong>, <strong>A2UI</strong>, <strong>ACP</strong> and <strong>ANP</strong>.</p>
+  <div style="margin-top:1.1em;display:flex;gap:10px;flex-wrap:wrap;">
+    <span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP · tools &amp; context</span>
+    <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A · agent ↔ agent</span>
+    <span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI / A2UI · agent ↔ human</span>
+    <span class="chip c-acp"><span class="dot" style="background:var(--acp)"></span>ACP · REST messaging</span>
+    <span class="chip c-anp"><span class="dot" style="background:var(--anp)"></span>ANP · open-internet discovery</span>
+  </div>
+  <p class="small muted" style="margin-top:1.4em;">130+ slides · per-protocol deep dives · 5 enterprise use cases · a decision matrix to pick the right one →</p>
+</section>
+
+<!-- 2 · HOW TO READ -->
+<section>
+  <span class="kicker">How to read this deck</span>
+  <h2>Eight parts, <span class="grad">one stack</span></h2>
+  <div class="rule"></div>
+  <div class="grid g4">
+    <div class="card lft"><h4>Part 0</h4><p style="font-size:.66em;">Foundations — transports, identity, the mental model.</p></div>
+    <div class="card t-mcp"><h4>Part 1 · MCP</h4><p style="font-size:.66em;">Agent → tools &amp; data. The resource layer.</p></div>
+    <div class="card t-a2a"><h4>Part 2 · A2A</h4><p style="font-size:.66em;">Agent ↔ agent. The collaboration layer.</p></div>
+    <div class="card t-agui"><h4>Part 3 · AG-UI / A2UI</h4><p style="font-size:.66em;">Agent ↔ human. The presentation layer.</p></div>
+    <div class="card t-acp"><h4>Part 4 · ACP</h4><p style="font-size:.66em;">REST-native agent messaging.</p></div>
+    <div class="card t-anp"><h4>Part 5 · ANP</h4><p style="font-size:.66em;">Agent ↔ open internet. The network layer.</p></div>
+    <div class="card lft"><h4>Part 6 · Landscape</h4><p style="font-size:.66em;">AGNTCY, NLWeb, native tool calling, governance.</p></div>
+    <div class="card lft"><h4>Part 7 · Decide</h4><p style="font-size:.66em;">5 use cases, the matrix, the roadmap.</p></div>
+  </div>
+  <p class="small muted center" style="margin-top:1em;">Each deep dive follows the same arc: <strong>what · why · architecture · primitives · wire format · security · ecosystem · when (not) to use.</strong></p>
+</section>
+
+<!-- 3 · THE PROBLEM -->
+<section>
+  <span class="kicker">Why this matters</span>
+  <h2>The <span class="grad">N×M integration</span> problem</h2>
+  <div class="rule"></div>
+  <div class="grid g2" style="align-items:center;">
+    <div>
+      <p class="lead">Every agent that needs <strong>M tools</strong>, must talk to <strong>N peer agents</strong> across <strong>K UIs</strong> creates a combinatorial explosion of bespoke, brittle glue code.</p>
+      <ul class="clean">
+        <li>Custom connectors rot the moment an API changes</li>
+        <li>No agent can discover or trust another vendor's agent</li>
+        <li>UIs are hard-wired to one model's streaming format</li>
+        <li>Governance &amp; audit scatter across a dozen places</li>
+      </ul>
+      <p class="small muted" style="margin-top:.7em;">Protocols collapse N×M custom integrations into <strong>N+M</strong> standard ones — the shift HTTP, USB-C and TCP/IP each delivered.</p>
+    </div>
+    <div class="grid" style="gap:14px;">
+      <div class="card" style="text-align:center;"><div class="metric m-a2a">N×M</div><p><strong>without</strong> standards — bespoke, fragile, unmonitored</p></div>
+      <div class="card" style="text-align:center;border-top:3px solid var(--agui);"><div class="metric m-agui">N+M</div><p><strong>with</strong> a shared protocol layer — reusable &amp; governed</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · WHY NOW -->
+<section>
+  <span class="kicker">Why now</span>
+  <h2>The <span class="grad">protocol moment</span>, 2024 → 2026</h2>
+  <div class="rule"></div>
+  <div class="timeline">
+    <div class="tl"><span class="when">Nov 2024</span><b>MCP</b> open-sourced by Anthropic — the spark for the whole movement.</div>
+    <div class="tl"><span class="when">Early 2025</span>OpenAI, Google &amp; Microsoft announce <b>MCP support</b> across their platforms.</div>
+    <div class="tl"><span class="when">Apr 2025</span><b>A2A</b> launched by Google with 50+ partners; <b>AG-UI</b> emerges from CopilotKit.</div>
+    <div class="tl"><span class="when">Mid 2025</span><b>ACP</b> (IBM/BeeAI) and <b>ANP</b> gain traction; the "Internet of Agents" framing spreads.</div>
+    <div class="tl"><span class="when">Jun 2025</span>Google donates <b>A2A</b> to the <b>Linux Foundation</b>; ACP converges toward it.</div>
+    <div class="tl"><span class="when">2025–26</span><b>A2UI</b> &amp; generative-UI patterns mature; MCP registry &amp; enterprise governance harden.</div>
+  </div>
+  <p class="small muted center" style="margin-top:.9em;">In ~18 months the industry went from zero standards to a layered, multi-vendor stack. <strong>This is the integration substrate of the agent era.</strong></p>
+</section>
+
+<!-- 5 · FOUR DIRECTIONS -->
+<section>
+  <span class="kicker">The mental model</span>
+  <h2>An agent connects in <span class="grad">four directions</span></h2>
+  <div class="rule"></div>
+  <p class="lead" style="margin-bottom:.5em;">Each protocol owns one axis. They are <strong>complementary, not competing</strong> — you will run several at once.</p>
+  <div class="grid g4">
+    <div class="card t-agui"><div class="chip c-agui">↑ UPWARD</div><h3>To the human</h3><p><strong>AG-UI / A2UI</strong> stream agent state, tokens &amp; rich UI to the frontend.</p></div>
+    <div class="card t-mcp"><div class="chip c-mcp">↓ DOWNWARD</div><h3>To tools &amp; data</h3><p><strong>MCP</strong> gives one model access to APIs, files, DBs &amp; prompts.</p></div>
+    <div class="card t-a2a"><div class="chip c-a2a">↔ SIDEWAYS</div><h3>To peer agents</h3><p><strong>A2A / ACP</strong> let agents delegate tasks to one another.</p></div>
+    <div class="card t-anp"><div class="chip c-anp">⤤ OUTWARD</div><h3>To the open web</h3><p><strong>ANP</strong> handles discovery &amp; identity across organizations.</p></div>
+  </div>
+  <p class="small muted center" style="margin-top:.9em;">“MCP is to <em>tools</em> what A2A is to <em>agents</em> what AG-UI is to <em>humans</em> what ANP is to the <em>internet</em>.”</p>
+</section>
+
+<!-- 6 · THE STACK -->
+<section>
+  <span class="kicker">The layered view</span>
+  <h2>The agent interoperability <span class="grad">stack</span></h2>
+  <div class="rule"></div>
+  <div class="stack">
+    <div class="layer"><span class="badge b-agui">AG-UI / A2UI</span><span class="desc"><b>Presentation layer.</b> Agent → human. Event-streamed tokens, tool-call status, generative &amp; interactive UI.</span></div>
+    <div class="layer"><span class="badge b-a2a">A2A · ACP</span><span class="desc"><b>Collaboration layer.</b> Agent ↔ agent. Task delegation, capability advertisement, async multi-agent workflows.</span></div>
+    <div class="layer"><span class="badge b-anp">ANP</span><span class="desc"><b>Network layer.</b> Agent ↔ internet. Decentralized identity (DIDs), discovery &amp; trust across org boundaries.</span></div>
+    <div class="layer"><span class="badge b-mcp">MCP</span><span class="desc"><b>Resource layer.</b> Agent → tools/data. Tools, resources, prompts &amp; sampling — the "USB-C port" for one model.</span></div>
+  </div>
+  <p class="small muted center" style="margin-top:.9em;">Loosely analogous to OSI: each layer hides the one below and is independently swappable.</p>
+</section>
+
+<!-- 7 · ANATOMY -->
+<section>
+  <span class="kicker">What actually connects</span>
+  <h2>Anatomy of an <span class="grad">enterprise agent</span></h2>
+  <div class="rule"></div>
+  <div class="grid g2" style="align-items:center;">
+    <div>
+      <p class="lead">Strip away the hype and an agent is a loop: <strong>perceive → reason → act → report.</strong> Each step crosses a protocol boundary.</p>
+      <ul class="clean">
+        <li><strong>Reason</strong> — the LLM core (weights, context window)</li>
+        <li><strong>Act</strong> — calls tools &amp; data via <span style="color:var(--mcp)">MCP</span></li>
+        <li><strong>Delegate</strong> — hands work to peers via <span style="color:var(--a2a)">A2A / ACP</span></li>
+        <li><strong>Report</strong> — streams to humans via <span style="color:var(--agui)">AG-UI / A2UI</span></li>
+        <li><strong>Discover</strong> — finds external agents via <span style="color:var(--anp)">ANP</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="stack" style="gap:8px;">
+        <div class="layer" style="padding:10px 16px;"><span class="badge b-agui" style="min-width:90px;font-size:.5em;">report ↑</span><span class="desc">streams progress &amp; UI to the user</span></div>
+        <div class="layer" style="padding:10px 16px;border-color:rgba(255,255,255,.25);"><span class="badge" style="min-width:90px;font-size:.5em;background:#fff;color:#0a0e1a;">LLM core</span><span class="desc">plan · reason · decide</span></div>
+        <div class="layer" style="padding:10px 16px;"><span class="badge b-a2a" style="min-width:90px;font-size:.5em;">delegate ↔</span><span class="desc">tasks to specialist agents</span></div>
+        <div class="layer" style="padding:10px 16px;"><span class="badge b-mcp" style="min-width:90px;font-size:.5em;">act ↓</span><span class="desc">tools, files, databases, APIs</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · AT A GLANCE -->
+<section>
+  <span class="kicker">Preview</span>
+  <h2>The six protocols <span class="grad">at a glance</span></h2>
+  <div class="rule"></div>
+  <table>
+    <thead><tr><th>Protocol</th><th>Connects</th><th>Steward</th><th>Born</th><th>Core idea</th><th>Layer</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl" style="color:var(--mcp)">MCP</td><td>Agent → tools / data</td><td>Anthropic → LF</td><td>Nov 2024</td><td>A universal port for model context</td><td>Resource</td></tr>
+      <tr><td class="lbl" style="color:var(--a2a)">A2A</td><td>Agent ↔ agent</td><td>Google → Linux Foundation</td><td>Apr 2025</td><td>Opaque agents delegate via Agent Cards &amp; Tasks</td><td>Collaboration</td></tr>
+      <tr><td class="lbl" style="color:var(--agui)">AG-UI</td><td>Agent ↔ human</td><td>CopilotKit / OSS</td><td>2025</td><td>Typed event stream from agent to frontend</td><td>Presentation</td></tr>
+      <tr><td class="lbl" style="color:var(--agui)">A2UI</td><td>Agent → UI</td><td>OSS / emerging</td><td>2025</td><td>Agent emits declarative, interactive UI</td><td>Presentation</td></tr>
+      <tr><td class="lbl" style="color:var(--acp)">ACP</td><td>Agent ↔ agent (REST)</td><td>IBM/BeeAI → LF</td><td>2025</td><td>Plain-REST agent messaging, SDK-optional</td><td>Collaboration</td></tr>
+      <tr><td class="lbl" style="color:var(--anp)">ANP</td><td>Agent ↔ open internet</td><td>ANP open-source</td><td>2025</td><td>DID identity + semantic discovery, decentralized</td><td>Network</td></tr>
+    </tbody>
+  </table>
+  <p class="tiny muted center" style="margin-top:.7em;">We now take each one to the ocean floor. Buckle up. ↓</p>
+</section>
+<section class="divider" data-auto-animate>
+  <div class="secnum grad">00</div>
+  <div class="sectitle">Foundations <span class="grad">Primer</span></div>
+  <div class="secsub">The transports, identity, and data models every agent protocol is built on — so the deep dives that follow make sense.</div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">Foundations</span>
+  <h2>Transports &amp; <span class="grad">Encodings</span></h2>
+  <div class="rule"></div>
+  <p class="lead">Most agent protocols reuse boring, proven web standards on purpose — interoperability beats novelty.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Protocol</th>
+        <th>Encoding</th>
+        <th>Transport</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="lbl"><span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span></td>
+        <td>JSON-RPC 2.0</td>
+        <td>stdio + Streamable HTTP</td>
+      </tr>
+      <tr>
+        <td class="lbl"><span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span></td>
+        <td>JSON-RPC 2.0 (+ gRPC, REST)</td>
+        <td>HTTP(S) + SSE</td>
+      </tr>
+      <tr>
+        <td class="lbl"><span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span></td>
+        <td>JSON events</td>
+        <td>SSE / WebSocket</td>
+      </tr>
+      <tr>
+        <td class="lbl"><span class="chip c-acp"><span class="dot" style="background:var(--acp)"></span>ACP</span></td>
+        <td>REST / JSON</td>
+        <td>HTTP</td>
+      </tr>
+      <tr>
+        <td class="lbl"><span class="chip c-anp"><span class="dot" style="background:var(--anp)"></span>ANP</span></td>
+        <td>JSON-LD</td>
+        <td>HTTP + DID</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout info" style="margin-top:1rem"><b>No new transport was invented</b> — that's the point: standards ride on HTTP.</div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">Foundations</span>
+  <h2>Streaming <span class="grad">Patterns</span></h2>
+  <div class="rule"></div>
+  <p class="lead">Long-running agents need more than request/response — protocols choose from three well-understood streaming models.</p>
+  <div class="grid g3">
+    <div class="card t-mcp">
+      <h3>SSE</h3>
+      <p class="small"><b>Server-Sent Events</b> — one-way server→client stream over a single HTTP connection. Each event is a newline-delimited JSON payload. Used by <span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span> <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span> <span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span> for token streaming and progress events.</p>
+    </div>
+    <div class="card t-agui">
+      <h3>WebSocket</h3>
+      <p class="small"><b>Full-duplex</b> persistent connection — both sides send messages freely. Used by <span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span> when the UI needs to push user actions (typing, interrupts) back to the agent while it streams output.</p>
+    </div>
+    <div class="card t-a2a">
+      <h3>Webhooks / Push</h3>
+      <p class="small"><b>Server calls back</b> a client-supplied URL when a long-running job completes or changes state. Used by <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span> push notifications — client disconnects safely; result arrives later.</p>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">Foundations</span>
+  <h2>Identity, Auth <span class="grad">&amp; Trust</span></h2>
+  <div class="rule"></div>
+  <p class="lead">Every agent call crosses a trust boundary — protocols layer standard auth mechanisms rather than invent new ones.</p>
+  <dl class="spec">
+    <div>
+      <dt>OAuth 2.1</dt>
+      <dd>Scoped bearer tokens with short TTLs. Used by <span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span> remote servers and <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span> for delegated agent-to-agent calls.</dd>
+    </div>
+    <div>
+      <dt>API Keys / HTTP Auth</dt>
+      <dd>Simple static credentials over HTTPS. Low friction for <span class="chip c-acp"><span class="dot" style="background:var(--acp)"></span>ACP</span> and <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span> internal deployments.</dd>
+    </div>
+    <div>
+      <dt>mTLS</dt>
+      <dd>Mutual TLS — both client and server present certificates. Used for high-assurance service-to-service lanes where token theft is a serious threat.</dd>
+    </div>
+    <div>
+      <dt>DIDs / Decentralized Identifiers</dt>
+      <dd>Self-sovereign identity anchored on a verifiable data registry. Enables cross-org, trustless agent identity — core to <span class="chip c-anp"><span class="dot" style="background:var(--anp)"></span>ANP</span>.</dd>
+    </div>
+  </dl>
+  <div class="callout warn" style="margin-top:0.8rem"><b>Discovery is not authorization.</b> Always scope and verify tokens — knowing an agent exists does not mean you may call it.</div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">Foundations</span>
+  <h2>The Content <span class="grad">Model</span></h2>
+  <div class="rule"></div>
+  <p class="lead">Agents exchange structured, multi-modal payloads — not raw strings. Each protocol wraps content in typed "parts" so consumers know exactly what they're getting.</p>
+  <div class="grid g2">
+    <div>
+      <ul class="clean">
+        <li><b>Structured I/O via JSON Schema</b> — tool inputs and outputs are validated against schemas declared in the manifest; no guessing types at runtime.</li>
+        <li><b>MCP content blocks</b> — text, image, audio, embedded resource, each with a <code>type</code> discriminator.</li>
+        <li><b>A2A Parts</b> — <code>TextPart</code>, <code>FilePart</code> (inline bytes or URI + MIME), <code>DataPart</code> (arbitrary JSON).</li>
+        <li><b>ACP MessagePart</b> — role + list of parts, each with <code>content_type</code> (MIME) so HTTP-native tooling can route and render without extra parsing.</li>
+      </ul>
+    </div>
+    <div>
+      <pre><code data-trim data-noescape class="language-json">{
+  "role": "agent",
+  "parts": [
+    {
+      "type": "text",
+      "content": "Here is the chart:"
+    },
+    {
+      "type": "file",
+      "content_type": "image/png",
+      "uri": "https://store/chart.png"
+    },
+    {
+      "type": "data",
+      "content_type": "application/json",
+      "data": { "rows": 42 }
+    }
+  ]
+}</code></pre>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">Foundations</span>
+  <h2>Sync, Async <span class="grad">&amp; Long-Running</span></h2>
+  <div class="rule"></div>
+  <p class="lead">Real agent work spans milliseconds to hours — protocols must support all three interaction shapes or agents become toys.</p>
+  <div class="grid g3">
+    <div class="card t-mcp">
+      <h3>Synchronous</h3>
+      <p class="small"><b>Request → Response</b> in one HTTP round-trip. Best for fast tool calls where latency is &lt;2 s. <span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span> tool invocations default here. Simple to reason about; fails for anything that might timeout.</p>
+    </div>
+    <div class="card t-agui">
+      <h3>Streaming</h3>
+      <p class="small"><b>Incremental output</b> delivered as it's produced — keeps UIs responsive during generation. <span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span> SSE token streams, <span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span> progress notifications, and <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span> task update events all use this shape.</p>
+    </div>
+    <div class="card t-a2a">
+      <h3>Async Long-Running</h3>
+      <p class="small"><b>Submit → poll / push</b> — task survives client disconnects. Critical for minutes-to-hours jobs: data pipelines, multi-step research, code review. <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span> Tasks + push notifications and <span class="chip c-acp"><span class="dot" style="background:var(--acp)"></span>ACP</span> async runs address this directly.</p>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">Foundations</span>
+  <h2>Glossary of <span class="grad">Core Terms</span></h2>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <dl class="spec">
+      <div><dt>Agent</dt><dd>An autonomous AI process that perceives context, decides, and acts via tools or other agents.</dd></div>
+      <div><dt>Tool</dt><dd>A callable function with a JSON Schema signature exposed by a server to an LLM or agent.</dd></div>
+      <div><dt>Resource</dt><dd>Read-only data (file, DB row, API response) served by MCP for context injection.</dd></div>
+      <div><dt>Capability</dt><dd>A declared feature set (tools / resources / prompts / streaming) that a server advertises on connect.</dd></div>
+      <div><dt>Agent Card</dt><dd>A2A's machine-readable JSON manifest listing an agent's skills, auth, and endpoint URL.</dd></div>
+      <div><dt>Task</dt><dd>A2A's durable unit of work — has an ID, state machine (submitted → working → completed), and artifacts.</dd></div>
+    </dl>
+    <dl class="spec">
+      <div><dt>Artifact</dt><dd>Output produced by an A2A Task — text, files, or structured data attached to the completed task.</dd></div>
+      <div><dt>Primitive</dt><dd>The smallest addressable unit in a protocol (e.g., MCP's tool / resource / prompt trinity).</dd></div>
+      <div><dt>JSON-RPC</dt><dd>Lightweight RPC spec over JSON: every call has <code>method</code>, <code>params</code>, and an <code>id</code> for correlation.</dd></div>
+      <div><dt>DID</dt><dd>Decentralized Identifier — a W3C standard URI resolvable without a central registry; used by ANP.</dd></div>
+      <div><dt>Elicitation</dt><dd>MCP mechanism for a server to request additional input from the user mid-call, mid-session.</dd></div>
+      <div><dt>Human-in-the-loop</dt><dd>A pattern requiring human approval before an agent takes an irreversible or high-stakes action.</dd></div>
+    </dl>
+  </div>
+</section>
+<section class="divider" data-auto-animate>
+  <div class="secnum grad">01</div>
+  <div class="sectitle">MCP — Model Context Protocol</div>
+  <div class="secsub">The resource layer. One model, any tool or data source. The protocol that started the movement.</div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <div>
+      <span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span>
+      <h2>What is <span style="color:var(--mcp)">MCP?</span></h2>
+    </div>
+    <div class="meta">Anthropic · Nov 2024<br>open standard · JSON-RPC 2.0</div>
+  </div>
+  <div class="rule mcp"></div>
+  <p class="lead">Model Context Protocol is an open standard that defines how applications provide tools, data, and context to LLMs — a universal adapter layer between models and the world.</p>
+  <div class="callout info">
+    <b>USB-C for AI:</b> Just as USB-C standardizes how devices connect to peripherals, MCP standardizes how any LLM application connects to any tool or data source — plug in once, works everywhere.
+  </div>
+  <dl class="spec" style="margin-top:1rem">
+    <div><dt>Created by</dt><dd>Anthropic — open-sourced November 2024</dd></div>
+    <div><dt>Wire format</dt><dd>JSON-RPC 2.0 over stateful sessions</dd></div>
+    <div><dt>Goal</dt><dd>Replace N×M bespoke integrations with a single shared protocol</dd></div>
+  </dl>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">MOTIVATION</span>
+  <h2>The problem <span style="color:var(--mcp)">MCP solves</span></h2>
+  <div class="rule mcp"></div>
+  <div class="grid g2">
+    <div class="card t-mcp">
+      <h3>Before MCP</h3>
+      <p class="muted small">Every model × every tool = custom glue code</p>
+      <ul class="cross">
+        <li>N models × M tools = N×M integrations</li>
+        <li>Each integration bespoke &amp; brittle</li>
+        <li>No shared auth, schema, or lifecycle</li>
+        <li>Duplicated effort across teams &amp; orgs</li>
+        <li>Context silos — data locked away</li>
+      </ul>
+    </div>
+    <div class="card t-mcp">
+      <h3>After MCP</h3>
+      <p class="muted small">One standard: N models + M servers = everything works</p>
+      <ul class="check">
+        <li>N + M implementations, not N × M</li>
+        <li>Standard lifecycle, negotiation, schema</li>
+        <li>Shared OAuth 2.1 authorization model</li>
+        <li>Write a server once; every host uses it</li>
+        <li>Resources, tools, prompts — unified API</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">ARCHITECTURE</span>
+  <h2>Host, Client, <span style="color:var(--mcp)">Server</span></h2>
+  <div class="rule mcp"></div>
+  <p class="lead">Three participants form every MCP deployment. One host runs many clients; each client holds exactly one stateful connection to one server.</p>
+  <div class="flow" style="margin:1.4rem 0">
+    <div class="node" style="border-color:var(--mcp)"><div class="t">HOST</div><div class="s">LLM app · manages model + clients</div></div>
+    <span class="arrow">⇄<span class="lab">spawns / connects</span></span>
+    <div class="node" style="border-color:var(--mcp)"><div class="t">CLIENT ×N</div><div class="s">1:1 stateful session per server</div></div>
+    <span class="arrow">⇄<span class="lab">JSON-RPC 2.0</span></span>
+    <div class="node" style="border-color:var(--mcp)"><div class="t">SERVER ×N</div><div class="s">Lightweight capability provider</div></div>
+  </div>
+  <div class="callout info">
+    <b>Examples:</b> Host = Claude Desktop, VS Code, an agent runtime. Server = GitHub MCP server, Postgres MCP server, a custom internal API adapter.
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">PARTICIPANTS</span>
+  <h2>The three <span style="color:var(--mcp)">participants</span></h2>
+  <div class="rule mcp"></div>
+  <div class="grid g3">
+    <div class="card t-mcp">
+      <h3>Host</h3>
+      <p>The LLM application or agent runtime. Manages the model inference, creates clients, enforces security policy, and presents results to the user.</p>
+      <p class="muted small">e.g. Claude Desktop, Cursor, a custom agent runtime</p>
+    </div>
+    <div class="card t-mcp">
+      <h3>Client</h3>
+      <p>Lives inside the host. Maintains a single, persistent, stateful JSON-RPC session with exactly one MCP server. Translates model intent into protocol calls.</p>
+      <p class="muted small">One client per server; many clients per host</p>
+    </div>
+    <div class="card t-mcp">
+      <h3>Server</h3>
+      <p>A lightweight program that exposes capabilities — tools, resources, prompts — to the host and model. Can be local or remote; stateless or stateful.</p>
+      <p class="muted small">e.g. GitHub, Slack, Postgres, custom API wrappers</p>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">WIRE FORMAT</span>
+  <h2>Built on <span style="color:var(--mcp)">JSON-RPC 2.0</span></h2>
+  <div class="rule mcp"></div>
+  <div class="grid g2">
+    <div>
+      <p class="lead">Every MCP message is a standard JSON-RPC 2.0 envelope. Sessions are stateful — both sides track connection state, negotiate features, and exchange notifications without request/response pairing.</p>
+      <dl class="spec">
+        <div><dt>Requests</dt><dd>id + method + params → expects a response</dd></div>
+        <div><dt>Responses</dt><dd>Matching id + result or error</dd></div>
+        <div><dt>Notifications</dt><dd>No id — fire-and-forget, no reply expected</dd></div>
+      </dl>
+    </div>
+    <div>
+      <pre><code data-trim data-noescape class="language-json">{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "search_orders",
+    "arguments": {
+      "query": "status:open",
+      "limit": 20
+    }
+  }
+}</code></pre>
+      <p class="muted tiny center">Generic JSON-RPC 2.0 request envelope</p>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">LIFECYCLE</span>
+  <h2>Connection <span style="color:var(--mcp)">lifecycle</span></h2>
+  <div class="rule mcp"></div>
+  <p class="lead">Every MCP session follows a strict, predictable lifecycle — ensuring both sides agree on capabilities before any work is done.</p>
+  <ol class="steps">
+    <li><b>initialize</b> — Client sends protocolVersion + its capability declarations; server responds with its own capabilities and chosen protocol version.</li>
+    <li><b>Capability negotiation</b> — Both sides inspect what the other supports; fall back gracefully to the intersection of features.</li>
+    <li><b>initialized notification</b> — Client fires a one-way notification confirming it is ready; operation phase begins.</li>
+    <li><b>Operation</b> — Free exchange: tools/call, resources/read, prompts/get, sampling/createMessage, etc.</li>
+    <li><b>Shutdown</b> — Either side can terminate cleanly; stdio servers exit, HTTP sessions close.</li>
+  </ol>
+  <div class="callout info" style="margin-top:0.8rem">
+    <b>Note:</b> No work may be performed before the <em>initialized</em> notification is sent by the client.
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">NEGOTIATION</span>
+  <h2>Capability <span style="color:var(--mcp)">negotiation</span></h2>
+  <div class="rule mcp"></div>
+  <p class="lead">During <code>initialize</code>, both sides declare the optional features they support. Neither side may rely on a capability the other did not advertise.</p>
+  <div class="grid g2">
+    <div class="card t-mcp">
+      <h4>Client declares</h4>
+      <ul class="clean mcp">
+        <li><code>sampling</code> — host can run LLM completions for servers</li>
+        <li><code>roots</code> — host exposes filesystem boundaries</li>
+        <li><code>elicitation</code> — host can prompt user for input</li>
+      </ul>
+    </div>
+    <div class="card t-mcp">
+      <h4>Server declares</h4>
+      <ul class="clean mcp">
+        <li><code>tools</code> — exposes callable functions</li>
+        <li><code>resources</code> — exposes URI-addressed data + subscribe</li>
+        <li><code>prompts</code> — exposes reusable prompt templates</li>
+        <li><code>logging</code> — can emit structured log messages</li>
+      </ul>
+    </div>
+  </div>
+  <p class="muted small center" style="margin-top:0.8rem">Features not declared are never attempted — clean forward-compatibility.</p>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">SERVER PRIMITIVES</span>
+  <h2>Primitive 1: <span style="color:var(--mcp)">Tools</span></h2>
+  <div class="rule mcp"></div>
+  <p class="lead">Tools are executable functions the <em>model</em> decides to invoke. The model reads descriptions and schemas, picks the right tool, supplies arguments — the host executes, returns results.</p>
+  <div class="grid g2">
+    <div>
+      <ul class="clean mcp">
+        <li><b>Model-controlled</b> — model decides when and how to call</li>
+        <li><b>name</b> — unique identifier within the server</li>
+        <li><b>description</b> — natural-language guide for the model</li>
+        <li><b>inputSchema</b> — JSON Schema for arguments (validated)</li>
+        <li><b>outputSchema</b> — optional structured output schema</li>
+        <li><b>Annotations</b> — <code>readOnlyHint</code>, <code>destructiveHint</code> signal risk level to host/user</li>
+        <li><b>Methods</b> — <code>tools/list</code> to enumerate, <code>tools/call</code> to invoke</li>
+        <li><b>Results</b> — content blocks (text, image, embedded resource)</li>
+      </ul>
+    </div>
+    <div class="callout good" style="align-self:center">
+      <b>Design tip:</b> Write tool descriptions as if briefing a smart but uninformed colleague. The model only knows what you put in <code>description</code> and <code>inputSchema</code>.
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">TOOLS ON THE WIRE</span>
+  <h2>Tools: <span style="color:var(--mcp)">request &amp; response</span></h2>
+  <div class="rule mcp"></div>
+  <div class="grid g2">
+    <div>
+      <p class="muted small" style="margin-bottom:0.4rem">tools/call request</p>
+      <pre><code data-trim data-noescape class="language-json">{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tools/call",
+  "params": {
+    "name": "search_orders",
+    "arguments": {
+      "query": "status:open",
+      "customer_id": "cust_123",
+      "limit": 10
+    }
+  }
+}</code></pre>
+    </div>
+    <div>
+      <p class="muted small" style="margin-bottom:0.4rem">tools/call response</p>
+      <pre><code data-trim data-noescape class="language-json">{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Found 3 open orders..."
+      }
+    ],
+    "isError": false
+  }
+}</code></pre>
+    </div>
+  </div>
+  <div class="callout info" style="margin-top:0.6rem">
+    <b>Content blocks</b> can be <code>text</code>, <code>image</code>, or <code>resource</code> — the host renders them appropriately alongside the model's reply.
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">SERVER PRIMITIVES</span>
+  <h2>Primitive 2: <span style="color:var(--mcp)">Resources</span></h2>
+  <div class="rule mcp"></div>
+  <p class="lead">Resources expose read-only, URI-addressed data — documents, database rows, files, API snapshots. The <em>application</em> (host) decides which resources to attach to context, not the model.</p>
+  <div class="grid g2">
+    <div>
+      <ul class="clean mcp">
+        <li><b>Application-controlled</b> — host decides what to load</li>
+        <li><b>URI-addressed</b> — <code>file://</code>, <code>postgres://</code>, <code>https://</code>, custom schemes</li>
+        <li><b>Read-only</b> — resources are context, not actions</li>
+        <li><b>Templates</b> — parameterized URI patterns via <code>resources/templates/list</code></li>
+        <li><b>Subscribe</b> — host can watch for updates; server pushes <code>resources/updated</code> notifications</li>
+        <li><b>Methods</b> — <code>resources/list</code>, <code>resources/read</code>, <code>resources/subscribe</code></li>
+      </ul>
+    </div>
+    <div class="callout info" style="align-self:center">
+      <b>Use resources for:</b> Long documents that shouldn't be re-fetched per turn, live database snapshots the host injects into context, configuration files, and any read-only structured data the model needs to reason over.
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">RESOURCES ON THE WIRE</span>
+  <h2>Resources: <span style="color:var(--mcp)">read request</span></h2>
+  <div class="rule mcp"></div>
+  <div class="grid g2">
+    <div>
+      <p class="muted small" style="margin-bottom:0.4rem">resources/read request</p>
+      <pre><code data-trim data-noescape class="language-json">{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "resources/read",
+  "params": {
+    "uri": "postgres://prod/orders?id=123"
+  }
+}</code></pre>
+    </div>
+    <div>
+      <p class="muted small" style="margin-bottom:0.4rem">resources/read response</p>
+      <pre><code data-trim data-noescape class="language-json">{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "contents": [
+      {
+        "uri": "postgres://prod/orders?id=123",
+        "mimeType": "application/json",
+        "text": "{\"id\":123,\"status\":\"open\"}"
+      }
+    ]
+  }
+}</code></pre>
+    </div>
+  </div>
+  <p class="muted small center" style="margin-top:0.6rem">Resource URIs are opaque to the model — the host resolves and injects content. MIME types guide rendering.</p>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">SERVER PRIMITIVES</span>
+  <h2>Primitive 3: <span style="color:var(--mcp)">Prompts</span></h2>
+  <div class="rule mcp"></div>
+  <p class="lead">Prompts are reusable, parameterized workflow templates exposed by a server — think slash commands. The <em>user</em> picks and invokes them; the server fills arguments and returns a ready-made message sequence.</p>
+  <div class="grid g2">
+    <div>
+      <ul class="clean mcp">
+        <li><b>User-controlled</b> — user selects from a menu / slash command</li>
+        <li><b>Parameterized</b> — server declares argument names + descriptions</li>
+        <li><b>Returns messages</b> — a ready-to-send array of user/assistant turns</li>
+        <li><b>Embeds resources</b> — can inline resource content into the prompt</li>
+        <li><b>Methods</b> — <code>prompts/list</code>, <code>prompts/get</code></li>
+      </ul>
+    </div>
+    <div>
+      <pre><code data-trim data-noescape class="language-json">{
+  "method": "prompts/get",
+  "params": {
+    "name": "review_pr",
+    "arguments": {
+      "pr_number": "42",
+      "focus": "security"
+    }
+  }
+}</code></pre>
+      <p class="muted tiny">Server returns a structured message array ready for the model</p>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">CLIENT PRIMITIVES</span>
+  <h2>Client power: <span style="color:var(--mcp)">Sampling</span></h2>
+  <div class="rule mcp"></div>
+  <p class="lead">Sampling inverts the flow — a server asks the <em>host's</em> LLM to reason on its behalf. The server gets agentic intelligence without shipping its own model or API keys.</p>
+  <div class="grid g2">
+    <div>
+      <ul class="clean mcp">
+        <li><b>Method:</b> <code>sampling/createMessage</code></li>
+        <li>Server supplies messages + modelPreferences</li>
+        <li>Host picks the actual model and runs inference</li>
+        <li>Result returned to the server as a completion</li>
+        <li>Enables multi-step reasoning inside a server tool</li>
+      </ul>
+      <div class="callout warn" style="margin-top:0.8rem">
+        <b>Human approval recommended</b> — hosts should surface sampling requests to the user before executing, especially for sensitive operations.
+      </div>
+    </div>
+    <div>
+      <pre><code data-trim data-noescape class="language-json">{
+  "method": "sampling/createMessage",
+  "params": {
+    "messages": [
+      {
+        "role": "user",
+        "content": {
+          "type": "text",
+          "text": "Classify this log line..."
+        }
+      }
+    ],
+    "maxTokens": 256
+  }
+}</code></pre>
+      <p class="muted tiny">Server → Client: host runs the LLM, returns completion</p>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">CLIENT PRIMITIVES</span>
+  <h2>Roots &amp; <span style="color:var(--mcp)">Elicitation</span></h2>
+  <div class="rule mcp"></div>
+  <div class="grid g2">
+    <div class="card t-mcp">
+      <h3>Roots</h3>
+      <p>The client tells the server which filesystem paths or URI prefixes it is allowed to operate within. Servers must respect these boundaries — no reads or writes outside declared roots.</p>
+      <ul class="clean mcp">
+        <li>Declared by client during or after init</li>
+        <li>Can be file:// paths or custom URI schemes</li>
+        <li>Server receives updated list via <code>roots/list_changed</code> notification</li>
+        <li>Primary sandbox enforcement mechanism for local servers</li>
+      </ul>
+    </div>
+    <div class="card t-mcp">
+      <h3>Elicitation</h3>
+      <p>Added in the 2025 spec — a server may pause mid-operation and ask the <em>user</em> (via the host) for structured input before proceeding.</p>
+      <ul class="clean mcp">
+        <li>Server sends a schema describing what it needs</li>
+        <li>Host surfaces a prompt or form to the user</li>
+        <li>User response returned as structured data</li>
+        <li>Enables interactive, human-in-the-loop tool flows</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">TRANSPORTS</span>
+  <h2>stdio vs <span style="color:var(--mcp)">Streamable HTTP</span></h2>
+  <div class="rule mcp"></div>
+  <p class="lead">MCP defines two standard transports. Choose based on where your server lives.</p>
+  <table style="margin-top:1rem">
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>stdio (local)</th>
+        <th>Streamable HTTP (remote)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="lbl">Deployment</td>
+        <td>Local subprocess; host spawns server</td>
+        <td>Remote HTTP endpoint; client POSTs requests</td>
+      </tr>
+      <tr>
+        <td class="lbl">Streaming</td>
+        <td>Synchronous stdin/stdout; no partial streaming</td>
+        <td>Server streams responses via SSE on the same connection</td>
+      </tr>
+      <tr>
+        <td class="lbl">Session model</td>
+        <td>Always stateful — process lifetime = session</td>
+        <td>Supports both stateless (per-request) and stateful modes</td>
+      </tr>
+      <tr>
+        <td class="lbl">Auth</td>
+        <td>OS-level process isolation</td>
+        <td>OAuth 2.1 with audience-bound tokens</td>
+      </tr>
+      <tr>
+        <td class="lbl">Best for</td>
+        <td>Local tools, dev environments, IDE plugins</td>
+        <td>Hosted APIs, multi-tenant SaaS, shared team servers</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="muted tiny center" style="margin-top:0.6rem">Streamable HTTP (introduced March 2025) supersedes the older separate HTTP + SSE transport.</p>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">SECURITY</span>
+  <h2>Authorization with <span style="color:var(--mcp)">OAuth 2.1</span></h2>
+  <div class="rule mcp"></div>
+  <p class="lead">For HTTP transport, MCP specifies OAuth 2.1. The MCP server acts as an OAuth Resource Server; a separate Authorization Server issues audience-bound tokens.</p>
+  <div class="grid g2">
+    <div>
+      <ol class="steps">
+        <li>Client discovers Auth Server via <b>Protected Resource Metadata</b></li>
+        <li>Client registers dynamically (<b>Dynamic Client Registration</b>)</li>
+        <li>User authenticates; Auth Server issues token scoped to resource</li>
+        <li><b>RFC 8707 Resource Indicators</b> bind token to the specific MCP server audience</li>
+        <li>Client presents token in every request; server validates audience + scopes</li>
+      </ol>
+    </div>
+    <div>
+      <div class="callout warn">
+        <b>No static long-lived keys.</b> The spec explicitly discourages API keys shared across servers. Tokens must be audience-bound — a token issued for Server A must not be accepted by Server B.
+      </div>
+      <div class="callout info" style="margin-top:0.8rem">
+        <b>Token pass-through anti-pattern:</b> Never forward a token you received to a downstream MCP server. Obtain a fresh, scoped token for each server.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">SECURITY</span>
+  <h2>The sharp <span style="color:var(--mcp)">edges</span></h2>
+  <div class="rule mcp"></div>
+  <div class="grid g3">
+    <div class="card t-mcp">
+      <h4>Tool poisoning</h4>
+      <p>Malicious or compromised servers embed hidden instructions inside tool descriptions or results. The model reads them as trusted context and follows attacker directives.</p>
+      <p class="muted tiny">Pin / allow-list server packages. Review tool definitions before enabling.</p>
+    </div>
+    <div class="card t-mcp">
+      <h4>The lethal trifecta</h4>
+      <p>Any MCP deployment combining all three is high-risk: <b>(1)</b> access to private data, <b>(2)</b> exposure to untrusted content, <b>(3)</b> ability to exfiltrate data.</p>
+      <p class="muted tiny">Audit each server against all three legs. Remove any unnecessary leg.</p>
+    </div>
+    <div class="card t-mcp">
+      <h4>Confused deputy &amp; token passthrough</h4>
+      <p>A server acts on behalf of the model using elevated host permissions it shouldn't have, or forwards tokens to unauthorized downstream systems.</p>
+      <p class="muted tiny">Scope tokens tightly; never pass through received tokens.</p>
+    </div>
+  </div>
+  <div class="callout warn" style="margin-top:0.8rem">
+    <b>Mitigations:</b> Explicit user consent for each server connection · pin/allow-list server packages by hash · review tool definitions before enabling · scope OAuth tokens to minimum required · sandbox server execution · surface sampling requests to user before executing.
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">ECOSYSTEM</span>
+  <h2>Ecosystem &amp; <span style="color:var(--mcp)">MCP-UI</span></h2>
+  <div class="rule mcp"></div>
+  <div class="grid g2">
+    <div>
+      <h4>Ecosystem highlights</h4>
+      <ul class="clean mcp">
+        <li><b>Official SDKs:</b> Python, TypeScript, Java, C#, Kotlin, Go, Ruby, Rust, Swift</li>
+        <li><b>Community servers:</b> GitHub, Slack, Postgres, Google Drive, Sentry, and thousands more</li>
+        <li><b>MCP Registry (2025):</b> central discovery &amp; verification for published servers</li>
+        <li><b>Adopted by:</b> OpenAI, Google DeepMind, Microsoft (Copilot Studio, Windows), VS Code, Cursor, Zed, JetBrains</li>
+        <li>Anthropic · Claude Desktop · Claude API natively support MCP</li>
+      </ul>
+    </div>
+    <div class="card t-mcp">
+      <h4>MCP-UI Extension</h4>
+      <p>A community extension to the core spec. MCP servers can return <strong>interactive UI resources</strong> via a <code>ui://</code> URI scheme — delivering HTML fragments, remote-DOM components, or external URLs that the host renders alongside tool results.</p>
+      <ul class="clean mcp">
+        <li>Enables rich in-chat UI (forms, tables, charts)</li>
+        <li>Host renders; server stays thin</li>
+        <li>Not in the core spec — opt-in per host</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">DECISION GUIDE</span>
+  <h2>MCP — <span style="color:var(--mcp)">when to use</span></h2>
+  <div class="rule mcp"></div>
+  <div class="grid g2">
+    <div class="card t-mcp">
+      <h3>Use MCP when…</h3>
+      <ul class="check">
+        <li>One model/agent needs grounded access to external tools or data</li>
+        <li>You want governed, auditable tool invocations with consent</li>
+        <li>You need to reuse existing MCP servers (GitHub, DB, Slack…)</li>
+        <li>You want standard auth (OAuth 2.1) without custom glue</li>
+        <li>You need resources (read-only context) injected into the model</li>
+        <li>You want reusable prompt templates surfaced as slash commands</li>
+      </ul>
+    </div>
+    <div class="card t-mcp">
+      <h3>Reach for something else when…</h3>
+      <ul class="cross">
+        <li><b>Agent-to-agent orchestration</b> — use A2A (Google's protocol for peer agents communicating with each other)</li>
+        <li><b>Streaming UI to humans</b> — use AG-UI (the agent-to-frontend event stream protocol)</li>
+        <li>You need bidirectional real-time agent collaboration across orgs</li>
+        <li>Your primary need is rendering live UI updates, not tool access</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout good" style="margin-top:0.8rem">
+    <b>One-line takeaway:</b> MCP is the resource and tool layer — pair it with A2A for multi-agent orchestration and AG-UI for live user-facing interfaces.
+  </div>
+</section>
+<section class="divider" data-auto-animate>
+  <div class="secnum grad">02</div>
+  <div class="sectitle">A2A — Agent2Agent</div>
+  <div class="secsub">The collaboration layer. Opaque agents discover each other and delegate work — across frameworks, clouds and vendors.</div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <div>
+      <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span>
+      <h2>What is A2A?</h2>
+    </div>
+    <div class="meta">Google · Apr 2025 → Linux Foundation<br>HTTP · JSON-RPC 2.0 · SSE</div>
+  </div>
+  <div class="rule a2a"></div>
+  <p class="lead">A2A is an open protocol that lets <strong>opaque agents</strong> — built on different frameworks, by different vendors — discover each other, communicate, and delegate tasks.</p>
+  <ul class="clean" style="margin-bottom:1.2rem">
+    <li>Launched by Google in <strong>April 2025</strong> with 50+ partners (Atlassian, Salesforce, SAP, ServiceNow, Box, PayPal, Cohere…)</li>
+    <li>Donated to the <strong>Linux Foundation</strong> in June 2025 — now the vendor-neutral <em>A2A Project</em></li>
+    <li>Current spec: <strong>v0.3</strong> — transports include JSON-RPC/HTTP, SSE, and gRPC</li>
+  </ul>
+  <div class="callout info"><b>The famous framing:</b> "MCP for tools, A2A for agents" — they are complementary, not competing.</div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">THE PROBLEM</span>
+  <h2>Islands of <span style="color:var(--a2a)">agents</span></h2>
+  <div class="rule a2a"></div>
+  <div class="grid g2" style="margin-top:1rem">
+    <div class="card" style="border-top-color:#e55">
+      <h3>Without A2A</h3>
+      <p class="muted small" style="margin-bottom:.6rem">Every agent pair requires bespoke integration</p>
+      <ul class="cross">
+        <li>Custom glue code per agent pair</li>
+        <li>No shared discovery or capability matching</li>
+        <li>Vendor lock-in — each agent speaks its own protocol</li>
+        <li>N × M integration matrix at scale</li>
+        <li>Re-implement auth, streaming &amp; retries every time</li>
+      </ul>
+    </div>
+    <div class="card t-a2a">
+      <h3>With A2A</h3>
+      <p class="muted small" style="margin-bottom:.6rem">Uniform protocol; any agent delegates to any other</p>
+      <ul class="check">
+        <li>Publish an <strong>Agent Card</strong> — other agents discover you</li>
+        <li>Capability matching built into the spec</li>
+        <li>Standard auth, streaming (SSE) &amp; push notifications</li>
+        <li>Cross-vendor, cross-framework by design</li>
+        <li>N + M instead of N × M integrations</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">DESIGN PRINCIPLES</span>
+  <h2>Six principles of <span style="color:var(--a2a)">A2A</span></h2>
+  <div class="rule a2a"></div>
+  <div class="grid g3" style="margin-top:1rem">
+    <div class="card t-a2a">
+      <h4>① Agentic capabilities</h4>
+      <p>Agents collaborate naturally without sharing memory, tools, or internal context — true peer autonomy.</p>
+    </div>
+    <div class="card t-a2a">
+      <h4>② Existing standards</h4>
+      <p>Built on HTTP, JSON-RPC 2.0, and SSE — no new transport; works with existing infrastructure.</p>
+    </div>
+    <div class="card t-a2a">
+      <h4>③ Secure by default</h4>
+      <p>Enterprise-grade auth via OAuth2, OIDC, API keys, and bearer tokens declared in the Agent Card.</p>
+    </div>
+    <div class="card t-a2a">
+      <h4>④ Long-running tasks</h4>
+      <p>Tasks span minutes to hours or days. Push notifications and SSE keep clients in sync — including humans in the loop.</p>
+    </div>
+    <div class="card t-a2a">
+      <h4>⑤ Modality agnostic</h4>
+      <p>Supports text, audio, video, files, and structured data. No single-modality assumption.</p>
+    </div>
+    <div class="card t-a2a">
+      <h4>⑥ Opaque execution</h4>
+      <p>Agents never expose internal reasoning, tool names, or model weights — a clean capability boundary.</p>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">PROTOCOLS</span>
+  <h2>A2A vs MCP — <span style="color:var(--a2a)">complementary</span></h2>
+  <div class="rule a2a"></div>
+  <div class="grid g2" style="margin-top:.8rem">
+    <div class="card" style="border-top-color:var(--mcp)">
+      <h3 style="color:var(--mcp)">MCP — vertical</h3>
+      <p class="muted small">Model Context Protocol</p>
+      <ul class="clean">
+        <li>Agent → <strong>Tools, Resources, Prompts</strong></li>
+        <li>Structured, typed contracts</li>
+        <li>Same process or trusted boundary</li>
+        <li>Low-level capability access (DB, APIs, files)</li>
+      </ul>
+    </div>
+    <div class="card t-a2a">
+      <h3>A2A — horizontal</h3>
+      <p class="muted small">Agent2Agent Protocol</p>
+      <ul class="clean">
+        <li>Agent ↔ <strong>Agent</strong> — peer delegation</li>
+        <li>Opaque — no shared internals</li>
+        <li>Cross-vendor, cross-cloud</li>
+        <li>High-level task handoff</li>
+      </ul>
+    </div>
+  </div>
+  <div style="margin-top:.9rem">
+    <div class="flow">
+      <div class="node" style="border-color:var(--a2a)"><div class="t">Orchestrator</div><div class="s">client agent</div></div>
+      <span class="arrow">→<span class="lab">A2A</span></span>
+      <div class="node" style="border-color:var(--a2a)"><div class="t">Specialist</div><div class="s">remote agent</div></div>
+      <span class="arrow">→<span class="lab">MCP</span></span>
+      <div class="node" style="border-color:var(--mcp)"><div class="t">Tool / DB</div><div class="s">resource</div></div>
+    </div>
+    <div class="callout info" style="margin-top:.7rem"><b>Compose them:</b> an A2A remote agent uses MCP internally to reach its own tools and resources.</div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">ARCHITECTURE</span>
+  <h2>Client &amp; remote <span style="color:var(--a2a)">agent</span></h2>
+  <div class="rule a2a"></div>
+  <p class="lead">Two clearly defined roles communicate over HTTP/JSON-RPC. The remote agent is fully opaque — the client never sees its internals.</p>
+  <div class="flow" style="margin:1.2rem 0">
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Client Agent</div><div class="s">initiates · sends tasks</div></div>
+    <span class="arrow">→<span class="lab">message/send<br>message/stream</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Remote Agent</div><div class="s">executes · responds</div></div>
+    <span class="arrow">→<span class="lab">push callback</span></span>
+    <div class="node" style="border-color:#888"><div class="t">Client Webhook</div><div class="s">async updates</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:.6rem">
+    <div class="card t-a2a">
+      <h4>Client Agent</h4>
+      <p>Discovers remote agents via Agent Cards. Sends tasks, streams results, handles <code>input-required</code> pauses.</p>
+    </div>
+    <div class="card t-a2a">
+      <h4>Remote Agent</h4>
+      <p>Exposes an Agent Card. Executes tasks in its own black box — own model, tools, memory. Reports status updates and artifacts.</p>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">DISCOVERY</span>
+  <h2>The <span style="color:var(--a2a)">Agent Card</span></h2>
+  <div class="rule a2a"></div>
+  <p class="lead">A public JSON manifest published at <code>https://HOST/.well-known/agent-card.json</code>. Enables <strong>discovery</strong> and <strong>capability matching</strong> without any prior agreement.</p>
+  <div class="grid g2" style="margin-top:.8rem">
+    <ul class="clean">
+      <li><strong>name</strong> / description / version / url</li>
+      <li><strong>provider</strong> — organization &amp; contact</li>
+      <li><strong>capabilities</strong> — streaming, pushNotifications, stateTransitionHistory</li>
+      <li><strong>defaultInputModes / outputModes</strong> — modalities</li>
+      <li><strong>skills[]</strong> — what the agent can do (id, name, tags, examples)</li>
+      <li><strong>securitySchemes</strong> — OAuth2, OIDC, API key, bearer</li>
+    </ul>
+    <div>
+      <div class="callout info"><b>Discovery flow:</b> client fetches <code>/.well-known/agent-card.json</code>, reads capabilities &amp; skills, selects best-fit agent, negotiates auth — all before sending a single task.</div>
+      <div class="callout info" style="margin-top:.6rem"><b>Extended card:</b> <code>agent/getAuthenticatedExtendedCard</code> reveals additional metadata visible only to authenticated callers.</div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">AGENT CARD</span>
+  <h2>Card on the <span style="color:var(--a2a)">wire</span></h2>
+  <div class="rule a2a"></div>
+  <pre><code data-trim data-noescape class="language-json">{
+  "name": "Invoice Processing Agent",
+  "description": "Extracts, validates and routes invoices.",
+  "url": "https://finance.example.com/agent",
+  "version": "1.2.0",
+  "provider": { "organization": "Acme Corp" },
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": true
+  },
+  "defaultInputModes": ["text", "file"],
+  "defaultOutputModes": ["text", "data"],
+  "skills": [{
+    "id": "extract-invoice",
+    "name": "Extract Invoice Data",
+    "description": "Parse PDF invoices into structured JSON.",
+    "tags": ["finance", "ocr"],
+    "examples": ["Process attached invoice PDF"]
+  }],
+  "securitySchemes": { "oauth2": { "type": "oauth2" } }
+}</code></pre>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">CAPABILITIES</span>
+  <h2>Skills &amp; <span style="color:var(--a2a)">capabilities</span></h2>
+  <div class="rule a2a"></div>
+  <div class="grid g2" style="margin-top:.8rem">
+    <div>
+      <h3 style="margin-bottom:.5rem">skills[]</h3>
+      <dl class="spec">
+        <div><dt>id</dt><dd>Unique identifier for the skill</dd></div>
+        <div><dt>name</dt><dd>Human-readable skill name</dd></div>
+        <div><dt>description</dt><dd>What the skill does (used for matching)</dd></div>
+        <div><dt>tags</dt><dd>Keyword labels for discovery</dd></div>
+        <div><dt>examples</dt><dd>Sample prompts a client might send</dd></div>
+        <div><dt>inputModes / outputModes</dt><dd>Modality overrides per skill</dd></div>
+      </dl>
+    </div>
+    <div>
+      <h3 style="margin-bottom:.5rem">capabilities flags</h3>
+      <div class="card t-a2a" style="margin-bottom:.6rem">
+        <h4>streaming</h4>
+        <p>Agent supports <code>message/stream</code> — SSE incremental updates for long responses.</p>
+      </div>
+      <div class="card t-a2a" style="margin-bottom:.6rem">
+        <h4>pushNotifications</h4>
+        <p>Agent can POST task updates to a client-registered webhook URL.</p>
+      </div>
+      <div class="card t-a2a">
+        <h4>stateTransitionHistory</h4>
+        <p>Task history includes full state transition log for audit and replay.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">CORE OBJECT</span>
+  <h2>The <span style="color:var(--a2a)">Task</span> object</h2>
+  <div class="rule a2a"></div>
+  <p class="lead">A Task is the central stateful unit of work — from submission through completion, carrying all history and outputs.</p>
+  <div class="grid g2" style="margin-top:.8rem">
+    <dl class="spec">
+      <div><dt>id</dt><dd>Unique task identifier</dd></div>
+      <div><dt>contextId</dt><dd>Groups related tasks into a session</dd></div>
+      <div><dt>status</dt><dd>state + message + timestamp snapshot</dd></div>
+      <div><dt>history[]</dt><dd>All messages exchanged (user &amp; agent turns)</dd></div>
+      <div><dt>artifacts[]</dt><dd>Outputs produced for this task</dd></div>
+    </dl>
+    <pre><code data-trim data-noescape class="language-json">{
+  "id": "task-7f3a",
+  "contextId": "ctx-002",
+  "status": {
+    "state": "working",
+    "message": {
+      "role": "agent",
+      "parts": [{"type":"text",
+        "text":"Extracting invoice…"}]
+    },
+    "timestamp": "2025-04-12T10:05:00Z"
+  },
+  "history": [],
+  "artifacts": []
+}</code></pre>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">TASK LIFECYCLE</span>
+  <h2>Task <span style="color:var(--a2a)">states</span></h2>
+  <div class="rule a2a"></div>
+  <div class="flow" style="flex-wrap:wrap; margin:1rem 0; gap:.5rem">
+    <div class="node" style="border-color:#888"><div class="t">submitted</div><div class="s">accepted</div></div>
+    <span class="arrow">→</span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">working</div><div class="s">processing</div></div>
+    <span class="arrow">⇄<span class="lab">more info?</span></span>
+    <div class="node" style="border-color:#e8a020"><div class="t">input-required</div><div class="s">paused</div></div>
+  </div>
+  <div class="flow" style="flex-wrap:wrap; margin:.5rem 0 1rem; gap:.5rem">
+    <div class="node" style="border-color:#4c4"><div class="t">completed</div><div class="s">success</div></div>
+    <div class="node" style="border-color:#e55"><div class="t">failed</div><div class="s">error</div></div>
+    <div class="node" style="border-color:#888"><div class="t">canceled</div><div class="s">aborted</div></div>
+    <div class="node" style="border-color:#e55"><div class="t">rejected</div><div class="s">refused</div></div>
+    <div class="node" style="border-color:#e8a020"><div class="t">auth-required</div><div class="s">needs creds</div></div>
+  </div>
+  <div class="callout warn"><b>input-required</b> is the human-in-the-loop state — the remote agent needs more information before it can continue. The client sends additional messages and the task resumes <code>working</code>.</div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">CONTENT MODEL</span>
+  <h2>Messages &amp; <span style="color:var(--a2a)">Parts</span></h2>
+  <div class="rule a2a"></div>
+  <p class="lead">A Message is one turn in the conversation (role: <em>user</em> or <em>agent</em>). It carries one or more Parts — enabling rich multi-modal payloads.</p>
+  <div class="grid g3" style="margin-top:1rem">
+    <div class="card t-a2a">
+      <h3>TextPart</h3>
+      <p class="muted small">type: "text"</p>
+      <p>Plain or markdown text. The most common part type — prompts, reasoning, status messages.</p>
+    </div>
+    <div class="card t-a2a">
+      <h3>FilePart</h3>
+      <p class="muted small">type: "file"</p>
+      <p>Binary content (base64 bytes) or a URI reference, plus mimeType. For PDFs, images, audio, video.</p>
+    </div>
+    <div class="card t-a2a">
+      <h3>DataPart</h3>
+      <p class="muted small">type: "data"</p>
+      <p>Structured JSON payload — tabular results, form data, API responses. Enables machine-to-machine data exchange.</p>
+    </div>
+  </div>
+  <p class="muted small center" style="margin-top:.8rem">A single message can combine multiple part types — e.g. TextPart (instruction) + FilePart (PDF) + DataPart (metadata).</p>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">OUTPUTS</span>
+  <h2><span style="color:var(--a2a)">Artifacts</span></h2>
+  <div class="rule a2a"></div>
+  <p class="lead">An Artifact is a discrete, named output that the remote agent produces for a Task. Artifacts are made of Parts — the same TextPart / FilePart / DataPart primitives.</p>
+  <div class="grid g2" style="margin-top:.9rem">
+    <ul class="clean">
+      <li>Attached to the Task in <code>artifacts[]</code></li>
+      <li>Each has an <strong>artifactId</strong>, optional name &amp; description</li>
+      <li>Streamed incrementally via SSE — clients see partial artifacts as they are generated</li>
+      <li>Persists after task completion — client can retrieve via <code>tasks/get</code></li>
+    </ul>
+    <div class="callout info"><b>Example artifacts:</b> a PDF report (FilePart), a structured invoice (DataPart), a markdown summary (TextPart), or an audio clip (FilePart with audio MIME type). One task may produce many artifacts.</div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">METHODS</span>
+  <h2>Core <span style="color:var(--a2a)">JSON-RPC methods</span></h2>
+  <div class="rule a2a"></div>
+  <table style="margin-top:.9rem; width:100%">
+    <thead>
+      <tr><th>Method</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="lbl">message/send</td><td>Send a message; blocks for synchronous Task response</td></tr>
+      <tr><td class="lbl">message/stream</td><td>Send a message; returns incremental SSE stream of Task/Artifact updates</td></tr>
+      <tr><td class="lbl">tasks/get</td><td>Poll current state, history, and artifacts of a Task by ID</td></tr>
+      <tr><td class="lbl">tasks/cancel</td><td>Request cancellation of an in-progress Task</td></tr>
+      <tr><td class="lbl">tasks/resubscribe</td><td>Re-attach SSE stream to an existing Task (reconnect after drop)</td></tr>
+      <tr><td class="lbl">tasks/pushNotificationConfig/set</td><td>Register a webhook URL for async push updates on a Task</td></tr>
+      <tr><td class="lbl">agent/getAuthenticatedExtendedCard</td><td>Retrieve the full Agent Card visible to authenticated clients</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">ON THE WIRE</span>
+  <h2>message/send <span style="color:var(--a2a)">request</span></h2>
+  <div class="rule a2a"></div>
+  <pre><code data-trim data-noescape class="language-json">POST /agent HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer &lt;token&gt;
+
+{
+  "jsonrpc": "2.0",
+  "id": "req-001",
+  "method": "message/send",
+  "params": {
+    "message": {
+      "role": "user",
+      "parts": [
+        {
+          "type": "text",
+          "text": "Extract line items from the attached invoice."
+        }
+      ],
+      "messageId": "msg-abc"
+    }
+  }
+}</code></pre>
+  <p class="muted small" style="margin-top:.6rem">The server responds with a full <strong>Task</strong> object — including its initial <code>status</code>, empty <code>history[]</code>, and <code>artifacts[]</code>. Use <code>tasks/get</code> to poll or switch to <code>message/stream</code> for live updates.</p>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">STREAMING</span>
+  <h2>message/stream &amp; <span style="color:var(--a2a)">SSE</span></h2>
+  <div class="rule a2a"></div>
+  <p class="lead"><code>message/stream</code> returns an HTTP SSE stream. The client receives incremental <strong>TaskStatusUpdate</strong> and <strong>TaskArtifactUpdate</strong> events as the remote agent works.</p>
+  <pre><code data-trim data-noescape class="language-http">HTTP/1.1 200 OK
+Content-Type: text/event-stream
+
+event: TaskStatusUpdate
+data: {"taskId":"task-7f3a","status":{"state":"working",...}}
+
+event: TaskArtifactUpdate
+data: {"taskId":"task-7f3a","artifact":{"artifactId":"art-1",
+  "parts":[{"type":"text","text":"Line items: 3 found"}]}}
+
+event: TaskStatusUpdate
+data: {"taskId":"task-7f3a","status":{"state":"completed",...}}
+</code></pre>
+  <div class="callout info" style="margin-top:.7rem"><b>Why SSE?</b> It's a standard HTTP mechanism — works through firewalls and proxies, requires no new infrastructure, and enables real-time streaming from any HTTP server.</div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">ASYNC</span>
+  <h2>Long-running tasks &amp; <span style="color:var(--a2a)">push</span></h2>
+  <div class="rule a2a"></div>
+  <p class="lead">When tasks run for minutes to hours — or clients go offline — SSE alone isn't enough. A2A push notifications let the remote agent call the client back.</p>
+  <ol class="steps">
+    <li>Client registers a webhook URL via <code>tasks/pushNotificationConfig/set</code></li>
+    <li>Client sends the task and disconnects (no open SSE connection needed)</li>
+    <li>Remote agent works asynchronously — uses its own tools/models</li>
+    <li>Agent POSTs <strong>TaskStatusUpdate</strong> events to the webhook as state changes</li>
+    <li>Client receives update, optionally calls <code>tasks/get</code> or <code>tasks/resubscribe</code></li>
+  </ol>
+  <pre><code data-trim data-noescape class="language-json">{
+  "jsonrpc": "2.0", "method": "tasks/pushNotificationConfig/set",
+  "params": {
+    "taskId": "task-7f3a",
+    "pushNotificationConfig": {
+      "url": "https://client.example.com/webhooks/a2a",
+      "token": "secret-verify-token"
+    }
+  }
+}</code></pre>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">SECURITY</span>
+  <h2>Auth &amp; enterprise <span style="color:var(--a2a)">security</span></h2>
+  <div class="rule a2a"></div>
+  <div class="grid g2" style="margin-top:.8rem">
+    <div>
+      <p class="lead" style="font-size:.95em">The Agent Card declares <code>securitySchemes</code> — clients obtain credentials <strong>out-of-band</strong> and pass them via standard HTTP auth headers.</p>
+      <ul class="clean">
+        <li><strong>OAuth2</strong> — authorization code / client credentials flows</li>
+        <li><strong>OpenID Connect</strong> — identity federation</li>
+        <li><strong>API Key</strong> — header or query parameter</li>
+        <li><strong>HTTP Bearer</strong> — JWT or opaque token</li>
+      </ul>
+      <p class="muted small" style="margin-top:.6rem">The remote agent is treated as a standard opaque enterprise application — no special agent-aware identity layer required.</p>
+    </div>
+    <div>
+      <div class="callout warn" style="margin-bottom:.7rem"><b>Discovery ≠ authorization.</b> Finding an Agent Card does not grant access. Auth must be negotiated separately — the card only describes <em>which scheme</em> to use.</div>
+      <div class="callout info"><b>auth-required state:</b> if credentials expire mid-task, the agent transitions to <code>auth-required</code> and pauses — the client re-authenticates and resubmits.</div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">PATTERNS</span>
+  <h2>Orchestration patterns &amp; <span style="color:var(--a2a)">ecosystem</span></h2>
+  <div class="rule a2a"></div>
+  <div class="grid g2" style="margin-top:.9rem">
+    <div class="card t-a2a">
+      <h3>Orchestration patterns</h3>
+      <ul class="clean">
+        <li><strong>Orchestrator-worker</strong> — central agent delegates sub-tasks to specialists</li>
+        <li><strong>Hierarchical / manager</strong> — multi-level delegation trees</li>
+        <li><strong>Sequential pipeline</strong> — output of one agent feeds the next</li>
+        <li><strong>Parallel fan-out</strong> — broadcast task to multiple agents, aggregate results</li>
+      </ul>
+    </div>
+    <div class="card t-a2a">
+      <h3>Ecosystem</h3>
+      <p class="muted small" style="margin-bottom:.4rem">150+ organizations · Linux Foundation</p>
+      <ul class="clean">
+        <li><strong>Frameworks:</strong> LangGraph, CrewAI, Google ADK, Genkit, Semantic Kernel, AG2</li>
+        <li><strong>Partners:</strong> Atlassian, Box, Salesforce, SAP, ServiceNow, MongoDB, PayPal, Cohere</li>
+        <li><strong>Tooling:</strong> spec validators, agent inspectors, SDK libraries</li>
+        <li><strong>Spec:</strong> v0.3 — gRPC &amp; REST/HTTP+JSON transport bindings added</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">DECISION GUIDE</span>
+  <h2>A2A — when to <span style="color:var(--a2a)">use</span></h2>
+  <div class="rule a2a"></div>
+  <div class="grid g2" style="margin-top:.9rem">
+    <div>
+      <h3 style="margin-bottom:.5rem">Use A2A when…</h3>
+      <ul class="check">
+        <li>Multiple <strong>specialist agents</strong> must collaborate across teams or vendors</li>
+        <li>Agents are built on <strong>different frameworks</strong> or clouds</li>
+        <li>Tasks are <strong>long-running</strong> (minutes → hours) or need human-in-the-loop</li>
+        <li>You need <strong>capability discovery</strong> without prior bilateral agreement</li>
+        <li>Delegation should be <strong>opaque</strong> — internals stay private</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="margin-bottom:.5rem">Don't use A2A for…</h3>
+      <ul class="cross">
+        <li>Reaching raw APIs, databases, or files — use <strong>MCP</strong></li>
+        <li>Streaming tokens to a human UI in real time — use <strong>AG-UI</strong></li>
+        <li>Simple in-process tool calls — direct function calls are cheaper</li>
+      </ul>
+      <div class="callout warn" style="margin-top:.7rem"><b>Limitations:</b> opaque agents are hard to debug &amp; trace; cross-org trust and discovery still maturing; spec is young (versioning churn); unbounded fan-out can exhaust budgets without rate controls.</div>
+    </div>
+  </div>
+  <p class="center muted small" style="margin-top:.9rem"><strong>Takeaway:</strong> A2A is the horizontal glue between specialist agents — pair it with MCP (vertical tools) for a complete agentic system.</p>
+</section>
+<section class="divider" data-auto-animate>
+  <div class="secnum grad">03</div>
+  <h2>AG-UI &amp; A2UI<br><span style="color:var(--agui)">the human layer</span></h2>
+  <div class="secsub">The last mile. Streaming an agent's work to a frontend, rendering rich UI, and letting a human steer.</div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">THE PROBLEM</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>The agent → human <span style="color:var(--agui)">problem</span></h2>
+  <p class="lead">Without a standard, every UI is hard-wired to one model's streaming format — brittle, bespoke, non-portable.</p>
+  <div class="grid g2">
+    <div>
+      <h4 class="center muted small">Without a standard</h4>
+      <ul class="cross">
+        <li>Custom streaming adapter per LLM provider</li>
+        <li>Token format breaks when you swap models</li>
+        <li>Tool-call events differ across frameworks</li>
+        <li>State sync re-invented every project</li>
+        <li>Human-in-the-loop logic scattered in glue code</li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="center small" style="color:var(--agui)">With AG-UI</h4>
+      <ul class="check">
+        <li>One typed-event contract for all agents</li>
+        <li>Swap LLMs without touching the frontend</li>
+        <li>Tool execution visible in the UI out of the box</li>
+        <li>Shared state synced via JSON Patch</li>
+        <li>Approval gates and interrupts are first-class</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">OVERVIEW</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>What is <span style="color:var(--agui)">AG-UI</span></h2>
+  <p class="lead">An open, lightweight, event-based protocol from <strong>CopilotKit</strong> (2025) that standardises how front-end apps connect to AI agents through a stream of typed JSON events.</p>
+  <div class="grid g3" style="margin-bottom:1rem">
+    <div class="card t-agui">
+      <h4>vs MCP</h4>
+      <p class="small">MCP wires the agent to <em>tools</em>. AG-UI wires the agent to the <em>user interface</em>.</p>
+    </div>
+    <div class="card t-agui">
+      <h4>vs A2A</h4>
+      <p class="small">A2A connects agents to <em>other agents</em>. AG-UI connects agents to <em>humans</em>.</p>
+    </div>
+    <div class="card t-agui">
+      <h4>The last mile</h4>
+      <p class="small">MCP → A2A → <strong>AG-UI</strong>. The final hop from agent runtime to the human surface.</p>
+    </div>
+  </div>
+  <div class="callout info"><b>Last mile to the user</b> — AG-UI completes the protocol stack: tool access (MCP), multi-agent coordination (A2A), and now the human interaction layer.</div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">CORE MODEL</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>The <span style="color:var(--agui)">event-stream</span> model</h2>
+  <p class="lead">~16 typed JSON events, grouped into five categories. Transport-agnostic: works over SSE, WebSockets, or webhooks.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin:1.4rem 0">
+    <span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>Lifecycle</span>
+    <span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>Text Messages</span>
+    <span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>Tool Calls</span>
+    <span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>State</span>
+    <span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>Special</span>
+  </div>
+  <dl class="spec">
+    <dt>Transport</dt><dd>SSE · WebSocket · Webhook — your choice</dd>
+    <dt>Wire format</dt><dd>Small JSON objects: <code>{ "type": "EVENT_TYPE", ...payload }</code></dd>
+    <dt>Direction</dt><dd>Agent → Frontend (with bidirectional state sync)</dd>
+    <dt>Middleware</dt><dd>Adapter layer bridges any agent's native format to AG-UI events</dd>
+  </dl>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">EVENTS · LIFECYCLE</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>Events: <span style="color:var(--agui)">Lifecycle</span></h2>
+  <p class="lead muted small">Signal when a run or step starts, finishes, or errors — giving the UI a clear execution skeleton.</p>
+  <dl class="spec">
+    <dt>RUN_STARTED</dt><dd>A new agent run has begun; carries run ID and initial metadata.</dd>
+    <dt>RUN_FINISHED</dt><dd>The run completed successfully; final signal to close the stream.</dd>
+    <dt>RUN_ERROR</dt><dd>The run failed; payload includes error message and stack context.</dd>
+    <dt>STEP_STARTED</dt><dd>A logical step within the run has begun (e.g., planning, retrieval, generation).</dd>
+    <dt>STEP_FINISHED</dt><dd>A step completed; UI can mark milestones or progress indicators.</dd>
+  </dl>
+  <div class="callout info" style="margin-top:1rem"><b>Why it matters</b> — Lifecycle events let any UI render accurate progress bars and error states without agent-specific parsing.</div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">EVENTS · TEXT</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>Events: <span style="color:var(--agui)">Text messages</span></h2>
+  <p class="lead">Three events bracket every streamed response, enabling token-by-token rendering identical to native LLM streaming.</p>
+  <div class="grid g3">
+    <div class="card t-agui">
+      <h3>TEXT_MESSAGE_START</h3>
+      <p class="small">Opens a new message; carries a <code>message_id</code> and role. UI allocates a chat bubble.</p>
+    </div>
+    <div class="card t-agui">
+      <h3>TEXT_MESSAGE_CONTENT</h3>
+      <p class="small"><strong>Token delta</strong> — emitted once per token chunk. UI appends the <code>delta</code> field to the bubble in real time.</p>
+    </div>
+    <div class="card t-agui">
+      <h3>TEXT_MESSAGE_END</h3>
+      <p class="small">Closes the message. UI finalises the bubble, enables copy/action controls.</p>
+      <p class="tiny muted">Note: no full text in END — reconstruct from deltas.</p>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">EVENTS · TOOL CALLS</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>Events: <span style="color:var(--agui)">Tool calls</span></h2>
+  <p class="lead">Four events expose live tool execution — the UI can show exactly what the agent is calling and what came back.</p>
+  <ul class="clean agui">
+    <li><strong>TOOL_CALL_START</strong> — agent begins invoking a tool; carries <code>tool_call_id</code> and <code>tool_name</code>. UI can show a spinner labelled with the tool name.</li>
+    <li><strong>TOOL_CALL_ARGS</strong> — streaming argument deltas (mirrors TEXT_MESSAGE_CONTENT for args). UI can preview the forming JSON in real time.</li>
+    <li><strong>TOOL_CALL_END</strong> — argument stream closed; tool is now executing. UI transitions from "building args" to "running".</li>
+    <li><strong>TOOL_CALL_RESULT</strong> — tool returned; payload carries the result or error. UI renders the output inline and resumes streaming.</li>
+  </ul>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">EVENTS · STATE</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>Events: <span style="color:var(--agui)">State management</span></h2>
+  <p class="lead">Shared agent–UI state kept in sync efficiently — full snapshots on connect, incremental patches thereafter.</p>
+  <div class="grid g2">
+    <div>
+      <dl class="spec">
+        <dt>STATE_SNAPSHOT</dt><dd>Full serialised state object sent once (e.g., on connect or reset). UI replaces its local copy entirely.</dd>
+        <dt>STATE_DELTA</dt><dd>Incremental update via <strong>JSON Patch (RFC 6902)</strong> — only the changed paths are sent. Bandwidth-efficient for large states.</dd>
+        <dt>MESSAGES_SNAPSHOT</dt><dd>Full conversation history snapshot. Used to re-hydrate UI after reconnection or page reload.</dd>
+      </dl>
+    </div>
+    <div>
+      <div class="card t-agui">
+        <h4>Why JSON Patch?</h4>
+        <p class="small">RFC 6902 patches express <code>add</code>, <code>remove</code>, <code>replace</code>, <code>move</code> operations on a JSON tree. A large agent state (100 KB) can be updated with a 50-byte patch — no re-serialisation of unchanged data.</p>
+      </div>
+      <div class="callout good" style="margin-top:.8rem"><b>Result:</b> agent and frontend share a live, consistent view of world state with minimal bandwidth.</div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">EXAMPLE</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>An AG-UI <span style="color:var(--agui)">event stream</span></h2>
+<pre><code data-trim data-noescape class="language-json">{ "type": "RUN_STARTED",   "run_id": "r1" }
+
+{ "type": "TEXT_MESSAGE_START",   "message_id": "m1", "role": "assistant" }
+{ "type": "TEXT_MESSAGE_CONTENT", "message_id": "m1", "delta": "Let me check " }
+{ "type": "TEXT_MESSAGE_CONTENT", "message_id": "m1", "delta": "the weather." }
+{ "type": "TEXT_MESSAGE_END",     "message_id": "m1" }
+
+{ "type": "TOOL_CALL_START", "tool_call_id": "tc1", "tool_name": "get_weather" }
+{ "type": "TOOL_CALL_ARGS",  "tool_call_id": "tc1", "delta": "{\"city\":\"SF\"}" }
+{ "type": "TOOL_CALL_END",   "tool_call_id": "tc1" }
+
+{ "type": "STATE_DELTA", "operations": [
+    { "op": "replace", "path": "/weather/city", "value": "SF" }
+  ]
+}
+
+{ "type": "TOOL_CALL_RESULT", "tool_call_id": "tc1", "result": "18°C, fog" }
+
+{ "type": "RUN_FINISHED", "run_id": "r1" }</code></pre>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">FEATURES</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>Shared state &amp; <span style="color:var(--agui)">frontend tools</span></h2>
+  <div class="grid g2">
+    <div class="card t-agui">
+      <h3>Bidirectional state sync</h3>
+      <p class="small">Agent and UI share a live state object. STATE_SNAPSHOT initialises it; STATE_DELTA patches it incrementally. The frontend can also push state mutations back to the agent — both sides see the same truth.</p>
+    </div>
+    <div class="card t-agui">
+      <h3>Frontend tools</h3>
+      <p class="small">The agent can invoke <em>tools defined in the UI</em> — functions the browser exposes. Examples:</p>
+      <ul class="clean agui" style="font-size:.82em">
+        <li><code>navigate(url)</code> — agent changes the page</li>
+        <li><code>highlight(selector)</code> — agent draws attention to an element</li>
+        <li><code>openModal(id)</code> — agent surfaces a dialog</li>
+        <li><code>fillForm(fields)</code> — agent pre-populates a form</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout info" style="margin-top:.8rem"><b>Generative UI</b> — combined, these primitives let the agent actively <em>drive</em> the interface, not just narrate into a chat bubble.</div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">HUMAN-IN-THE-LOOP</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>Human-in-the-<span style="color:var(--agui)">loop</span></h2>
+  <p class="lead">AG-UI makes approvals and interrupts first-class citizens — not afterthoughts bolted onto a chat window.</p>
+  <div class="grid g2">
+    <div>
+      <ul class="check">
+        <li>Agent pauses and emits an approval event before irreversible actions (file delete, send email, deploy)</li>
+        <li>Frontend renders an Approve / Reject prompt; response streams back into the run</li>
+        <li>Mid-task human input supported — user can inject context or correct course at any step</li>
+        <li>Interrupt at any point — run can be paused, modified, or cancelled via the same channel</li>
+        <li>Audit trail — every approval decision is an event in the stream, persistent and inspectable</li>
+      </ul>
+    </div>
+    <div>
+      <div class="callout good"><b>Safety gate</b> — gate irreversible actions behind a human approval without changing agent logic; the protocol handles the pause-resume handshake.</div>
+      <div class="callout warn" style="margin-top:.9rem"><b>Pattern</b> — agent emits STEP_FINISHED with <code>"requires_approval": true</code>; frontend holds the stream; user responds; STEP_STARTED resumes the next step.</div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">ARCHITECTURE</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>Architecture &amp; <span style="color:var(--agui)">integrations</span></h2>
+  <div class="grid g2">
+    <div>
+      <div class="flow">
+        <div class="node" style="border-color:var(--agui)">Frontend<br><span class="tiny muted">React / any</span></div>
+        <div class="node" style="border-color:var(--agui)">AG-UI Client<br><span class="tiny muted">CopilotKit SDK</span></div>
+        <div class="node" style="border-color:var(--agui)">Middleware<br><span class="tiny muted">format adapter</span></div>
+        <div class="node" style="border-color:var(--agui)">Agent Runtime<br><span class="tiny muted">any framework</span></div>
+      </div>
+      <p class="tiny muted center">HTTP · SSE · WebSocket</p>
+    </div>
+    <div>
+      <h4>Supported agent frameworks</h4>
+      <ul class="clean agui">
+        <li>LangGraph</li>
+        <li>CrewAI</li>
+        <li>Mastra</li>
+        <li>Pydantic AI</li>
+        <li>LlamaIndex</li>
+        <li>Agno &amp; AG2</li>
+      </ul>
+      <p class="small muted" style="margin-top:.6rem">Middleware layer adapts any non-native agent to the AG-UI event spec — no framework lock-in.</p>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">A2UI</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>A2UI — <span style="color:var(--agui)">generative UI</span></h2>
+  <p class="lead">Instead of returning only text, the agent emits a <strong>declarative description of UI components</strong> — forms, cards, buttons, charts — that the client renders natively. User interactions flow back to the agent.</p>
+  <ul class="clean agui">
+    <li>UI is <strong>runtime-composed</strong> — no hardcoded screens; the agent decides what to show per turn</li>
+    <li>Components are described in a structured schema: type, props, children, event callbacks</li>
+    <li>User taps a button → the interaction event is sent back to the agent as context</li>
+    <li>Enables rich data-collection flows, approval dialogs, and dashboards — all agent-driven</li>
+  </ul>
+  <div class="callout info" style="margin-top:.9rem"><b>AG-UI vs A2UI</b> — AG-UI is the <em>event transport protocol</em> (how bytes travel). A2UI is about the <em>UI content payloads</em> carried across that transport — the two are complementary, not competing.</div>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">A2UI · EXAMPLE</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>A2UI — a <span style="color:var(--agui)">UI payload</span></h2>
+<pre><code data-trim data-noescape class="language-json">{
+  "type": "ui_component",
+  "component": {
+    "type": "card",
+    "title": "Confirm deployment",
+    "body": [
+      {
+        "type": "text",
+        "content": "Deploy v2.4.1 to production?"
+      },
+      {
+        "type": "text_field",
+        "label": "Release note",
+        "placeholder": "Optional message...",
+        "callback": "on_note_change"
+      }
+    ],
+    "actions": [
+      { "type": "button", "label": "Deploy",  "variant": "primary",  "callback": "on_confirm" },
+      { "type": "button", "label": "Cancel",  "variant": "secondary","callback": "on_cancel"  }
+    ]
+  }
+}</code></pre>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">COMPARISON</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>AG-UI vs A2UI vs <span style="color:var(--agui)">MCP-UI</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>What it carries</th>
+        <th>Origin of UI</th>
+        <th>Layer</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="lbl"><span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span></td>
+        <td>Typed event stream (lifecycle, text, tool calls, state)</td>
+        <td>Agent runtime</td>
+        <td>Transport / protocol</td>
+      </tr>
+      <tr>
+        <td class="lbl"><span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>A2UI</span></td>
+        <td>Declarative UI component payloads inside the stream</td>
+        <td>Agent (declarative schema)</td>
+        <td>UI content / rendering</td>
+      </tr>
+      <tr>
+        <td class="lbl"><span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP-UI</span></td>
+        <td>Interactive UI resources returned by MCP tool servers (<code>ui://</code>)</td>
+        <td>Tool server (MCP extension)</td>
+        <td>Tool-result rendering</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="small muted center" style="margin-top:.9rem">Together: AG-UI (transport) + A2UI (agent-generated content) + MCP-UI (tool-server UI) cover the full human surface.</p>
+</section>
+
+<section data-auto-animate>
+  <div class="phead">
+    <span class="kicker">DECISION GUIDE</span>
+    <div class="rule agui"></div>
+  </div>
+  <h2>AG-UI / A2UI — <span style="color:var(--agui)">when to use</span></h2>
+  <div class="grid g2">
+    <div>
+      <h4 class="center" style="color:var(--agui)">Use when</h4>
+      <ul class="check">
+        <li>Humans watch an agent work in real time (copilots, IDE assistants, customer chat)</li>
+        <li>You need token-streaming in a custom UI without per-model adapters</li>
+        <li>Approval gates are required before irreversible actions</li>
+        <li>Agent state must stay in sync with the frontend</li>
+        <li>You want the agent to drive UI — forms, confirmations, dashboards</li>
+        <li>Swapping agent frameworks without rewriting the frontend</li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="center muted">Skip when</h4>
+      <ul class="cross">
+        <li>Purely headless, back-end agent pipelines with no human observer</li>
+        <li>Batch / offline workloads where latency doesn't matter</li>
+        <li>Simple single-turn request-response with no state to share</li>
+        <li>Internal automation with no approval requirement</li>
+      </ul>
+    </div>
+  </div>
+  <p class="lead center" style="margin-top:.9rem;color:var(--agui)">If a human is watching — use AG-UI.</p>
+</section>
+<!-- SLIDE 1: ACP DIVIDER -->
+<section class="divider">
+  <div class="secnum grad">04</div>
+  <h2>ACP — Agent Communication Protocol</h2>
+  <p class="secsub">REST-native agent messaging. The simplest possible contract between services-as-agents.</p>
+</section>
+
+<!-- SLIDE 2: What is ACP -->
+<section>
+  <div class="phead">
+    <span class="kicker">ACP</span>
+    <span class="meta">IBM / BeeAI → Linux Foundation / REST · HTTP · async-first</span>
+  </div>
+  <div class="rule acp"></div>
+  <h2>What is <span style="color:var(--acp)">ACP?</span></h2>
+  <p class="lead">A REST-native open standard for agent-to-agent communication — designed to be the simplest possible contract a service-as-agent can offer.</p>
+  <div class="grid g3" style="margin-top:1.2rem">
+    <div class="card t-acp">
+      <h4>Origin</h4>
+      <p>Born at <strong>IBM Research</strong> via the <strong>BeeAI</strong> project. Now in open governance under the <strong>Linux Foundation</strong>.</p>
+    </div>
+    <div class="card t-acp">
+      <h4>Philosophy</h4>
+      <p>Standardized RESTful API over plain HTTP. No SDK required. Async-first, multimodal, local-first and minimalistic.</p>
+    </div>
+    <div class="card t-acp">
+      <h4>Sweet spot</h4>
+      <p>Existing REST / microservice estates that want agent capabilities without a heavy new runtime or framework dependency.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3: REST-native by design -->
+<section>
+  <span class="kicker">ACP</span>
+  <h2>REST-native <span style="color:var(--acp)">by design</span></h2>
+  <div class="rule acp"></div>
+  <ul class="clean acp">
+    <li><strong>No SDK required</strong> — any HTTP client works, including plain <code>curl</code></li>
+    <li><strong>Rides plain HTTP</strong> — works behind every API gateway, proxy, and load balancer already in your estate</li>
+    <li><strong>Async-first</strong> — fire a run, poll or subscribe; sync and SSE streaming also supported</li>
+    <li><strong>Multimodal</strong> — messages carry MIME-typed parts (text, images, files) natively</li>
+    <li><strong>Local-first</strong> — discovery manifest ships with the agent package; no central registry needed</li>
+  </ul>
+  <div class="callout info" style="margin-top:1rem">
+    <b>Why it matters:</b> most enterprise services already speak REST. ACP makes those services agents with zero framework lock-in.
+  </div>
+</section>
+
+<!-- SLIDE 4: Core concepts -->
+<section>
+  <span class="kicker">ACP</span>
+  <h2>Core <span style="color:var(--acp)">concepts</span></h2>
+  <div class="rule acp"></div>
+  <dl class="spec">
+    <dt><span class="chip c-acp"><span class="dot" style="background:var(--acp)"></span>Agent</span></dt>
+    <dd>A service described by a manifest (Agent Detail). Discoverable via <code>GET /agents/{name}</code>. Stateless or stateful across sessions.</dd>
+    <dt><span class="chip c-acp"><span class="dot" style="background:var(--acp)"></span>Run</span></dt>
+    <dd>A single invocation of an agent. Can be synchronous, asynchronous, or streamed. Has a lifecycle: created → running → completed / failed / cancelled.</dd>
+    <dt><span class="chip c-acp"><span class="dot" style="background:var(--acp)"></span>Message</span></dt>
+    <dd>An ordered list of MessageParts sent to or received from an agent. Equivalent to a "turn" in the conversation.</dd>
+    <dt><span class="chip c-acp"><span class="dot" style="background:var(--acp)"></span>MessagePart</span></dt>
+    <dd>Atomic content unit: a <code>content_type</code> (MIME), an optional <code>name</code>, and either inline <code>content</code> or a <code>content_url</code>.</dd>
+    <dt><span class="chip c-acp"><span class="dot" style="background:var(--acp)"></span>Await</span></dt>
+    <dd>The agent pauses a run and requests additional information from the caller — ACP's elicitation / human-in-the-loop primitive.</dd>
+  </dl>
+</section>
+
+<!-- SLIDE 5: RESTful endpoint model -->
+<section>
+  <span class="kicker">ACP</span>
+  <h2>The RESTful <span style="color:var(--acp)">endpoint model</span></h2>
+  <div class="rule acp"></div>
+  <table>
+    <thead>
+      <tr><th>Method &amp; Path</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="lbl"><code>GET /agents</code></td>
+        <td>List all agents available on this server — the discovery index</td>
+      </tr>
+      <tr>
+        <td class="lbl"><code>GET /agents/{name}</code></td>
+        <td>Fetch the manifest (Agent Detail) for a specific agent</td>
+      </tr>
+      <tr>
+        <td class="lbl"><code>POST /runs</code></td>
+        <td>Create a new run — body specifies agent name, mode (sync/async/stream), and the input message</td>
+      </tr>
+      <tr>
+        <td class="lbl"><code>GET /runs/{run_id}</code></td>
+        <td>Poll run status and retrieve the output when complete</td>
+      </tr>
+      <tr>
+        <td class="lbl"><code>POST /runs/{run_id}/cancel</code></td>
+        <td>Request cancellation of an in-progress run</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="muted small center" style="margin-top:0.8rem">SSE (Server-Sent Events) is used when <code>mode: "stream"</code> — no WebSocket dependency.</p>
+</section>
+
+<!-- SLIDE 6: Run modes -->
+<section>
+  <span class="kicker">ACP</span>
+  <h2>Run modes: <span style="color:var(--acp)">sync · async · stream</span></h2>
+  <div class="rule acp"></div>
+  <div class="grid g3">
+    <div class="card t-acp">
+      <h3>Sync</h3>
+      <p>POST /runs blocks until the agent responds. Simple request–response. Best for fast, bounded tasks where latency is acceptable.</p>
+      <p class="tiny muted">mode: "sync"</p>
+    </div>
+    <div class="card t-acp">
+      <h3>Async <span class="tiny muted">(default)</span></h3>
+      <p>POST /runs returns a <code>run_id</code> immediately. Caller polls <code>GET /runs/{id}</code> for status and result. Scales to long-running agents.</p>
+      <p class="tiny muted">mode: "async"</p>
+    </div>
+    <div class="card t-acp">
+      <h3>Stream</h3>
+      <p>POST /runs opens an SSE connection. Agent emits partial results as events — useful for token-by-token LLM output. No WebSocket needed.</p>
+      <p class="tiny muted">mode: "stream"</p>
+    </div>
+  </div>
+  <div class="callout info" style="margin-top:1rem">
+    <b>Async-first design:</b> ACP treats async as the default mental model — sync and stream are convenience overlays on top.
+  </div>
+</section>
+
+<!-- SLIDE 7: ACP on the wire -->
+<section>
+  <span class="kicker">ACP</span>
+  <h2>ACP <span style="color:var(--acp)">on the wire</span></h2>
+  <div class="rule acp"></div>
+  <pre><code data-trim data-noescape class="language-bash">
+# Create an async run — no SDK, just curl
+curl -X POST https://agents.example.com/runs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_name": "summarizer",
+    "mode": "async",
+    "message": {
+      "parts": [
+        {
+          "content_type": "text/plain",
+          "content": "Summarise the Q2 earnings report."
+        }
+      ]
+    }
+  }'
+# → { "run_id": "run_01JXYZ", "status": "created" }
+
+# Poll for result
+curl https://agents.example.com/runs/run_01JXYZ
+  </code></pre>
+</section>
+
+<!-- SLIDE 8: Discovery & manifests -->
+<section>
+  <span class="kicker">ACP</span>
+  <h2>Discovery <span style="color:var(--acp)">&amp; manifests</span></h2>
+  <div class="rule acp"></div>
+  <p class="lead">Every ACP agent ships a <strong>manifest</strong> (Agent Detail) that describes its identity, capabilities, and expected message schema.</p>
+  <ul class="clean acp">
+    <li><strong>Offline / embedded discovery</strong> — the manifest travels with the agent package; no external registry call required at startup</li>
+    <li><strong>Runtime discovery</strong> — <code>GET /agents</code> and <code>GET /agents/{name}</code> expose manifests over the wire to any caller</li>
+    <li><strong>Schema-first</strong> — callers can inspect input/output schemas before creating a run, enabling validation and tooling</li>
+    <li><strong>Stateless or stateful</strong> — manifest declares whether the agent supports sessions across runs</li>
+  </ul>
+  <div class="callout info" style="margin-top:1rem">
+    <b>Local-first principle:</b> ACP is designed to work fully without cloud connectivity — package the manifest, deploy anywhere, discover locally.
+  </div>
+</section>
+
+<!-- SLIDE 9: ACP vs A2A -->
+<section>
+  <span class="kicker">ACP vs A2A</span>
+  <h2>Overlap <span style="color:var(--acp)">&amp; convergence</span></h2>
+  <div class="rule acp"></div>
+  <table>
+    <thead>
+      <tr><th></th><th>ACP</th><th>A2A</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="lbl">Wire format</td><td>REST / JSON over HTTP</td><td>JSON-RPC 2.0 over HTTP</td></tr>
+      <tr><td class="lbl">Discovery</td><td>Manifest shipped with package; <code>GET /agents</code></td><td>Agent Card at <code>/.well-known/agent.json</code></td></tr>
+      <tr><td class="lbl">SDK required?</td><td>No — curl-friendly</td><td>No, but SDKs common</td></tr>
+      <tr><td class="lbl">Task model</td><td>Run (lightweight)</td><td>Task (richer lifecycle)</td></tr>
+      <tr><td class="lbl">Design focus</td><td>Local-first, async, minimal</td><td>Multi-vendor ecosystem, enterprise</td></tr>
+      <tr><td class="lbl">Ecosystem</td><td>IBM BeeAI, growing</td><td>Google, broader multi-vendor</td></tr>
+      <tr><td class="lbl">Governance</td><td>Linux Foundation</td><td>Linux Foundation</td></tr>
+    </tbody>
+  </table>
+  <div class="callout info" style="margin-top:0.8rem">
+    <b>Converging:</b> Both sit under the Linux Foundation. In 2025 the BeeAI/IBM team aligned ACP's roadmap toward A2A. Expect consolidation — the boundary is blurring.
+  </div>
+</section>
+
+<!-- SLIDE 10: ACP — when to use -->
+<section>
+  <span class="kicker">ACP</span>
+  <h2>When to <span style="color:var(--acp)">use ACP</span></h2>
+  <div class="rule acp"></div>
+  <div class="grid g2">
+    <div>
+      <h4 class="center" style="color:var(--acp)">Use ACP when…</h4>
+      <ul class="check">
+        <li>You want the <strong>simplest possible REST contract</strong> with zero framework lock-in</li>
+        <li>You're in an <strong>existing REST / microservice estate</strong> and agents are just another service</li>
+        <li>You need <strong>local-first or embedded</strong> agent discovery (air-gapped / edge)</li>
+        <li>Async-first polling fits your orchestration pattern</li>
+        <li>Small team; minimal operational overhead is a priority</li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="center" style="color:var(--acp)">Avoid ACP when…</h4>
+      <ul class="cross">
+        <li>You need <strong>rich streaming UX</strong> to a browser client (reach for AG-UI)</li>
+        <li>You need to <strong>reach raw tools / context</strong> (use MCP)</li>
+        <li>You want the <strong>broadest multi-vendor ecosystem</strong> today (A2A has more traction)</li>
+        <li>Complex task lifecycle with callbacks, artifacts, and auth flows (A2A)</li>
+      </ul>
+    </div>
+  </div>
+  <p class="muted small center" style="margin-top:0.8rem">ACP and A2A are converging — choose ACP for plain-REST simplicity now; watch the Linux Foundation roadmap for the merged future.</p>
+</section>
+
+<!-- SLIDE 11: ANP DIVIDER -->
+<section class="divider">
+  <div class="secnum grad">05</div>
+  <h2>ANP — Agent Network Protocol</h2>
+  <p class="secsub">The network layer for the open agent web. Decentralized identity and discovery across organizations.</p>
+</section>
+
+<!-- SLIDE 12: The open agent web -->
+<section>
+  <div class="phead">
+    <span class="kicker">ANP</span>
+    <span class="meta">open-source / DID · JSON-LD · decentralized</span>
+  </div>
+  <div class="rule anp"></div>
+  <h2>The open <span style="color:var(--anp)">agent web</span></h2>
+  <p class="lead">ANP's vision: be the <strong>"HTTP of the agent era"</strong> — a universal network layer that lets agents discover, identify, and communicate across the open web without central coordination.</p>
+  <div class="grid g2" style="margin-top:1.2rem">
+    <div class="card t-anp">
+      <h4>Internet of Agents</h4>
+      <p>Just as HTTP let any server talk to any browser, ANP aspires to let any agent talk to any other agent — regardless of vendor, org, or runtime — on the open internet.</p>
+    </div>
+    <div class="card t-anp">
+      <h4>Decentralized by design</h4>
+      <p>No central registry. No single authority. Agents publish crawlable description documents and carry self-sovereign identities via W3C DIDs — the web infrastructure applied to agents.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 13: The problem — trust between strangers -->
+<section>
+  <span class="kicker">ANP</span>
+  <h2>The problem: <span style="color:var(--anp)">trust between strangers</span></h2>
+  <div class="rule anp"></div>
+  <p class="lead">Enterprise protocols (A2A, ACP) assume you already <em>know</em> your counterparties. But the open agent web needs agents to find and trust <strong>complete strangers</strong>.</p>
+  <div class="grid g2" style="margin-top:1rem">
+    <div>
+      <h4 class="center">Without ANP</h4>
+      <ul class="cross">
+        <li>No shared identity standard across orgs</li>
+        <li>No decentralized discovery — siloed registries or manual configuration</li>
+        <li>No way to verify an unknown agent's claims without a trusted third party</li>
+        <li>Cross-org collaboration requires bilateral integration agreements</li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="center" style="color:var(--anp)">With ANP</h4>
+      <ul class="check">
+        <li>Self-sovereign DID identity — verifiable, no central authority</li>
+        <li>Crawlable description docs — find agents like web pages</li>
+        <li>End-to-end encrypted communication channel</li>
+        <li>Dynamic protocol negotiation — interop without pre-agreement</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 14: Three-layer architecture -->
+<section>
+  <span class="kicker">ANP</span>
+  <h2>Three-layer <span style="color:var(--anp)">architecture</span></h2>
+  <div class="rule anp"></div>
+  <div class="flow" style="flex-direction:column;gap:0.7rem;margin-top:0.6rem">
+    <div class="node" style="border-color:var(--anp);padding:0.8rem 1.4rem">
+      <span class="chip c-anp"><span class="dot" style="background:var(--anp)"></span>Layer 3 — Application</span>
+      <p class="small" style="margin:0.3rem 0 0">Agent Description documents (JSON-LD). Publish capabilities, endpoints, and interfaces as crawlable, semantically searchable linked data.</p>
+    </div>
+    <div class="node" style="border-color:var(--anp);padding:0.8rem 1.4rem">
+      <span class="chip c-anp"><span class="dot" style="background:var(--anp)"></span>Layer 2 — Meta-protocol</span>
+      <p class="small" style="margin:0.3rem 0 0">Dynamic negotiation of which protocol and data format to use — via natural language and code — so agents interoperate without pre-agreed schemas.</p>
+    </div>
+    <div class="node" style="border-color:var(--anp);padding:0.8rem 1.4rem">
+      <span class="chip c-anp"><span class="dot" style="background:var(--anp)"></span>Layer 1 — Identity &amp; Encryption</span>
+      <p class="small" style="margin:0.3rem 0 0">W3C Decentralized Identifiers (DIDs) — notably <strong>did:wba</strong> — giving each agent a self-sovereign, verifiable identity with end-to-end encrypted communication. No central authority.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 15: Layer 1 — DIDs & did:wba -->
+<section>
+  <span class="kicker">ANP · Layer 1</span>
+  <h2>DIDs <span style="color:var(--anp)">&amp; did:wba</span></h2>
+  <div class="rule anp"></div>
+  <p class="lead"><strong>W3C Decentralized Identifiers (DIDs)</strong> give each agent a globally unique, cryptographically verifiable identity that no central authority controls.</p>
+  <ul class="clean anp">
+    <li><strong>did:wba</strong> (Web-Based Agent) — the ANP-native DID method; resolves via HTTPS, no blockchain required</li>
+    <li><strong>Self-sovereign</strong> — the agent owns its identity; no registration with a central directory</li>
+    <li><strong>Verifiable</strong> — public/private key pairs let counterparties verify identity claims without a trusted third party</li>
+    <li><strong>End-to-end encryption</strong> — communication channels are encrypted at the protocol layer, not just transport (TLS)</li>
+    <li><strong>Portable</strong> — the same DID works regardless of hosting provider, runtime, or cloud vendor</li>
+  </ul>
+  <div class="callout info" style="margin-top:0.9rem">
+    <b>Analogy:</b> A DID is to an agent what a domain name + TLS certificate is to a web server — but self-issued and cryptographically bound.
+  </div>
+</section>
+
+<!-- SLIDE 16: Layer 2 — meta-protocol negotiation -->
+<section>
+  <span class="kicker">ANP · Layer 2</span>
+  <h2>Meta-protocol <span style="color:var(--anp)">negotiation</span></h2>
+  <div class="rule anp"></div>
+  <p class="lead">Agents that have never met before must agree on <em>how</em> to talk before they can exchange meaningful content. Layer 2 handles this dynamically.</p>
+  <div class="grid g2" style="margin-top:1rem">
+    <div class="card t-anp">
+      <h4>The challenge</h4>
+      <p>Different agents may speak REST, JSON-RPC, GraphQL, or custom schemas. Pre-agreeing on a single format doesn't scale to an open agent internet.</p>
+    </div>
+    <div class="card t-anp">
+      <h4>The solution</h4>
+      <p>Agents negotiate via <strong>natural language + code</strong> — describing their capabilities and agreeing on a protocol/format at runtime, without any shared prior configuration.</p>
+    </div>
+  </div>
+  <div class="callout info" style="margin-top:1rem">
+    <b>Key insight:</b> LLM-native agents can read each other's capability descriptions in natural language and generate adapter code on the fly — making interop a runtime concern, not a design-time constraint.
+  </div>
+</section>
+
+<!-- SLIDE 17: Layer 3 — Agent Description (JSON-LD) -->
+<section>
+  <span class="kicker">ANP · Layer 3</span>
+  <h2>Agent Description <span style="color:var(--anp)">(JSON-LD)</span></h2>
+  <div class="rule anp"></div>
+  <p class="muted small">Capabilities published as crawlable, semantically rich linked-data documents — like a web page for agents.</p>
+  <pre><code data-trim data-noescape class="language-json">
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://anp.example/ns/agent/v1"
+  ],
+  "@type": "AgentDescription",
+  "did": "did:wba:agents.acme.com:summarizer",
+  "name": "Acme Summarizer",
+  "description": "Summarises documents up to 200k tokens.",
+  "capabilities": [
+    {
+      "@type": "Capability",
+      "name": "summarize",
+      "inputSchema": "https://schema.org/DigitalDocument",
+      "outputSchema": "https://schema.org/Article"
+    }
+  ],
+  "endpoint": "https://agents.acme.com/summarizer"
+}
+  </code></pre>
+</section>
+
+<!-- SLIDE 18: Decentralized discovery -->
+<section>
+  <span class="kicker">ANP</span>
+  <h2>Decentralized <span style="color:var(--anp)">discovery</span></h2>
+  <div class="rule anp"></div>
+  <p class="lead">ANP eliminates the need for a central agent registry by treating agent discovery like web crawling — follow the links, index the semantics.</p>
+  <ul class="clean anp">
+    <li><strong>Crawlable linked documents</strong> — Agent Description docs reference each other via standard web links; a crawler can traverse the agent graph</li>
+    <li><strong>Semantic search</strong> — JSON-LD + schema.org vocabulary means search engines (and agents) can understand capability semantics, not just keywords</li>
+    <li><strong>No central registry</strong> — any agent can publish its description at its DID endpoint; no permission or registration required</li>
+    <li><strong>Composable</strong> — agent descriptions can link to sub-agents, forming a navigable capability graph across the open web</li>
+    <li><strong>Resilient</strong> — decentralized means no single point of failure for discovery; mirrors how DNS/web works</li>
+  </ul>
+  <p class="muted small center" style="margin-top:0.8rem">Aspires to enable "agent search engines" analogous to Google — but for discovering agent capabilities across organizations.</p>
+</section>
+
+<!-- SLIDE 19: ANP vs A2A -->
+<section>
+  <span class="kicker">ANP vs A2A</span>
+  <h2>Open internet <span style="color:var(--anp)">vs enterprise</span></h2>
+  <div class="rule anp"></div>
+  <table>
+    <thead>
+      <tr><th></th><th>A2A</th><th>ANP</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="lbl">Target scope</td><td>Enterprise, known counterparties</td><td>Open internet, strangers</td></tr>
+      <tr><td class="lbl">Discovery</td><td><code>/.well-known/agent.json</code> within a trust boundary</td><td>Crawlable JSON-LD docs, decentralized</td></tr>
+      <tr><td class="lbl">Identity</td><td>OAuth / OIDC within org or federation</td><td>W3C DIDs — self-sovereign, no central authority</td></tr>
+      <tr><td class="lbl">Trust model</td><td>Pre-established trust, managed access</td><td>Cryptographic verification between strangers</td></tr>
+      <tr><td class="lbl">Protocol negotiation</td><td>Defined upfront (JSON-RPC)</td><td>Dynamic meta-protocol negotiation</td></tr>
+      <tr><td class="lbl">Maturity</td><td>Production-ready, growing ecosystem</td><td>Early / research-forward</td></tr>
+    </tbody>
+  </table>
+  <div class="callout info" style="margin-top:0.8rem">
+    <b>Complementary:</b> ANP can provide the identity and discovery substrate <em>beneath</em> cross-org A2A workflows — DIDs resolve who you're talking to before A2A task negotiation begins.
+  </div>
+</section>
+
+<!-- SLIDE 20: ANP — when to use -->
+<section>
+  <span class="kicker">ANP</span>
+  <h2>When to <span style="color:var(--anp)">use ANP</span></h2>
+  <div class="rule anp"></div>
+  <div class="grid g2">
+    <div>
+      <h4 class="center" style="color:var(--anp)">Use ANP when…</h4>
+      <ul class="check">
+        <li>Agents must <strong>find and trust counterparties</strong> across organizational boundaries</li>
+        <li>You're building an <strong>open agent marketplace</strong> or cross-org collaboration platform</li>
+        <li>You need <strong>self-sovereign identity</strong> — no central auth provider for all participants</li>
+        <li>You want your agents to be <strong>semantically discoverable</strong> like web pages</li>
+        <li>Long-term vision aligns with a <strong>decentralized Internet of Agents</strong></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="center" style="color:var(--anp)">Avoid ANP when…</h4>
+      <ul class="cross">
+        <li>Agents are <strong>internal, known-party workflows</strong> — A2A or ACP are simpler</li>
+        <li>You need <strong>production-ready maturity today</strong> — ANP is early/research-forward</li>
+        <li>Your org already has a <strong>centralized identity provider</strong> (OIDC/OAuth) that covers your agent estate</li>
+        <li>Team lacks Web3 / DID experience and the learning curve isn't justified</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout warn" style="margin-top:0.8rem">
+    <b>Maturity note:</b> ANP is research-forward and part of the broader "Internet of Agents" movement. Evaluate carefully before committing to production workloads.
+  </div>
+</section>
+<section class="divider" data-auto-animate>
+  <div class="secnum grad">06</div>
+  <div class="sectitle">The wider landscape</div>
+  <div class="secsub">Beyond the core five: adjacent protocols, frameworks, governance, and where this is all heading.</div>
+</section>
+
+<section>
+  <span class="kicker">LANDSCAPE</span>
+  <h2>The protocol <span class="grad">map</span></h2>
+  <div class="rule"></div>
+  <p class="lead center">Every layer is complementary — not a competition. Different protocols solve different jobs.</p>
+  <div class="grid g23" style="margin-top:0.6rem;gap:0.7rem">
+    <div class="card" style="padding:0.8rem 1rem">
+      <h4 style="margin-bottom:0.5rem">Resource layer</h4>
+      <span class="chip c-mcp">MCP<span class="dot" style="background:var(--mcp)"></span>Model Context Protocol</span>
+      <p class="muted small" style="margin-top:0.4rem">Agent ↔ tools, files, APIs</p>
+    </div>
+    <div class="card" style="padding:0.8rem 1rem">
+      <h4 style="margin-bottom:0.5rem">Collaboration layer</h4>
+      <span class="chip c-a2a">A2A<span class="dot" style="background:var(--a2a)"></span>Agent-to-Agent</span>
+      <span class="chip c-acp" style="margin-top:0.3rem;display:inline-block">ACP<span class="dot" style="background:var(--acp)"></span>IBM Agent Comm.</span>
+      <span class="chip c-anp" style="margin-top:0.3rem;display:inline-block">AGNTCY-ACP<span class="dot" style="background:var(--anp)"></span>Agent Connect</span>
+      <p class="muted small" style="margin-top:0.4rem">Agent ↔ agent delegation</p>
+    </div>
+    <div class="card" style="padding:0.8rem 1rem">
+      <h4 style="margin-bottom:0.5rem">Presentation layer</h4>
+      <span class="chip c-agui">AG-UI<span class="dot" style="background:var(--agui)"></span>Agent-User Interaction</span>
+      <p class="muted small" style="margin-top:0.4rem">Agent ↔ human UI</p>
+    </div>
+    <div class="card" style="padding:0.8rem 1rem">
+      <h4 style="margin-bottom:0.5rem">Open-web / Network</h4>
+      <span class="chip c-anp">ANP<span class="dot" style="background:var(--anp)"></span>Agent Network Protocol</span>
+      <span class="chip c-anp" style="margin-top:0.3rem;display:inline-block">AGNTCY Directory<span class="dot" style="background:var(--anp)"></span>Discovery</span>
+      <p class="muted small" style="margin-top:0.4rem">Decentralized agent discovery</p>
+    </div>
+    <div class="card" style="padding:0.8rem 1rem">
+      <h4 style="margin-bottom:0.5rem">Payments</h4>
+      <span class="chip c-a2a">AP2<span class="dot" style="background:var(--a2a)"></span>Agent Payments Protocol</span>
+      <p class="muted small" style="margin-top:0.4rem">Agent ↔ commerce / mandates</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="kicker">ADJACENT PROTOCOL</span>
+  <h2>AGNTCY — Internet <span class="grad">of Agents</span></h2>
+  <div class="rule"></div>
+  <div class="grid g2" style="gap:1.2rem;align-items:start">
+    <div>
+      <div class="card lft" style="margin-bottom:0.8rem">
+        <h3>What it is</h3>
+        <p>Open-source collective — founded by <strong>Cisco Outshift</strong>, <strong>LangChain</strong>, and <strong>Galileo</strong> — now under the <strong>Linux Foundation</strong>. Goal: build an open "Internet of Agents."</p>
+      </div>
+      <div class="card" style="border-left:4px solid var(--anp)">
+        <h4>Three pillars</h4>
+        <ul class="clean small">
+          <li><strong>Agent Connect Protocol (ACP)</strong> — open wire protocol for agent-to-agent communication across vendors</li>
+          <li><strong>OASF</strong> — Open Agentic Schema Framework; describes agent capabilities, inputs, outputs</li>
+          <li><strong>Agent Directory</strong> — decentralized discovery registry for finding agents by capability</li>
+        </ul>
+      </div>
+      <p class="muted small" style="margin-top:0.6rem">Also defines observability and identity components. Designed to <em>collaborate with</em> MCP &amp; A2A, not replace them.</p>
+    </div>
+    <div>
+      <div class="callout warn">
+        <b>Name clash — ACP is ambiguous!</b><br>
+        "ACP" refers to <strong>two unrelated protocols</strong>:<br><br>
+        <strong>AGNTCY ACP</strong> (Agent Connect Protocol) — Cisco/LangChain/Linux Foundation open-web agent communication.<br><br>
+        <strong>IBM ACP</strong> (Agent Communication Protocol) — IBM's agent-to-agent standard, also under the Linux Foundation.<br><br>
+        Always qualify which ACP you mean in conversation and documentation.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="kicker">ADJACENT PROTOCOL</span>
+  <h2>NLWeb — the <span class="grad">agentic web</span></h2>
+  <div class="rule"></div>
+  <div class="grid g2" style="gap:1.2rem;align-items:start">
+    <div>
+      <div class="card lft" style="margin-bottom:0.8rem">
+        <h3>What it is</h3>
+        <p>Open project from <strong>Microsoft</strong>, led by <strong>R.V. Guha</strong> (creator of RSS and schema.org). Turns any website into a conversational, agent-queryable endpoint.</p>
+      </div>
+      <ul class="clean" style="margin-bottom:0.8rem">
+        <li>Uses <strong>existing structured data</strong> — schema.org markup, RSS — so no new crawling infrastructure required</li>
+        <li>Sites expose a natural-language query interface that agents call directly</li>
+        <li>Every NLWeb instance <strong>also acts as an MCP server</strong> — agents that speak MCP get NLWeb for free</li>
+        <li>Zero-new-infrastructure path: leverage what sites already publish</li>
+      </ul>
+    </div>
+    <div>
+      <div class="callout info">
+        <b>"HTML for the agentic web"</b><br><br>
+        Just as HTML made the web readable by browsers, NLWeb makes it <em>queryable by agents</em>. The goal is a web where every page is a first-class participant in agentic workflows — without waiting for sites to rebuild their backends.
+      </div>
+      <div class="card" style="margin-top:0.9rem;border-left:4px solid var(--mcp)">
+        <h4>MCP synergy</h4>
+        <p class="small">Because NLWeb exposes an MCP interface, any MCP-compatible agent can query NLWeb sites out of the box — no per-site integration required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="kicker">FOUNDATIONS</span>
+  <h2>Native tool calling &amp; <span class="grad">vendor SDKs</span></h2>
+  <div class="rule"></div>
+  <div class="grid g2" style="gap:1.4rem;align-items:start">
+    <div>
+      <div class="card lft" style="margin-bottom:0.8rem">
+        <h3>Model-native function calling</h3>
+        <p>Every major model exposes tool/function calling — but this is <strong>internal to a single model session</strong>. The model decides which tools to invoke; the host app wires up the actual functions.</p>
+      </div>
+      <dl class="spec small">
+        <dt>OpenAI</dt>
+        <dd>Function calling + Responses API built-in tools (web search, code interpreter, file search)</dd>
+        <dt>Anthropic</dt>
+        <dd>Tool use in Claude — same pattern, model-internal</dd>
+        <dt>Apps SDK / AgentKit</dt>
+        <dd>OpenAI's higher-level SDKs — built <strong>on top of</strong> MCP for cross-app interop</dd>
+      </dl>
+    </div>
+    <div>
+      <div class="callout info">
+        <b>Complementary, not competing</b><br><br>
+        Native tool calling handles <em>how a model picks and invokes tools</em> inside one runtime.<br><br>
+        <strong>MCP standardizes the wire</strong> — how tools are described, discovered, and called <em>across apps, servers, and vendors</em>.<br><br>
+        OpenAI's own Apps SDK and AgentKit are built on MCP precisely because MCP solves the cross-boundary problem that native calling does not.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="kicker">ECOSYSTEM</span>
+  <h2>Frameworks <span class="grad">&amp; payments</span></h2>
+  <div class="rule"></div>
+  <p class="muted small center" style="margin-bottom:0.7rem">Frameworks are orchestration layers — not wire protocols. They build agents and increasingly speak MCP + A2A + AG-UI.</p>
+  <div class="grid g2" style="gap:1.2rem;align-items:start">
+    <div class="card" style="border-left:4px solid var(--agui)">
+      <h3>Orchestration frameworks</h3>
+      <ul class="clean small">
+        <li><strong>LangGraph / LangChain</strong> — graph-based agent loops; AGNTCY co-founder</li>
+        <li><strong>CrewAI</strong> — role-based multi-agent crews</li>
+        <li><strong>Google ADK</strong> (Agent Development Kit) — Google's agent building SDK; speaks A2A natively</li>
+        <li><strong>Microsoft Semantic Kernel &amp; Agent Framework</strong> — enterprise agent orchestration; MCP + A2A support</li>
+        <li><strong>AG2</strong> — AutoGen successor; multi-agent conversations</li>
+        <li><strong>LlamaIndex</strong> — retrieval-augmented agent workflows</li>
+      </ul>
+      <p class="muted tiny" style="margin-top:0.5rem">All of these are <em>consumers</em> of MCP/A2A/AG-UI, not replacements for them.</p>
+    </div>
+    <div class="card" style="border-left:4px solid var(--a2a)">
+      <h3>Agent payments — AP2</h3>
+      <p><strong>Agent Payments Protocol (AP2)</strong> — led by Google with industry partners. Extends the agent collaboration layer to handle financial transactions and payment mandates between agents.</p>
+      <ul class="clean small" style="margin-top:0.5rem">
+        <li>Agents can authorize, initiate, and confirm payments on behalf of users</li>
+        <li>Designed to layer on top of A2A-style agent communication</li>
+        <li>Handles delegation of spending authority + auditability</li>
+      </ul>
+      <div class="callout warn" style="margin-top:0.7rem">
+        <b>Status: emerging.</b> AP2 and agent-commerce standards are still forming — expect flux in 2025–2026.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="kicker">GOVERNANCE</span>
+  <h2>Who governs <span class="grad">what</span></h2>
+  <div class="rule"></div>
+  <p class="lead center">The Linux Foundation is rapidly becoming the neutral home for agent interop standards.</p>
+  <table style="width:100%;margin-top:0.7rem;font-size:0.82rem;border-collapse:collapse">
+    <thead>
+      <tr>
+        <th style="text-align:left;padding:0.5rem 0.7rem;border-bottom:2px solid rgba(255,255,255,0.15)">Protocol / Effort</th>
+        <th style="text-align:left;padding:0.5rem 0.7rem;border-bottom:2px solid rgba(255,255,255,0.15)">Steward</th>
+        <th style="text-align:left;padding:0.5rem 0.7rem;border-bottom:2px solid rgba(255,255,255,0.15)">Layer</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="lbl" style="padding:0.45rem 0.7rem"><span class="chip c-mcp">MCP<span class="dot" style="background:var(--mcp)"></span></span></td>
+        <td style="padding:0.45rem 0.7rem">Anthropic + community (Linux Foundation steward)</td>
+        <td style="padding:0.45rem 0.7rem" class="muted">Resource / tools</td>
+      </tr>
+      <tr style="background:rgba(255,255,255,0.03)">
+        <td class="lbl" style="padding:0.45rem 0.7rem"><span class="chip c-a2a">A2A<span class="dot" style="background:var(--a2a)"></span></span></td>
+        <td style="padding:0.45rem 0.7rem">Linux Foundation</td>
+        <td style="padding:0.45rem 0.7rem" class="muted">Collaboration</td>
+      </tr>
+      <tr>
+        <td class="lbl" style="padding:0.45rem 0.7rem"><span class="chip c-acp">ACP (IBM)<span class="dot" style="background:var(--acp)"></span></span></td>
+        <td style="padding:0.45rem 0.7rem">Linux Foundation</td>
+        <td style="padding:0.45rem 0.7rem" class="muted">Collaboration</td>
+      </tr>
+      <tr style="background:rgba(255,255,255,0.03)">
+        <td class="lbl" style="padding:0.45rem 0.7rem"><span class="chip c-anp">AGNTCY / ACP<span class="dot" style="background:var(--anp)"></span></span></td>
+        <td style="padding:0.45rem 0.7rem">Linux Foundation (Cisco/LangChain/Galileo)</td>
+        <td style="padding:0.45rem 0.7rem" class="muted">Open-web / network</td>
+      </tr>
+      <tr>
+        <td class="lbl" style="padding:0.45rem 0.7rem"><span class="chip c-agui">AG-UI<span class="dot" style="background:var(--agui)"></span></span></td>
+        <td style="padding:0.45rem 0.7rem">CopilotKit / OSS community</td>
+        <td style="padding:0.45rem 0.7rem" class="muted">Presentation / UI</td>
+      </tr>
+      <tr style="background:rgba(255,255,255,0.03)">
+        <td class="lbl" style="padding:0.45rem 0.7rem">DIDs</td>
+        <td style="padding:0.45rem 0.7rem">W3C</td>
+        <td style="padding:0.45rem 0.7rem" class="muted">Identity</td>
+      </tr>
+      <tr>
+        <td class="lbl" style="padding:0.45rem 0.7rem">NLWeb</td>
+        <td style="padding:0.45rem 0.7rem">Microsoft / OSS</td>
+        <td style="padding:0.45rem 0.7rem" class="muted">Open web</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <span class="kicker">OUTLOOK</span>
+  <h2>Convergence vs <span class="grad">fragmentation</span></h2>
+  <div class="rule"></div>
+  <div class="grid g2" style="gap:1.2rem;align-items:start;margin-bottom:0.8rem">
+    <div class="callout good">
+      <b>Consolidation signals</b>
+      <ul class="check small" style="margin-top:0.5rem">
+        <li>MCP has effectively <strong>won the resource/tools layer</strong> — broad adoption across OpenAI, Google, Microsoft, and the OSS ecosystem</li>
+        <li>A2A, IBM ACP, and AGNTCY are all consolidating under the <strong>Linux Foundation</strong> — neutral governance reduces lock-in</li>
+        <li>Frameworks (LangGraph, ADK, Semantic Kernel) are converging on MCP + A2A as first-class citizens</li>
+        <li>NLWeb + MCP integration means the open web can join the agentic ecosystem without rebuilding</li>
+      </ul>
+    </div>
+    <div class="callout warn">
+      <b>Remaining fragmentation</b>
+      <ul class="cross small" style="margin-top:0.5rem">
+        <li>Agent↔agent layer still has <strong>three overlapping standards</strong> (A2A, IBM ACP, AGNTCY ACP) — consolidation in progress but not complete</li>
+        <li>UI layer (AG-UI and variants) is still forming — no clear winner yet</li>
+        <li>Agent payments (AP2) and open-web layers are nascent — expect breaking changes</li>
+        <li>The ACP <strong>name collision</strong> is a live source of confusion in documentation and tooling</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout info center">
+    <b>Forward-looking takeaway:</b> Bet on MCP for the resource layer today; watch the Linux Foundation for agent↔agent consolidation; UI and open-web standards will clarify by 2026.
+  </div>
+</section>
+<section class="divider" data-auto-animate>
+  <div class="secnum grad">07</div>
+  <div class="sectitle">How they fit — 5 use cases</div>
+  <div class="secsub">Where each protocol earns its place, and how they compose into real enterprise systems.</div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">COMPOSITE WALKTHROUGH</span>
+  <h2>One request, <span class="grad">every protocol</span></h2>
+  <div class="rule"></div>
+  <p class="lead center">A customer asks for a refund — watch every protocol light up in a single transaction.</p>
+  <div class="flow" style="margin:18px 0 22px;">
+    <div class="node" style="border-color:var(--agui)"><div class="t">👤 Customer</div><div class="s">web / mobile / voice</div></div>
+    <span class="arrow">→<span class="lab">AG-UI</span></span>
+    <div class="node" style="border-color:var(--agui)"><div class="t">Support Agent</div><div class="s">router / orchestrator</div></div>
+    <span class="arrow">→<span class="lab">A2A</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Billing Agent</div><div class="s">specialist</div></div>
+    <span class="arrow">→<span class="lab">MCP</span></span>
+    <div class="node" style="border-color:var(--mcp)"><div class="t">Payments API</div><div class="s">tool / data source</div></div>
+    <span class="arrow">→<span class="lab">ANP</span></span>
+    <div class="node" style="border-color:var(--anp)"><div class="t">Partner Bank</div><div class="s">external agent</div></div>
+  </div>
+  <div class="grid g4">
+    <div class="card t-agui">
+      <h4><span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span></h4>
+      <p>Streams progress tokens to the UI; renders refund-confirm interactive card; captures one-click approval from the customer.</p>
+    </div>
+    <div class="card t-a2a">
+      <h4><span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span></h4>
+      <p>Router delegates the refund task to the Billing specialist; task status pushed back asynchronously — teams deploy independently.</p>
+    </div>
+    <div class="card t-mcp">
+      <h4><span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span></h4>
+      <p>Billing agent calls Payments API and order ledger through governed MCP servers — every tool call logged for audit.</p>
+    </div>
+    <div class="card t-anp">
+      <h4><span class="chip c-anp"><span class="dot" style="background:var(--anp)"></span>ANP</span></h4>
+      <p>If the refund routes through a partner bank, ANP resolves and cryptographically verifies the external agent before A2A connects.</p>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <div style="display:flex;gap:18px;align-items:baseline;">
+    <span class="usecase-num">01</span>
+    <h2>Omnichannel Customer Support</h2>
+  </div>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <div>
+      <p class="lead">A single router agent handles web, mobile, and voice chat — delegating to Billing, Returns, and Tech-Support specialists owned by separate product teams.</p>
+      <ul class="clean">
+        <li>Customers switch channels mid-session without losing context</li>
+        <li>Live refund execution — not just promises — inside the chat thread</li>
+        <li>Specialists updated on their own release cadence; router never changes</li>
+        <li>CRM, order DB, knowledge base, and ticketing unified behind governed APIs</li>
+        <li>Agent-assist mode: human agents see AI drafts and can override before send</li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="callout warn">
+        <b>The integration trap.</b> Without standards, each specialist team writes bespoke connectors to every channel and data source — and the router becomes a monolith that everyone fears touching.
+      </div>
+      <div class="callout info">
+        <b>Why standards matter here.</b> AG-UI decouples the UX from agent logic. A2A lets billing, returns, and tech specialists evolve independently. MCP gives every specialist the same governed, audited access to shared data.
+      </div>
+      <div class="callout good">
+        <b>Payoff signal.</b> When the Returns team ships a new return-reason classifier, the router needs zero changes — it just calls the updated specialist via A2A.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <div style="display:flex;gap:18px;align-items:baseline;">
+    <span class="usecase-num">01</span>
+    <h2>Omnichannel Customer Support <span class="muted small">— architecture</span></h2>
+  </div>
+  <div class="rule"></div>
+  <div class="flow" style="margin:14px 0 18px;">
+    <div class="node" style="border-color:var(--agui)"><div class="t">Customer</div><div class="s">web / mobile / voice</div></div>
+    <span class="arrow">→<span class="lab">AG-UI</span></span>
+    <div class="node" style="border-color:var(--agui)"><div class="t">Router Agent</div><div class="s">stream + cards</div></div>
+    <span class="arrow">→<span class="lab">A2A</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Billing Agent</div><div class="s">team A</div></div>
+    <span class="arrow">→<span class="lab">MCP</span></span>
+    <div class="node" style="border-color:var(--mcp)"><div class="t">CRM / Orders</div><div class="s">tool servers</div></div>
+  </div>
+  <div class="flow" style="margin:0 0 18px;padding-left:180px;">
+    <span class="arrow" style="opacity:0">→</span>
+    <div class="node" style="border-color:var(--a2a);opacity:0.85"><div class="t">Returns Agent</div><div class="s">team B</div></div>
+    <span class="arrow">→<span class="lab">MCP</span></span>
+    <div class="node" style="border-color:var(--mcp)"><div class="t">Knowledge Base</div><div class="s">+ Ticketing</div></div>
+  </div>
+  <div class="grid g3">
+    <div class="card t-agui">
+      <h3><span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span></h3>
+      <p>Streams partial responses to every channel; renders refund-confirm and return-label action cards; surfaces agent-assist drafts to human agents before send.</p>
+    </div>
+    <div class="card t-a2a">
+      <h3><span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span></h3>
+      <p>Router delegates work as typed tasks to specialist agents. Each team owns its agent's API contract; push notifications return results asynchronously without polling.</p>
+    </div>
+    <div class="card t-mcp">
+      <h3><span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span></h3>
+      <p>Every specialist reads CRM, order DB, knowledge base, and ticketing via MCP servers — one consistent access layer, one audit trail, one place to enforce rate limits.</p>
+    </div>
+  </div>
+  <p class="muted small center" style="margin-top:10px;"><b>Payoff:</b> teams ship specialists independently; the router composes them with zero coupling to internal implementations.</p>
+</section>
+
+<section data-auto-animate>
+  <div style="display:flex;gap:18px;align-items:baseline;">
+    <span class="usecase-num">02</span>
+    <h2>Automated Loan Underwriting</h2>
+  </div>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <div>
+      <p class="lead">A regulated orchestrator coordinates Credit, Fraud, and Compliance specialist agents — each owned by a different risk team — then presents a synthesized recommendation to the loan officer for final sign-off.</p>
+      <ul class="clean">
+        <li>Credit bureau pulls, fraud-signal scoring, AML checks — all in parallel</li>
+        <li>Each specialist's reasoning must be explainable and logged for regulators</li>
+        <li>Loan officer reviews agent reasoning chains and issues approve / deny</li>
+        <li>Long-running tasks: credit bureau responses can take 30–90 seconds</li>
+        <li>No specialist exposes its proprietary model — only structured decisions</li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="callout warn">
+        <b>Regulatory exposure.</b> If tool calls to core banking and credit bureaus aren't logged atomically, compliance audits become archaeology — reconstructed from scattered logs across five systems.
+      </div>
+      <div class="callout info">
+        <b>Why standards matter here.</b> A2A lets specialists push results back when ready — no polling. MCP creates one audit trail across all governed data reads. AG-UI gives the loan officer a structured cockpit, not a chat box.
+      </div>
+      <div class="callout good">
+        <b>Payoff signal.</b> The Fraud team can retrain its model monthly — the orchestrator never changes because A2A separates the task contract from the implementation.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <div style="display:flex;gap:18px;align-items:baseline;">
+    <span class="usecase-num">02</span>
+    <h2>Automated Loan Underwriting <span class="muted small">— architecture</span></h2>
+  </div>
+  <div class="rule"></div>
+  <div class="flow" style="margin:14px 0 10px;">
+    <div class="node" style="border-color:var(--agui)"><div class="t">Loan Officer</div><div class="s">approve / deny gate</div></div>
+    <span class="arrow">→<span class="lab">AG-UI</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Orchestrator</div><div class="s">underwriting</div></div>
+    <span class="arrow">→<span class="lab">A2A</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Credit Agent</div><div class="s">bureau pulls</div></div>
+    <span class="arrow">→<span class="lab">MCP</span></span>
+    <div class="node" style="border-color:var(--mcp)"><div class="t">Core Banking</div><div class="s">+ Credit Bureau</div></div>
+  </div>
+  <div class="flow" style="margin:0 0 14px;padding-left:300px;">
+    <span class="arrow">→<span class="lab">A2A</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Fraud Agent</div><div class="s">AML / signals</div></div>
+    <span class="arrow">→<span class="lab">MCP</span></span>
+    <div class="node" style="border-color:var(--mcp)"><div class="t">Document Store</div><div class="s">+ Watchlists</div></div>
+  </div>
+  <div class="grid g3">
+    <div class="card t-a2a">
+      <h3><span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span></h3>
+      <p>Orchestrator fans out long-running tasks to Credit, Fraud, and Compliance agents. Push callbacks eliminate polling; structured task status enables parallel execution.</p>
+    </div>
+    <div class="card t-mcp">
+      <h3><span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span></h3>
+      <p>Governed reads from core banking, credit bureaus, and document stores — OAuth-gated, least-privilege scopes, every call audited. One trail for regulators across all agents.</p>
+    </div>
+    <div class="card t-agui">
+      <h3><span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span></h3>
+      <p>Loan-officer cockpit shows each agent's reasoning chain in real time. Structured approve / deny gate is a hard human-in-the-loop checkpoint — not a chat suggestion.</p>
+    </div>
+  </div>
+  <p class="muted small center" style="margin-top:8px;"><b>Payoff:</b> opaque A2A agents share decisions without exposing proprietary models; MCP gives one unified audit trail across all governed data sources.</p>
+</section>
+
+<section data-auto-animate>
+  <div style="display:flex;gap:18px;align-items:baseline;">
+    <span class="usecase-num">03</span>
+    <h2>Autonomous Supply Chain &amp; Procurement</h2>
+  </div>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <div>
+      <p class="lead">Buyer agents negotiate quantities, pricing, and logistics with external supplier agents — across company boundaries, in real time, with no shared infrastructure and no pre-existing trust relationship.</p>
+      <ul class="clean">
+        <li>Supplier agents may be hosted by third parties on unknown infrastructure</li>
+        <li>Multi-round negotiation: quantity discounts, SLA tiers, delivery windows</li>
+        <li>Each buyer agent reads its own ERP, inventory, and logistics systems</li>
+        <li>Purchase orders generated and signed programmatically after agreement</li>
+        <li>Full audit trail of negotiation steps for procurement compliance</li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="callout bad">
+        <b>Trust is the unsolved problem.</b> You can't federate procurement if you can't verify that the agent claiming to be "Acme Supplies" actually is — and has authority to commit to contracts.
+      </div>
+      <div class="callout info">
+        <b>Why ANP is essential here.</b> ANP resolves agent identities via DIDs, verifies cryptographic credentials across org boundaries, and establishes the trust baseline that A2A negotiation sessions require — without a shared directory.
+      </div>
+      <div class="callout warn">
+        <b>Discovery ≠ authorization.</b> ANP confirms who an agent is. Business logic, spend limits, and approval gates must still be enforced inside the buyer agent.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <div style="display:flex;gap:18px;align-items:baseline;">
+    <span class="usecase-num">03</span>
+    <h2>Supply Chain &amp; Procurement <span class="muted small">— architecture</span></h2>
+  </div>
+  <div class="rule"></div>
+  <div class="flow" style="margin:14px 0 18px;">
+    <div class="node" style="border-color:var(--mcp)"><div class="t">ERP / Inventory</div><div class="s">buyer's systems</div></div>
+    <span class="arrow">→<span class="lab">MCP</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Buyer Agent</div><div class="s">your org</div></div>
+    <span class="arrow">→<span class="lab">ANP</span></span>
+    <div class="node" style="border-color:var(--anp)"><div class="t">DID Registry</div><div class="s">identity resolution</div></div>
+    <span class="arrow">→<span class="lab">A2A</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Supplier Agent</div><div class="s">external org</div></div>
+    <span class="arrow">→<span class="lab">MCP</span></span>
+    <div class="node" style="border-color:var(--mcp)"><div class="t">Supplier ERP</div><div class="s">their systems</div></div>
+  </div>
+  <div class="grid g3">
+    <div class="card t-anp">
+      <h3><span class="chip c-anp"><span class="dot" style="background:var(--anp)"></span>ANP</span></h3>
+      <p>Discovers and cryptographically verifies external supplier agents via DIDs before any negotiation begins. Resolves org boundaries with no shared directory or pre-registration.</p>
+    </div>
+    <div class="card t-a2a">
+      <h3><span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span></h3>
+      <p>Negotiates quantities, pricing, logistics, and SLA tiers as cross-vendor multi-turn tasks. Push status updates track each negotiation round; task artifact carries the signed PO.</p>
+    </div>
+    <div class="card t-mcp">
+      <h3><span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span></h3>
+      <p>Each buyer agent reads its own ERP, inventory, and logistics tools via MCP — isolated from supplier systems. Supplier agents do the same on their side. No cross-org data exposure.</p>
+    </div>
+  </div>
+  <p class="muted small center" style="margin-top:8px;"><b>Payoff:</b> this is the case that <em>needs</em> ANP — establishing trust between strangers across org boundaries is the hard problem no other protocol solves.</p>
+</section>
+
+<section data-auto-animate>
+  <div style="display:flex;gap:18px;align-items:baseline;">
+    <span class="usecase-num">04</span>
+    <h2>Clinical Care Coordination</h2>
+  </div>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <div>
+      <p class="lead">A clinician copilot summarizes patient records, coordinates scheduling, labs, and billing agents — all under strict HIPAA governance — and surfaces every order for clinician confirmation before execution.</p>
+      <ul class="clean">
+        <li>EHR access scoped per clinician role via OAuth; FHIR resource-level permissions</li>
+        <li>Scheduling and billing run as existing REST microservices — not new AI runtimes</li>
+        <li>Every order — lab, imaging, medication — requires explicit clinician sign-off</li>
+        <li>Full audit log of agent reads and writes for compliance and malpractice defense</li>
+        <li>No proprietary SDK adoption required by hospital IT for downstream services</li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="callout bad">
+        <b>Integration reality.</b> Hospital scheduling and billing systems are legacy REST services maintained by separate vendor teams. They cannot adopt a new agent runtime — they need a standard they already speak.
+      </div>
+      <div class="callout info">
+        <b>Why ACP fits here.</b> ACP's plain-REST message envelope wraps existing scheduling and billing microservices as agents without requiring new SDKs or runtime changes — critical in hospital service meshes.
+      </div>
+      <div class="callout good">
+        <b>Payoff signal.</b> The billing microservice team adds ACP headers to their existing API — no rewrite, no new dependency — and the copilot can now delegate billing tasks to it as a first-class agent.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <div style="display:flex;gap:18px;align-items:baseline;">
+    <span class="usecase-num">04</span>
+    <h2>Clinical Care Coordination <span class="muted small">— architecture</span></h2>
+  </div>
+  <div class="rule"></div>
+  <div class="flow" style="margin:14px 0 10px;">
+    <div class="node" style="border-color:var(--agui)"><div class="t">Clinician</div><div class="s">reviews + confirms</div></div>
+    <span class="arrow">→<span class="lab">AG-UI</span></span>
+    <div class="node" style="border-color:var(--agui)"><div class="t">Care Copilot</div><div class="s">summarize + coordinate</div></div>
+    <span class="arrow">→<span class="lab">MCP</span></span>
+    <div class="node" style="border-color:var(--mcp)"><div class="t">EHR / FHIR</div><div class="s">labs + imaging</div></div>
+  </div>
+  <div class="flow" style="margin:0 0 14px;padding-left:252px;">
+    <span class="arrow">→<span class="lab">ACP</span></span>
+    <div class="node" style="border-color:var(--acp)"><div class="t">Scheduling Svc</div><div class="s">REST microservice</div></div>
+    <span class="arrow">→<span class="lab">ACP</span></span>
+    <div class="node" style="border-color:var(--acp)"><div class="t">Billing Svc</div><div class="s">REST microservice</div></div>
+  </div>
+  <div class="grid g3">
+    <div class="card t-mcp">
+      <h3><span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span></h3>
+      <p>Scoped, audited EHR access via FHIR — OAuth-gated, least-privilege per clinician role. Labs and imaging reads logged atomically. The single source of compliance truth.</p>
+    </div>
+    <div class="card t-acp">
+      <h3><span class="chip c-acp"><span class="dot" style="background:var(--acp)"></span>ACP</span></h3>
+      <p>Plain-REST message envelope converts existing scheduling and billing microservices into addressable agents — no SDK adoption, no runtime changes, fits the hospital service mesh today.</p>
+    </div>
+    <div class="card t-agui">
+      <h3><span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span></h3>
+      <p>Clinician sees the patient summary and each proposed order with agent reasoning. Every lab, imaging, and medication order requires explicit confirmation — HITL is non-negotiable.</p>
+    </div>
+  </div>
+  <p class="muted small center" style="margin-top:8px;"><b>Payoff:</b> ACP's plain-REST contract fits the hospital's existing service mesh with no new SDKs — the integration tax drops to near zero.</p>
+</section>
+
+<section data-auto-animate>
+  <div style="display:flex;gap:18px;align-items:baseline;">
+    <span class="usecase-num">05</span>
+    <h2>Enterprise SDLC / DevOps Copilot</h2>
+  </div>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <div>
+      <p class="lead">Planner, Coder, Reviewer, and Release agents work in parallel inside the IDE and CI/CD pipeline — accelerating the full software delivery lifecycle from ticket to production.</p>
+      <ul class="clean">
+        <li>Planner breaks epics into tasks; Coder implements in parallel branches</li>
+        <li>Reviewer agent runs static analysis, security scans, and diff review simultaneously</li>
+        <li>Release agent manages version bumps, changelog, and deployment gates</li>
+        <li>IDE shows streaming progress; developer approves diffs before merge</li>
+        <li>Git, Jira, CI/CD, observability, and cloud infra all accessible as MCP tools</li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="callout info">
+        <b>MCP is the workhorse.</b> In DevOps, the number of tools is large and diverse — Git, CI/CD, Jira, Datadog, cloud APIs. MCP turns them all into composable, auditable tool calls with one integration pattern.
+      </div>
+      <div class="callout good">
+        <b>A2A adds parallelism.</b> Once one agent isn't enough — when code review and security scanning should run simultaneously with implementation — A2A delegates those as concurrent tasks.
+      </div>
+      <div class="callout warn">
+        <b>Human gates matter.</b> AG-UI's approve-to-merge checkpoint keeps the developer in control; no agent pushes to main without explicit sign-off.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <div style="display:flex;gap:18px;align-items:baseline;">
+    <span class="usecase-num">05</span>
+    <h2>Enterprise SDLC / DevOps Copilot <span class="muted small">— architecture</span></h2>
+  </div>
+  <div class="rule"></div>
+  <div class="flow" style="margin:14px 0 10px;">
+    <div class="node" style="border-color:var(--agui)"><div class="t">Developer</div><div class="s">IDE + approve gate</div></div>
+    <span class="arrow">→<span class="lab">AG-UI</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Planner Agent</div><div class="s">orchestrator</div></div>
+    <span class="arrow">→<span class="lab">A2A</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Coder Agent</div><div class="s">parallel impl</div></div>
+    <span class="arrow">→<span class="lab">MCP</span></span>
+    <div class="node" style="border-color:var(--mcp)"><div class="t">Git / Jira</div><div class="s">+ CI/CD tools</div></div>
+  </div>
+  <div class="flow" style="margin:0 0 14px;padding-left:298px;">
+    <span class="arrow">→<span class="lab">A2A</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Reviewer Agent</div><div class="s">diff + security</div></div>
+    <span class="arrow">→<span class="lab">MCP</span></span>
+    <div class="node" style="border-color:var(--mcp)"><div class="t">Observability</div><div class="s">+ Cloud APIs</div></div>
+  </div>
+  <div class="grid g3">
+    <div class="card t-mcp">
+      <h3><span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span></h3>
+      <p>The workhorse — Git, CI/CD, Jira, observability dashboards, and cloud infra all exposed as MCP servers. Every agent reads and writes through the same governed tool layer.</p>
+    </div>
+    <div class="card t-a2a">
+      <h3><span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span></h3>
+      <p>Planner delegates Coder, Reviewer, and Release as parallel long-running tasks. Reviewer and security scan run concurrently with implementation — no serial bottleneck.</p>
+    </div>
+    <div class="card t-agui">
+      <h3><span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span></h3>
+      <p>IDE streams task progress and partial diffs in real time. Approve-to-merge is a hard gate — the developer sees every diff and explicitly authorizes before any push to main.</p>
+    </div>
+  </div>
+  <p class="muted small center" style="margin-top:8px;"><b>Payoff:</b> MCP-first turns the entire DevOps toolchain into composable calls; A2A adds parallelism exactly where one agent would become a bottleneck.</p>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">CROSS-CUTTING CONCERN</span>
+  <h2>Observability — <span class="grad">tracing across protocols</span></h2>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <div>
+      <p class="lead">A single user request can traverse AG-UI → A2A → MCP across multiple agents and tool servers. Without end-to-end tracing, debugging a failed refund means archaeology across five log systems.</p>
+      <ul class="check">
+        <li>Propagate a single <code>trace-id</code> from the AG-UI event through every A2A task delegation and every MCP tool call</li>
+        <li>Log each A2A task dispatch: task ID, agent endpoint, input schema hash, and push-callback reference</li>
+        <li>Log every MCP tool invocation: server name, tool name, arguments (redacted), latency, and result status</li>
+        <li>Log every AG-UI human approval or override with timestamp and user identity</li>
+        <li>Emit OpenTelemetry spans at each protocol boundary — compatible with Datadog, Grafana, Jaeger</li>
+        <li>Capture agent reasoning tokens (summarized) alongside tool calls for explainability audits</li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="callout info">
+        <b>One trace, all hops.</b> The trace ID injected at the AG-UI layer must flow through A2A task metadata and MCP request headers unchanged — making the full causal chain reconstructable from any single hop's logs.
+      </div>
+      <div class="callout good">
+        <b>Approval gates are events.</b> Every human-in-the-loop confirmation via AG-UI should emit a structured event (user ID, decision, timestamp, context hash) — not just a log line — so it can be joined to the trace.
+      </div>
+      <div class="callout warn">
+        <b>Watch for fan-out.</b> A2A parallel task dispatch multiplies span count rapidly. Set sampling budgets by trace root, not per-span, to avoid log volume explosions in high-throughput pipelines.
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">CROSS-CUTTING CONCERN</span>
+  <h2>Security &amp; Trust — <span class="grad">identity at every hop</span></h2>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <div class="card t-agui" style="padding:20px 22px;">
+      <h3>User → Agent <span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span></h3>
+      <p>App session token identifies the human user. AG-UI events carry session context; approval actions are signed with user identity. Frontend never has direct tool access.</p>
+      <ul class="check" style="margin-top:10px;">
+        <li>Session token scoped to app; short-lived</li>
+        <li>Human approval events signed + timestamped</li>
+        <li>Agent cannot bypass the UI gate</li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card t-a2a" style="padding:18px 20px;">
+        <h3>Agent → Agent <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span></h3>
+        <p>mTLS between agent runtimes; OAuth client credentials scoped to the delegating agent's identity. The receiving specialist agent enforces its own authorization — it does not trust the orchestrator blindly.</p>
+      </div>
+      <div class="card t-mcp" style="padding:18px 20px;">
+        <h3>Agent → Tools <span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span></h3>
+        <p>OAuth 2.0 scopes grant least-privilege access per agent role. MCP servers enforce scope boundaries; no agent can call a tool outside its granted scopes, regardless of what the orchestrator requested.</p>
+      </div>
+    </div>
+  </div>
+  <div class="callout warn" style="margin-top:16px;">
+    <b>Discovery ≠ authorization.</b> ANP resolves and cryptographically verifies an external agent's identity via DIDs — but that only establishes <em>who</em> it is. Business logic, spend limits, data-access policies, and approval gates must still be enforced inside your own agent. Trust is graduated, not binary.
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">CROSS-CUTTING CONCERN</span>
+  <h2>Cost, Latency &amp; <span class="grad">Failure Modes</span></h2>
+  <div class="rule"></div>
+  <p class="lead center">Each protocol hop adds latency and spend. Design budgets, degradation paths, and failure contracts before scaling agents.</p>
+  <div class="grid g3" style="margin-top:18px;">
+    <div class="card t-agui">
+      <h3>Latency &amp; Cost Budget</h3>
+      <p>Every A2A delegation and MCP tool call adds round-trip latency and LLM token spend. Set per-request budgets:</p>
+      <ul class="clean" style="margin-top:8px;">
+        <li><b>Max hop depth</b> — prevent runaway recursion in orchestrators</li>
+        <li><b>Max parallel tasks</b> — A2A fan-out can multiply costs 10×</li>
+        <li><b>Token ceilings</b> — per agent, per session, per tool call</li>
+        <li><b>Timeout escalation</b> — short timeout → push callback → SLA alert</li>
+      </ul>
+    </div>
+    <div class="card t-a2a">
+      <h3>Long-Running Task Handling</h3>
+      <p>A2A push model is designed for tasks that outlast HTTP timeouts — but partial failure must be handled explicitly:</p>
+      <ul class="clean" style="margin-top:8px;">
+        <li><b>Idempotent task IDs</b> — safe to retry on transient failure</li>
+        <li><b>Checkpoint artifacts</b> — partial results preserved on failure</li>
+        <li><b>Dead-letter handling</b> — tasks with no push callback after TTL</li>
+        <li><b>Compensation tasks</b> — rollback logic for committed side effects</li>
+      </ul>
+    </div>
+    <div class="card t-mcp">
+      <h3>Graceful Degradation</h3>
+      <p>When a downstream tool server or specialist agent is unavailable, the system should degrade gracefully — not fail completely:</p>
+      <ul class="clean" style="margin-top:8px;">
+        <li><b>Fallback responses</b> — cached data or reduced-capability mode</li>
+        <li><b>Circuit breakers</b> — stop hammering unavailable MCP servers</li>
+        <li><b>Human escalation</b> — AG-UI surfaces failures for manual override</li>
+        <li><b>Partial results</b> — return what's available; flag what's missing</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section data-auto-animate>
+  <span class="kicker">SUMMARY</span>
+  <h2>Use case → <span class="grad">protocol map</span></h2>
+  <div class="rule"></div>
+  <p class="lead center" style="margin-bottom:18px;">Which protocol carries the load in each system — and which are situational or unnecessary.</p>
+  <table style="width:100%;border-collapse:collapse;font-size:0.82em;">
+    <thead>
+      <tr>
+        <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);">Use Case</th>
+        <th style="text-align:center;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--mcp);">MCP</th>
+        <th style="text-align:center;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--a2a);">A2A</th>
+        <th style="text-align:center;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--agui);">AG-UI / A2UI</th>
+        <th style="text-align:center;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--acp);">ACP</th>
+        <th style="text-align:center;padding:8px 10px;border-bottom:2px solid var(--border);color:var(--anp);">ANP</th>
+        <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);">Lead protocol</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--border);">
+        <td class="lbl" style="padding:9px 10px;">01 · Omnichannel Support</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;">○</td>
+        <td style="text-align:center;padding:9px 10px;" class="s3">◐</td>
+        <td style="padding:9px 10px;"><span class="chip c-agui"><span class="dot" style="background:var(--agui)"></span>AG-UI</span> <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span></td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border);">
+        <td class="lbl" style="padding:9px 10px;">02 · Loan Underwriting</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;">○</td>
+        <td style="text-align:center;padding:9px 10px;">○</td>
+        <td style="padding:9px 10px;"><span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span> <span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span></td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border);">
+        <td class="lbl" style="padding:9px 10px;">03 · Supply Chain / Procurement</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;" class="s3">◐</td>
+        <td style="text-align:center;padding:9px 10px;">○</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="padding:9px 10px;"><span class="chip c-anp"><span class="dot" style="background:var(--anp)"></span>ANP</span> <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span></td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border);">
+        <td class="lbl" style="padding:9px 10px;">04 · Clinical Care Coordination</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;">○</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;">○</td>
+        <td style="padding:9px 10px;"><span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span> <span class="chip c-acp"><span class="dot" style="background:var(--acp)"></span>ACP</span></td>
+      </tr>
+      <tr>
+        <td class="lbl" style="padding:9px 10px;">05 · SDLC / DevOps Copilot</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;" class="s5">●</td>
+        <td style="text-align:center;padding:9px 10px;">○</td>
+        <td style="text-align:center;padding:9px 10px;">○</td>
+        <td style="padding:9px 10px;"><span class="chip c-mcp"><span class="dot" style="background:var(--mcp)"></span>MCP</span> <span class="chip c-a2a"><span class="dot" style="background:var(--a2a)"></span>A2A</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="muted tiny center" style="margin-top:14px;">● primary &nbsp;&nbsp; ◐ situational &nbsp;&nbsp; ○ not needed in this system</p>
+</section>
+<!-- ===================== PART 7 · DECIDE ===================== -->
+
+<!-- DIVIDER -->
+<section class="divider" data-auto-animate>
+  <div class="secnum grad">08</div>
+  <div class="sectitle">How to <span class="grad">choose</span></div>
+  <div class="secsub">The decision matrix, a 30-second heuristic, a selection-by-scenario table, anti-patterns, and a phased adoption roadmap.</div>
+</section>
+
+<!-- DECISION MATRIX 1 -->
+<section>
+  <span class="kicker">The decision matrix · part 1</span>
+  <h2>Pick by <span class="grad">what you are connecting</span></h2>
+  <div class="rule"></div>
+  <table>
+    <thead><tr><th>Protocol</th><th>Connects</th><th>Reach for it when…</th><th>Primitive</th><th>Transport</th><th>Steward</th><th>Maturity</th><th>Don't use for</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl" style="color:var(--mcp)">MCP</td><td>Agent → tools / data</td><td>One agent needs grounded, governed access to systems</td><td>Tools · Resources · Prompts</td><td>stdio · Streamable HTTP</td><td>Anthropic + LF</td><td><span class="score s5">●●●●●</span></td><td>Agent-to-agent collaboration</td></tr>
+      <tr><td class="lbl" style="color:var(--a2a)">A2A</td><td>Agent ↔ agent</td><td>Multiple agents (cross-team/vendor) must delegate work</td><td>Agent Card · Task · Artifact</td><td>HTTP · JSON-RPC · SSE</td><td>Linux Foundation</td><td><span class="score s4">●●●●○</span></td><td>Reaching raw APIs / DBs</td></tr>
+      <tr><td class="lbl" style="color:var(--agui)">AG-UI</td><td>Agent ↔ human</td><td>A user watches an agent work &amp; must steer / approve it</td><td>Typed event stream · shared state</td><td>SSE · WebSocket</td><td>CopilotKit / OSS</td><td><span class="score s3">●●●○○</span></td><td>Back-end agent comms</td></tr>
+      <tr><td class="lbl" style="color:var(--agui)">A2UI</td><td>Agent → UI</td><td>The agent should render rich, interactive UI, not just text</td><td>Declarative UI components</td><td>over AG-UI / MCP-UI</td><td>OSS / emerging</td><td><span class="score s2">●●○○○</span></td><td>Headless back-end flows</td></tr>
+      <tr><td class="lbl" style="color:var(--acp)">ACP</td><td>Agent ↔ agent (REST)</td><td>You want the simplest plain-REST contract, no SDK</td><td>REST endpoints · MIME parts</td><td>HTTP / REST</td><td>Linux Foundation</td><td><span class="score s3">●●●○○</span></td><td>Rich client streaming UX</td></tr>
+      <tr><td class="lbl" style="color:var(--anp)">ANP</td><td>Agent ↔ open internet</td><td>Agents must discover &amp; trust strangers across orgs</td><td>DID identity · JSON-LD discovery</td><td>HTTP + DID / E2E crypto</td><td>ANP open-source</td><td><span class="score s2">●●○○○</span></td><td>Internal, known-party workflows</td></tr>
+    </tbody>
+  </table>
+  <p class="tiny muted" style="margin-top:.5em;">Maturity = ecosystem &amp; production readiness as of early 2026, not protocol quality. MCP is the safe default; add others as topology demands.</p>
+</section>
+
+<!-- DECISION MATRIX 2 -->
+<section>
+  <span class="kicker">The decision matrix · part 2</span>
+  <h2>Pick by <span class="grad">operational profile</span></h2>
+  <div class="rule"></div>
+  <table>
+    <thead><tr><th>Dimension</th><th style="color:var(--mcp)">MCP</th><th style="color:var(--a2a)">A2A</th><th style="color:var(--agui)">AG-UI / A2UI</th><th style="color:var(--acp)">ACP</th><th style="color:var(--anp)">ANP</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">State model</td><td>Mostly stateless calls</td><td>Stateful Tasks w/ lifecycle</td><td>Streaming + shared state</td><td>Stateless or session</td><td>Stateful sessions</td></tr>
+      <tr><td class="lbl">Long-running jobs</td><td>Limited</td><td>First-class (push notif.)</td><td>Live progress events</td><td>Async-first</td><td>Supported</td></tr>
+      <tr><td class="lbl">Multi-modal</td><td>Yes (content types)</td><td>Yes (Parts)</td><td>Yes (UI + media)</td><td>Yes (MIME parts)</td><td>Yes</td></tr>
+      <tr><td class="lbl">Discovery</td><td>Registry / config</td><td>Agent Card (.well-known)</td><td>n/a (client-bound)</td><td>Manifest endpoint</td><td>DID + semantic search</td></tr>
+      <tr><td class="lbl">Trust boundary</td><td>Inside the agent</td><td>Cross-team / vendor</td><td>Agent ↔ its own UI</td><td>Service mesh</td><td>Open internet</td></tr>
+      <tr><td class="lbl">Auth</td><td>OAuth 2.1 scopes</td><td>Per-skill schemes</td><td>App session</td><td>HTTP auth</td><td>DID / E2E crypto</td></tr>
+      <tr><td class="lbl">Human-in-loop</td><td>Elicitation</td><td>input-required state</td><td>Native (approvals)</td><td>App-level</td><td>App-level</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 30-SECOND HEURISTIC -->
+<section>
+  <span class="kicker">The 30-second heuristic</span>
+  <h2>What are you <span class="grad">connecting?</span></h2>
+  <div class="rule"></div>
+  <div class="grid g2" style="gap:16px;">
+    <div class="card t-mcp"><h3>"My agent needs to <em>do</em> or <em>read</em> something."</h3><p style="font-size:.72em;">→ A tool, API, database, or file. <strong style="color:var(--mcp)">Start with MCP.</strong> ~80% of enterprise value lives here.</p></div>
+    <div class="card t-a2a"><h3>"One agent isn't enough — I need <em>specialists</em>."</h3><p style="font-size:.72em;">→ Delegation across teams or vendors. <strong style="color:var(--a2a)">Add A2A</strong> (or ACP if you just want REST).</p></div>
+    <div class="card t-agui"><h3>"A <em>human</em> needs to watch &amp; steer the agent."</h3><p style="font-size:.72em;">→ Live progress, approvals, generative UI. <strong style="color:var(--agui)">Add AG-UI / A2UI.</strong></p></div>
+    <div class="card t-anp"><h3>"The other party is <em>outside my walls</em>."</h3><p style="font-size:.72em;">→ Unknown, cross-org counterparties. <strong style="color:var(--anp)">Add ANP</strong> for identity &amp; discovery.</p></div>
+  </div>
+  <p class="small muted center" style="margin-top:.9em;"><strong>MCP first · A2A when you scale out · AG-UI when humans watch · ANP when you cross the firewall.</strong></p>
+</section>
+
+<!-- SELECTION BY SCENARIO -->
+<section>
+  <span class="kicker">Selection by scenario</span>
+  <h2>Common scenarios → <span class="grad">protocol mix</span></h2>
+  <div class="rule"></div>
+  <table>
+    <thead><tr><th>Scenario</th><th>MCP</th><th>A2A</th><th>AG-UI/A2UI</th><th>ACP</th><th>ANP</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="lbl">Single copilot over internal tools</td><td class="s5">●</td><td>○</td><td class="s5">●</td><td>○</td><td>○</td><td>The starter pattern</td></tr>
+      <tr><td class="lbl">Multi-agent workflow, one org</td><td class="s5">●</td><td class="s5">●</td><td class="s3">◐</td><td class="s3">◐</td><td>○</td><td>A2A or ACP for delegation</td></tr>
+      <tr><td class="lbl">Cross-vendor agent collaboration</td><td class="s5">●</td><td class="s5">●</td><td>○</td><td>○</td><td class="s3">◐</td><td>A2A's home turf</td></tr>
+      <tr><td class="lbl">Open marketplace of agents</td><td class="s3">◐</td><td class="s5">●</td><td>○</td><td>○</td><td class="s5">●</td><td>ANP for trust &amp; discovery</td></tr>
+      <tr><td class="lbl">Customer-facing rich chat</td><td class="s5">●</td><td class="s3">◐</td><td class="s5">●</td><td>○</td><td>○</td><td>A2UI for generative UI</td></tr>
+      <tr><td class="lbl">Legacy REST microservice mesh</td><td class="s5">●</td><td class="s3">◐</td><td>○</td><td class="s5">●</td><td>○</td><td>ACP fits existing REST</td></tr>
+    </tbody>
+  </table>
+  <p class="tiny muted" style="margin-top:.5em;">● primary · ◐ optional / situational · ○ not needed</p>
+</section>
+
+<!-- ANTI-PATTERNS -->
+<section>
+  <span class="kicker">Hard-won guidance</span>
+  <h2>Anti-patterns to <span class="grad">avoid</span></h2>
+  <div class="rule"></div>
+  <div class="grid g3">
+    <div class="card"><h3>⚠️ Protocol sprawl</h3><p>Don't adopt all six on day one. Each adds attack surface &amp; ops burden. Earn each layer.</p></div>
+    <div class="card"><h3>⚠️ A2A as an API bus</h3><p>A2A is for <em>agents</em>, not a fancy wrapper over a REST call — that's MCP or plain HTTP.</p></div>
+    <div class="card"><h3>⚠️ Trusting Agent Cards blindly</h3><p>Discovery ≠ authorization. Verify identity (ANP / mTLS) &amp; scope every capability.</p></div>
+    <div class="card"><h3>🔐 Tool-poisoning &amp; injection</h3><p>MCP tool descriptions are untrusted input. Pin servers, review, sandbox.</p></div>
+    <div class="card"><h3>🔐 Over-broad scopes</h3><p>One mega-token for everything = blast radius. OAuth 2.1 scope per server; least privilege.</p></div>
+    <div class="card"><h3>🌀 Unbounded agent loops</h3><p>Agent-to-agent recursion can fan out forever. Budget hops, depth &amp; spend.</p></div>
+  </div>
+</section>
+
+<!-- SECURITY & GOVERNANCE -->
+<section>
+  <span class="kicker">Cross-cutting</span>
+  <h2>A <span class="grad">governance</span> checklist for every layer</h2>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <div>
+      <h3 style="color:var(--mcp)">Identity &amp; access</h3>
+      <ul class="check">
+        <li>OAuth 2.1 + scopes on every remote MCP server</li>
+        <li>Per-skill auth schemes declared in A2A Agent Cards</li>
+        <li>DID / mTLS verification before trusting external agents</li>
+        <li>Short-lived, audience-bound tokens — no static keys</li>
+      </ul>
+      <h3 style="color:var(--a2a);margin-top:.5em;">Observability</h3>
+      <ul class="check">
+        <li>Trace IDs propagated across MCP → A2A → UI</li>
+        <li>Log every tool call, task delegation &amp; approval</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color:var(--agui)">Safety &amp; control</h3>
+      <ul class="check">
+        <li>Human approval gates (AG-UI) on irreversible actions</li>
+        <li>Allow-list &amp; pin MCP servers; review tool descriptions</li>
+        <li>Sandbox tool execution; validate &amp; constrain outputs</li>
+        <li>Budget hops, recursion depth &amp; token spend per request</li>
+      </ul>
+      <div class="callout warn" style="margin-top:.6em;"><b>Golden rule:</b> discovery is not authorization, and a capability advertised is not a capability you must grant. Verify, scope, log.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ADOPTION ROADMAP -->
+<section>
+  <span class="kicker">Adoption roadmap</span>
+  <h2>Crawl · walk · <span class="grad">run</span></h2>
+  <div class="rule"></div>
+  <div class="grid g3">
+    <div class="card t-mcp">
+      <h3>🐣 Crawl — quarter 1</h3>
+      <ul class="clean mcp" style="margin-top:.3em;">
+        <li>Stand up 2–3 <strong>MCP servers</strong> over your highest-value systems</li>
+        <li>One copilot, one team, governed access</li>
+        <li>Add <strong>AG-UI</strong> for a real user surface</li>
+      </ul>
+    </div>
+    <div class="card t-a2a">
+      <h3>🚶 Walk — quarters 2–3</h3>
+      <ul class="clean" style="margin-top:.3em;">
+        <li>Split the monolith copilot into <strong>specialist agents</strong></li>
+        <li>Introduce <strong>A2A / ACP</strong> for delegation</li>
+        <li>Central registry, tracing &amp; approval gates</li>
+      </ul>
+    </div>
+    <div class="card t-anp">
+      <h3>🏃 Run — quarters 4+</h3>
+      <ul class="clean anp" style="margin-top:.3em;">
+        <li>Open select agents to <strong>partners</strong> via A2A</li>
+        <li>Adopt <strong>ANP</strong> for cross-org identity &amp; discovery</li>
+        <li>Generative UI (<strong>A2UI</strong>), marketplace, FinOps controls</li>
+      </ul>
+    </div>
+  </div>
+  <p class="small muted center" style="margin-top:.9em;">Let <strong>governance and real demand</strong>, not hype, set the pace of each step.</p>
+</section>
+
+<!-- MYTHS / FAQ -->
+<section>
+  <span class="kicker">Myths, busted</span>
+  <h2>What people <span class="grad">get wrong</span></h2>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <div class="callout bad"><b>"A2A replaces MCP."</b><br><span class="small">No. MCP connects an agent to tools; A2A connects agents to each other. An A2A agent typically <em>uses</em> MCP internally.</span></div>
+    <div class="callout bad"><b>"Pick one protocol and standardize."</b><br><span class="small">They are layers, not alternatives. A mature system runs MCP + A2A + AG-UI together.</span></div>
+    <div class="callout bad"><b>"MCP is just function calling."</b><br><span class="small">Function calling is model-internal. MCP standardizes the <em>wire</em> between agent and external servers — discovery, auth, resources, prompts.</span></div>
+    <div class="callout bad"><b>"Protocols make agents secure."</b><br><span class="small">They give you the <em>hooks</em> (auth, identity, audit). Security is what you build on top.</span></div>
+  </div>
+</section>
+
+<!-- REFERENCE ARCH RECAP -->
+<section>
+  <span class="kicker">The whole picture</span>
+  <h2>One reference <span class="grad">architecture</span></h2>
+  <div class="rule"></div>
+  <div class="flow" style="margin-bottom:14px;">
+    <div class="node" style="border-color:var(--agui)"><div class="t">👤 Users</div><div class="s">web · mobile · IDE</div></div>
+    <span class="arrow">↕<span class="lab">AG-UI / A2UI</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Orchestrator</div><div class="s">agent</div></div>
+    <span class="arrow">↔<span class="lab">A2A · ACP</span></span>
+    <div class="node" style="border-color:var(--a2a)"><div class="t">Specialist agents</div><div class="s">pool</div></div>
+  </div>
+  <div class="flow" style="margin-bottom:14px;">
+    <div class="node" style="border-color:var(--mcp)"><div class="t">MCP servers</div><div class="s">CRM · ERP · data lake · CI/CD</div></div>
+    <span class="arrow">↓<span class="lab">MCP</span></span>
+    <div class="node"><div class="t">Enterprise systems</div><div class="s">of record</div></div>
+    <span class="arrow">⤤<span class="lab">ANP</span></span>
+    <div class="node" style="border-color:var(--anp)"><div class="t">External agents</div><div class="s">partners · marketplace</div></div>
+  </div>
+  <div class="callout info"><b>Cross-cutting:</b> identity &amp; OAuth · distributed tracing · approval gates · spend &amp; rate budgets · audit log — applied uniformly across all four directions.</div>
+</section>
+
+<!-- KEY TAKEAWAYS -->
+<section data-auto-animate>
+  <span class="kicker">Takeaways</span>
+  <h1>The protocols are <span class="grad">layers</span>, not rivals.</h1>
+  <div class="rule" style="width:240px;"></div>
+  <ul class="clean" style="font-size:1.02em;max-width:23em;">
+    <li><strong>MCP</strong> grounds an agent in your systems — adopt it now.</li>
+    <li><strong>A2A / ACP</strong> let agents collaborate as you scale out.</li>
+    <li><strong>AG-UI / A2UI</strong> put a trustworthy human in the loop.</li>
+    <li><strong>ANP</strong> opens the door to the cross-org agent economy.</li>
+  </ul>
+  <p class="lead" style="margin-top:.8em;">Build vertical first (MCP), expand horizontally (A2A) as the problem demands, and let governance — not hype — set the pace.</p>
+</section>
+
+<!-- RESOURCES / CLOSING -->
+<section>
+  <span class="kicker">Go deeper</span>
+  <h2>Resources &amp; <span class="grad">next steps</span></h2>
+  <div class="rule"></div>
+  <div class="grid g2">
+    <div>
+      <h3>Specs &amp; docs</h3>
+      <ul class="clean">
+        <li><strong>MCP</strong> — modelcontextprotocol.io</li>
+        <li><strong>A2A</strong> — a2a-protocol.org (Linux Foundation)</li>
+        <li><strong>AG-UI</strong> — docs.ag-ui.com (CopilotKit)</li>
+        <li><strong>ACP</strong> — agentcommunicationprotocol.dev</li>
+        <li><strong>ANP</strong> — agent-network-protocol.com</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Your first 30 days</h3>
+      <ul class="steps">
+        <li>Inventory the 3 systems an agent most needs to reach</li>
+        <li>Wrap them as MCP servers with scoped OAuth</li>
+        <li>Ship one AG-UI copilot to a friendly team</li>
+        <li>Instrument tracing &amp; approvals before you scale to A2A</li>
+      </ul>
+    </div>
+  </div>
+  <p class="small muted center" style="margin-top:1em;">Press <strong>O</strong> for slide overview · <strong>S</strong> for speaker notes · <strong>F</strong> for fullscreen · <strong>Esc</strong> to zoom out.</p>
+  <p class="tiny muted center" style="margin-top:.6em;">Protocol maturity &amp; stewardship reflect the landscape as of early 2026 — verify current state before an external audience.</p>
+</section>
+
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/zoom/zoom.js"></script>
+<script>
+Reveal.initialize({
+  hash:true, slideNumber:'c/t', transition:'slide', backgroundTransition:'fade',
+  controls:true, progress:true, center:false, width:1280, height:720, margin:0.055,
+  plugins:[RevealHighlight, RevealNotes, RevealZoom]
+});
+</script>
+</body>
+</html>

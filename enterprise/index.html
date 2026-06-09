@@ -1,0 +1,2463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enterprise AI Strategy — Board Funding Presentation</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --navy: #060b14; --navy2: #0a1628; --navy3: #111d33;
+  --teal: #00d4aa; --teal-dim: #00a884;
+  --blue: #4fc3f7; --blue-dim: #2196f3; --blue-glow: rgba(79,195,247,0.3);
+  --coral: #ff6b6b; --coral-dim: #e74c3c;
+  --gold: #ffd166; --gold-dim: #f4a261; --gold-glow: rgba(255,209,102,0.3);
+  --purple: #9b5de5; --purple-dim: #7b2cbf;
+  --slate: #94a3b8; --slate2: #64748b; --slate3: #475569;
+  --light: #f1f5f9; --white: #ffffff;
+  --grad-hero: linear-gradient(135deg, #060b14 0%, #0a1628 40%, #111d33 100%);
+  --grad-card: linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%);
+  --shadow: 0 20px 60px rgba(0,0,0,0.5);
+  --shadow-sm: 0 8px 24px rgba(0,0,0,0.25);
+}
+
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--navy); color: var(--light); overflow: hidden; height: 100vh; }
+.deck { width: 100vw; height: 100vh; position: relative; }
+
+.slide {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  padding: 40px 50px; opacity: 0; pointer-events: none; transition: all 0.6s cubic-bezier(0.4,0,0.2,1);
+  background: var(--grad-hero); overflow-y: auto;
+}
+.slide.active { opacity: 1; pointer-events: all; z-index: 10; }
+
+/* ===== NAVIGATION ===== */
+.nav { position: fixed; bottom: 24px; right: 30px; z-index: 100; display: flex; gap: 12px; align-items: center; }
+.nav button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); cursor: pointer; background: rgba(255,255,255,0.08); color: var(--light); font-size: 16px; font-weight: bold; backdrop-filter: blur(12px); box-shadow: var(--shadow-sm); transition: all 0.25s; }
+.nav button:hover { transform: scale(1.12); background: var(--gold); color: var(--navy); border-color: var(--gold); }
+.progress { position: fixed; bottom: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--teal), var(--gold)); transition: width 0.4s; z-index: 100; box-shadow: 0 0 10px var(--teal); }
+.slide-num { position: fixed; bottom: 28px; left: 30px; z-index: 100; font-size: 13px; color: var(--slate); font-weight: 600; letter-spacing: 1px; }
+.nav-dots { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 8px; }
+.nav-dots button { width: 10px; height: 10px; border-radius: 50%; border: none; background: rgba(255,255,255,0.2); cursor: pointer; transition: all 0.3s; }
+.nav-dots button.active { background: var(--gold); transform: scale(1.3); box-shadow: 0 0 8px var(--gold); }
+
+/* ===== TYPOGRAPHY ===== */
+h1 { font-size: clamp(2.2rem, 4vw, 3.2rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 700; margin-bottom: 20px; line-height: 1.2; }
+h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 10px; }
+p, li { font-size: 1rem; line-height: 1.6; color: var(--slate); }
+.subtitle { font-size: 1.15rem; opacity: 0.85; margin-top: 10px; font-weight: 300; }
+.highlight { color: var(--teal); }
+.highlight-blue { color: var(--blue); }
+.highlight-coral { color: var(--coral); }
+.highlight-gold { color: var(--gold); }
+.highlight-purple { color: var(--purple); }
+
+.tag { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; border: 1px solid; }
+.tag.teal { background: rgba(0,212,170,0.1); color: var(--teal); border-color: rgba(0,212,170,0.3); }
+.tag.blue { background: rgba(79,195,247,0.1); color: var(--blue); border-color: rgba(79,195,247,0.3); }
+.tag.coral { background: rgba(255,107,107,0.1); color: var(--coral); border-color: rgba(255,107,107,0.3); }
+.tag.gold { background: rgba(255,209,102,0.1); color: var(--gold); border-color: rgba(255,209,102,0.3); }
+.tag.purple { background: rgba(155,93,229,0.1); color: var(--purple); border-color: rgba(155,93,229,0.3); }
+
+/* ===== LAYOUTS ===== */
+.center { text-align: center; max-width: 900px; }
+.wide { width: 100%; max-width: 1300px; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: 100%; max-width: 1300px; align-items: center; }
+.split-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: 100%; max-width: 1300px; }
+.split-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%; max-width: 1300px; }
+.split-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; width: 100%; max-width: 1300px; }
+
+/* ===== CARDS ===== */
+.card { background: var(--grad-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; backdrop-filter: blur(20px); transition: all 0.3s; position: relative; overflow: hidden; }
+.card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.15); box-shadow: var(--shadow); }
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--teal); opacity: 0.5; }
+.card.blue::before { background: var(--blue); }
+.card.coral::before { background: var(--coral); }
+.card.gold::before { background: var(--gold); }
+.card.purple::before { background: var(--purple); }
+.card h3 { color: var(--white); font-size: 1.05rem; }
+.card p, .card li { font-size: 0.9rem; line-height: 1.55; }
+
+.icon-box { width: 48px; height: 48px; border-radius: 12px; background: rgba(0,212,170,0.12); border: 1px solid rgba(0,212,170,0.25); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 14px; }
+.icon-box.blue { background: rgba(79,195,247,0.12); border-color: rgba(79,195,247,0.25); }
+.icon-box.coral { background: rgba(255,107,107,0.12); border-color: rgba(255,107,107,0.25); }
+.icon-box.gold { background: rgba(255,209,102,0.12); border-color: rgba(255,209,102,0.25); }
+.icon-box.purple { background: rgba(155,93,229,0.12); border-color: rgba(155,93,229,0.25); }
+
+/* ===== BADGES ===== */
+.badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; margin: 2px; }
+.badge.info { background: rgba(79,195,247,0.12); color: var(--blue); }
+.badge.success { background: rgba(0,212,170,0.12); color: var(--teal); }
+.badge.warning { background: rgba(255,209,102,0.12); color: var(--gold); }
+.badge.danger { background: rgba(255,107,107,0.12); color: var(--coral); }
+
+/* ===== ARCHITECTURE DIAGRAMS ===== */
+.arch-layer { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+.arch-node { padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; border: 1.5px solid; }
+.arch-node.teal { background: rgba(0,212,170,0.1); border-color: var(--teal); color: var(--teal); }
+.arch-node.blue { background: rgba(79,195,247,0.1); border-color: var(--blue); color: var(--blue); }
+.arch-node.gold { background: rgba(255,209,102,0.1); border-color: var(--gold); color: var(--gold); }
+.arch-node.purple { background: rgba(155,93,229,0.1); border-color: var(--purple); color: var(--purple); }
+.arch-node.coral { background: rgba(255,107,107,0.1); border-color: var(--coral); color: var(--coral); }
+.arch-connector { width: 24px; height: 2px; background: linear-gradient(90deg, var(--slate3), var(--slate2)); border-radius: 1px; }
+
+/* ===== STAT BOXES ===== */
+.stat-box { text-align: center; padding: 20px; }
+.stat-box .num { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.stat-box .label { font-size: 0.8rem; color: var(--slate2); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
+
+/* ===== PIPELINE ===== */
+.pipeline { display: flex; gap: 0; align-items: stretch; width: 100%; max-width: 1100px; margin: 20px auto; }
+.pipe-seg { flex: 1; padding: 16px; text-align: center; position: relative; border-top: 3px solid; border-bottom: 3px solid; }
+.pipe-seg:first-child { border-left: 3px solid; border-radius: 10px 0 0 10px; }
+.pipe-seg:last-child { border-right: 3px solid; border-radius: 0 10px 10px 0; }
+.pipe-seg.teal { border-color: var(--teal); background: rgba(0,212,170,0.05); }
+.pipe-seg.blue { border-color: var(--blue); background: rgba(79,195,247,0.05); }
+.pipe-seg.gold { border-color: var(--gold); background: rgba(255,209,102,0.05); }
+.pipe-seg.purple { border-color: var(--purple); background: rgba(155,93,229,0.05); }
+.pipe-seg.coral { border-color: var(--coral); background: rgba(255,107,107,0.05); }
+.pipe-title { font-weight: 700; color: var(--white); font-size: 0.85rem; margin-bottom: 6px; }
+.pipe-desc { font-size: 0.78rem; color: var(--slate2); }
+.pipe-arrow { position: absolute; right: -14px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; color: var(--slate3); z-index: 2; }
+.pipe-seg:last-child .pipe-arrow { display: none; }
+
+/* ===== TABLES ===== */
+.comparison-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; background: rgba(255,255,255,0.03); border-radius: 14px; overflow: hidden; }
+.comparison-table th { background: rgba(0,212,170,0.12); color: var(--teal); font-weight: 700; padding: 14px 18px; text-align: left; border-bottom: 2px solid rgba(0,212,170,0.2); }
+.comparison-table td { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.06); color: var(--slate); }
+.comparison-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+/* ===== SVG DIAGRAMS ===== */
+.svg-container { width: 100%; max-width: 1200px; margin: 0 auto; }
+.diagram-box { fill: rgba(255,255,255,0.04); stroke: rgba(255,255,255,0.12); stroke-width: 1.5; rx: 10; }
+.diagram-box.teal { stroke: var(--teal); fill: rgba(0,212,170,0.06); }
+.diagram-box.blue { stroke: var(--blue); fill: rgba(79,195,247,0.06); }
+.diagram-box.gold { stroke: var(--gold); fill: rgba(255,209,102,0.06); }
+.diagram-box.purple { stroke: var(--purple); fill: rgba(155,93,229,0.06); }
+.diagram-box.coral { stroke: var(--coral); fill: rgba(255,107,107,0.06); }
+.diagram-text { fill: var(--white); font-size: 12px; font-weight: 600; text-anchor: middle; }
+.diagram-text.small { font-size: 10px; font-weight: 500; }
+.diagram-text.slate { fill: var(--slate); font-size: 10px; }
+.diagram-line { stroke: var(--slate3); stroke-width: 1.5; fill: none; }
+.diagram-line.teal { stroke: var(--teal); }
+.diagram-line.blue { stroke: var(--blue); }
+.diagram-line.gold { stroke: var(--gold); }
+.diagram-arrow { fill: var(--slate3); }
+.diagram-cluster-label { fill: var(--slate2); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+
+/* ===== TIMELINE ===== */
+.timeline { display: flex; gap: 1rem; width: 100%; max-width: 1100px; }
+.timeline-item { flex: 1; padding: 1.2rem; border-radius: .8rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); position: relative; }
+.timeline-item::after { content: ''; position: absolute; top: 1.5rem; right: -1rem; width: 2rem; height: 2px; background: linear-gradient(90deg, var(--gold), transparent); }
+.timeline-item:last-child::after { display: none; }
+.timeline-q { font-size: .8rem; color: var(--gold); font-weight: 700; margin-bottom: .25rem; }
+.timeline-title { font-size: .95rem; font-weight: 600; color: var(--white); margin-bottom: .25rem; }
+.timeline-desc { font-size: .8rem; color: var(--slate2); }
+
+/* ===== ANIMATED BG ===== */
+.orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .25; animation: float 10s ease-in-out infinite; pointer-events: none; }
+.orb1 { width: 400px; height: 400px; background: #4f46e5; top: -100px; right: -100px; animation-delay: 0s; }
+.orb2 { width: 300px; height: 300px; background: #06b6d4; bottom: -80px; left: -80px; animation-delay: 2s; }
+.orb3 { width: 250px; height: 250px; background: #8b5cf6; top: 40%; left: 30%; animation-delay: 4s; }
+@keyframes float { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-30px)} }
+
+/* ===== DECISION MATRIX ===== */
+.matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 1100px; margin: 20px auto; }
+.matrix-cell { padding: 20px; border-radius: 12px; border: 1.5px solid; position: relative; }
+.matrix-cell .q-label { position: absolute; top: -10px; left: 16px; background: var(--navy); padding: 2px 10px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-radius: 10px; }
+.matrix-cell.teal { border-color: var(--teal); background: rgba(0,212,170,0.05); }
+.matrix-cell.teal .q-label { color: var(--teal); }
+.matrix-cell.blue { border-color: var(--blue); background: rgba(79,195,247,0.05); }
+.matrix-cell.blue .q-label { color: var(--blue); }
+.matrix-cell.gold { border-color: var(--gold); background: rgba(255,209,102,0.05); }
+.matrix-cell.gold .q-label { color: var(--gold); }
+.matrix-cell.coral { border-color: var(--coral); background: rgba(255,107,107,0.05); }
+.matrix-cell.coral .q-label { color: var(--coral); }
+
+/* ===== DECISION FLOW ===== */
+.decision-flow { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 900px; margin: 16px auto; }
+.decision-row { display: flex; align-items: center; gap: 12px; }
+.decision-diamond { width: 140px; height: 50px; display: flex; align-items: center; justify-content: center; background: rgba(255,209,102,0.1); border: 1.5px solid var(--gold); border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: var(--gold); text-align: center; padding: 6px; }
+.decision-branch { display: flex; align-items: center; gap: 8px; flex: 1; }
+.decision-yes { padding: 8px 14px; border-radius: 8px; background: rgba(0,212,170,0.1); border: 1px solid var(--teal); font-size: 0.8rem; color: var(--teal); flex: 1; }
+.decision-no { padding: 8px 14px; border-radius: 8px; background: rgba(255,107,107,0.1); border: 1px solid var(--coral); font-size: 0.8rem; color: var(--coral); flex: 1; }
+.decision-result { padding: 10px 16px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: var(--white); font-weight: 600; }
+
+/* ===== FLYWHEEL ===== */
+.flywheel { display: flex; align-items: center; justify-content: center; gap: 0; width: 100%; max-width: 900px; margin: 20px auto; position: relative; }
+.flywheel-step { flex: 1; text-align: center; padding: 16px 12px; border-radius: 12px; border: 1.5px solid; position: relative; }
+.flywheel-step::after { content: '\2192'; position: absolute; right: -18px; top: 50%; transform: translateY(-50%); font-size: 1.4rem; color: var(--slate3); z-index: 2; }
+.flywheel-step:last-child::after { content: '\21BA'; right: -22px; font-size: 1.6rem; color: var(--gold); }
+.flywheel-step.teal { border-color: var(--teal); background: rgba(0,212,170,0.05); }
+.flywheel-step.blue { border-color: var(--blue); background: rgba(79,195,247,0.05); }
+.flywheel-step.gold { border-color: var(--gold); background: rgba(255,209,102,0.05); }
+.flywheel-step.purple { border-color: var(--purple); background: rgba(155,93,229,0.05); }
+.flywheel-step.coral { border-color: var(--coral); background: rgba(255,107,107,0.05); }
+.flywheel-num { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+.flywheel-title { font-size: 0.85rem; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+.flywheel-desc { font-size: 0.75rem; color: var(--slate2); }
+
+/* ===== OSI STACK ===== */
+.osi-stack { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 700px; margin: 16px auto; }
+.osi-layer { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 8px; border: 1px solid; }
+.osi-layer-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; flex-shrink: 0; }
+.osi-layer-name { width: 140px; font-size: 0.85rem; font-weight: 700; color: var(--white); flex-shrink: 0; }
+.osi-layer-tech { flex: 1; font-size: 0.8rem; color: var(--slate); }
+.osi-layer.app { background: rgba(0,212,170,0.08); border-color: rgba(0,212,170,0.25); }
+.osi-layer.app .osi-layer-num { background: rgba(0,212,170,0.2); color: var(--teal); }
+.osi-layer.pres { background: rgba(79,195,247,0.08); border-color: rgba(79,195,247,0.25); }
+.osi-layer.pres .osi-layer-num { background: rgba(79,195,247,0.2); color: var(--blue); }
+.osi-layer.sess { background: rgba(255,209,102,0.08); border-color: rgba(255,209,102,0.25); }
+.osi-layer.sess .osi-layer-num { background: rgba(255,209,102,0.2); color: var(--gold); }
+.osi-layer.trans { background: rgba(155,93,229,0.08); border-color: rgba(155,93,229,0.25); }
+.osi-layer.trans .osi-layer-num { background: rgba(155,93,229,0.2); color: var(--purple); }
+.osi-layer.net { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.25); }
+.osi-layer.net .osi-layer-num { background: rgba(255,107,107,0.2); color: var(--coral); }
+.osi-layer.data { background: rgba(100,116,139,0.1); border-color: rgba(100,116,139,0.25); }
+.osi-layer.data .osi-layer-num { background: rgba(100,116,139,0.2); color: var(--slate); }
+.osi-layer.phys { background: rgba(71,85,105,0.1); border-color: rgba(71,85,105,0.25); }
+.osi-layer.phys .osi-layer-num { background: rgba(71,85,105,0.2); color: var(--slate3); }
+
+/* ===== DATA CLASSIFICATION ===== */
+.data-class { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; border: 1.5px solid; margin-bottom: 10px; }
+.data-class.internal { background: rgba(0,212,170,0.05); border-color: var(--teal); }
+.data-class.confidential { background: rgba(255,209,102,0.05); border-color: var(--gold); }
+.data-class.restricted { background: rgba(255,107,107,0.08); border-color: var(--coral); }
+.data-class-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 3px 10px; border-radius: 10px; }
+.data-class.internal .data-class-label { background: rgba(0,212,170,0.15); color: var(--teal); }
+.data-class.confidential .data-class-label { background: rgba(255,209,102,0.15); color: var(--gold); }
+.data-class.restricted .data-class-label { background: rgba(255,107,107,0.15); color: var(--coral); }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--slate3); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- ============ SLIDE 1: TITLE ============ -->
+<div class="slide active" data-slide="0">
+  <div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+  <div class="center" style="position:relative;z-index:2;">
+    <span class="tag gold">Board Strategy & Funding</span>
+    <h1 style="margin-bottom:16px;">Enterprise AI Operating System</h1>
+    <p class="subtitle" style="font-size:1.3rem;max-width:700px;margin:0 auto 32px;">
+      A unified GenAI platform and observability fabric to orchestrate agents across 
+      <span class="highlight-gold">Salesforce</span>, <span class="highlight-blue">SAP</span>, 
+      <span class="highlight">ServiceNow</span>, <span class="highlight-purple">Databricks</span>, 
+      and <span class="highlight-coral">Microsoft Copilot</span> — at $100B scale.
+    </p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:24px;">
+      <div class="card" style="min-width:180px;text-align:center;padding:16px;">
+        <div class="stat-box" style="padding:0;"><div class="num" style="font-size:2rem;">$100B+</div><div class="label">Enterprise Revenue</div></div>
+      </div>
+      <div class="card blue" style="min-width:180px;text-align:center;padding:16px;">
+        <div class="stat-box" style="padding:0;"><div class="num" style="font-size:2rem;">6</div><div class="label">Major Platforms</div></div>
+      </div>
+      <div class="card gold" style="min-width:180px;text-align:center;padding:16px;">
+        <div class="stat-box" style="padding:0;"><div class="num" style="font-size:2rem;">1</div><div class="label">Unified GenAI OS</div></div>
+      </div>
+    </div>
+    <p style="margin-top:32px;font-size:0.85rem;color:var(--slate2);">Global Enterprise AI Strategy &middot; FY2026 Funding Request</p>
+  </div>
+</div>
+
+<!-- ============ SLIDE 2: THE ENTERPRISE AT SCALE ============ -->
+<div class="slide" data-slide="1">
+  <div class="wide">
+    <span class="tag blue">The Enterprise Context</span>
+    <h2>Operating at <span class="highlight-blue">$100 Billion Scale</span></h2>
+    <p style="margin-bottom:28px;">Like PepsiCo or Unilever, we run a global, multi-brand, multi-region operation with decades of technology investments and data spread across hundreds of systems.</p>
+    <div class="split-5">
+      <div class="card" style="text-align:center;">
+        <div class="stat-box"><div class="num">200+</div><div class="label">Countries</div></div>
+        <p style="font-size:0.82rem;margin-top:8px;">Global operations with regional data residency requirements</p>
+      </div>
+      <div class="card blue" style="text-align:center;">
+        <div class="stat-box"><div class="num">500+</div><div class="label">Brands / SKUs</div></div>
+        <p style="font-size:0.82rem;margin-top:8px;">From flagship brands to niche regional product lines</p>
+      </div>
+      <div class="card gold" style="text-align:center;">
+        <div class="stat-box"><div class="num">50+</div><div class="label">ERP Instances</div></div>
+        <p style="font-size:0.82rem;margin-top:8px;">SAP, Oracle, and custom systems across business units</p>
+      </div>
+      <div class="card purple" style="text-align:center;">
+        <div class="stat-box"><div class="num">2PB+</div><div class="label">Data Lake</div></div>
+        <p style="font-size:0.82rem;margin-top:8px;">Structured, semi-structured, and unstructured enterprise data</p>
+      </div>
+      <div class="card coral" style="text-align:center;">
+        <div class="stat-box"><div class="num">100K+</div><div class="label">Employees</div></div>
+        <p style="font-size:0.82rem;margin-top:8px;">From factory floors to executive suites, all needing AI access</p>
+      </div>
+    </div>
+    <div style="margin-top:24px;padding:18px 24px;background:rgba(255,209,102,0.06);border:1px solid rgba(255,209,102,0.15);border-radius:12px;">
+      <p style="font-size:0.95rem;color:var(--gold);margin:0;"><strong style="color:var(--white);">The Reality:</strong> Every major vendor is shipping AI agents. Salesforce has Agentforce. SAP has Joule. ServiceNow has AI Agents. Microsoft has Copilots. Each claims to be "the" AI layer. None talk to each other. Data is fragmented. Governance is impossible.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 3: THE AI REVOLUTION IS HERE ============ -->
+<div class="slide" data-slide="2">
+  <div class="wide">
+    <span class="tag teal">Market Context</span>
+    <h2>The <span class="highlight">AI Revolution</span> Is Not Coming. It Is Here.</h2>
+    <div class="split">
+      <div>
+        <p style="margin-bottom:20px;">Enterprises that do not centralize their AI strategy will face agent sprawl, duplicated costs, compliance gaps, and shadow AI. Those that build a unified GenAI platform will compound advantages for a decade.</p>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(0,212,170,0.06);border-radius:10px;border-left:3px solid var(--teal);">
+            <span style="font-size:1.3rem;">&#128200;</span>
+            <div><strong style="color:var(--white);">$1.3T AI market by 2032</strong> <span style="color:var(--slate);">— Enterprise AI is the fastest-growing segment</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(79,195,247,0.06);border-radius:10px;border-left:3px solid var(--blue);">
+            <span style="font-size:1.3rem;">&#9889;</span>
+            <div><strong style="color:var(--white);">Productivity gains of 30-50%</strong> <span style="color:var(--slate);">— In functions with well-orchestrated AI agents</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,209,102,0.06);border-radius:10px;border-left:3px solid var(--gold);">
+            <span style="font-size:1.3rem;">&#128161;</span>
+            <div><strong style="color:var(--white);">Every major vendor is AI-first now</strong> <span style="color:var(--slate);">— Salesforce, SAP, ServiceNow, Microsoft, Workday</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,107,107,0.06);border-radius:10px;border-left:3px solid var(--coral);">
+            <span style="font-size:1.3rem;">&#9888;</span>
+            <div><strong style="color:var(--white);">Shadow AI is already happening</strong> <span style="color:var(--slate);">— Employees use ChatGPT with company data. We have no visibility.</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="padding:24px;">
+          <h3 style="margin-bottom:16px;color:var(--white);">The Competitive Divide</h3>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.85rem;font-weight:600;color:var(--coral);">Fragmented (Status Quo)</span><span style="font-size:0.8rem;color:var(--slate2);">Us today</span></div>
+              <div style="height:8px;background:rgba(255,107,107,0.15);border-radius:4px;overflow:hidden;"><div style="width:35%;height:100%;background:var(--coral);border-radius:4px;"></div></div>
+              <p style="font-size:0.78rem;margin-top:4px;">Siloed agents, duplicated LLM costs, no governance, data leakage risk</p>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.85rem;font-weight:600;color:var(--slate2);">Ad-hoc Piloting</span><span style="font-size:0.8rem;color:var(--slate2);">Most peers</span></div>
+              <div style="height:8px;background:rgba(148,163,184,0.15);border-radius:4px;overflow:hidden;"><div style="width:55%;height:100%;background:var(--slate2);border-radius:4px;"></div></div>
+              <p style="font-size:0.78rem;margin-top:4px;">Point solutions, some ROI, growing technical debt, unclear scaling path</p>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.85rem;font-weight:600;color:var(--teal);">Unified GenAI Platform</span><span style="font-size:0.8rem;color:var(--slate2);">Where we go</span></div>
+              <div style="height:8px;background:rgba(0,212,170,0.15);border-radius:4px;overflow:hidden;"><div style="width:90%;height:100%;background:var(--teal);border-radius:4px;"></div></div>
+              <p style="font-size:0.78rem;margin-top:4px;">Centralized LLMs, unified observability, governed data access, compounding ROI</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 4: CURRENT STATE — FRAGMENTED AI ============ -->
+<div class="slide" data-slide="3">
+  <div class="wide">
+    <span class="tag coral">Current State</span>
+    <h2>The <span class="highlight-coral">Fragmented AI</span> Landscape</h2>
+    <p style="margin-bottom:24px;">Every enterprise system has launched its own AI agents. None are coordinated. Each brings its own LLM, its own data connector, its own security model.</p>
+    <div class="svg-container">
+      <svg viewBox="0 0 1100 420" style="width:100%;">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#475569"/></marker>
+          <marker id="arrT" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#00d4aa"/></marker>
+        </defs>
+        <!-- Data Sources -->
+        <rect x="20" y="20" width="160" height="70" rx="8" class="diagram-box" />
+        <text x="100" y="45" class="diagram-text">SharePoint</text>
+        <text x="100" y="60" class="diagram-text small slate">Documents & Wikis</text>
+        <text x="100" y="75" class="diagram-text small slate">Enterprise Knowledge</text>
+
+        <rect x="200" y="20" width="160" height="70" rx="8" class="diagram-box" />
+        <text x="280" y="45" class="diagram-text">SAP HANA</text>
+        <text x="280" y="60" class="diagram-text small slate">ERP & Supply Chain</text>
+        <text x="280" y="75" class="diagram-text small slate">Financial Data</text>
+
+        <rect x="380" y="20" width="160" height="70" rx="8" class="diagram-box" />
+        <text x="460" y="45" class="diagram-text">Salesforce</text>
+        <text x="460" y="60" class="diagram-text small slate">CRM & Customer 360</text>
+        <text x="460" y="75" class="diagram-text small slate">Pipeline & Contracts</text>
+
+        <rect x="560" y="20" width="160" height="70" rx="8" class="diagram-box" />
+        <text x="640" y="45" class="diagram-text">ServiceNow</text>
+        <text x="640" y="60" class="diagram-text small slate">ITSM & Workflows</text>
+        <text x="640" y="75" class="diagram-text small slate">Tickets & Processes</text>
+
+        <rect x="740" y="20" width="160" height="70" rx="8" class="diagram-box" />
+        <text x="820" y="45" class="diagram-text">Databricks</text>
+        <text x="820" y="60" class="diagram-text small slate">Data Lakehouse</text>
+        <text x="820" y="75" class="diagram-text small slate">Analytics & ML</text>
+
+        <rect x="920" y="20" width="160" height="70" rx="8" class="diagram-box" />
+        <text x="1000" y="45" class="diagram-text">Microsoft 365</text>
+        <text x="1000" y="60" class="diagram-text small slate">Teams & Outlook</text>
+        <text x="1000" y="75" class="diagram-text small slate">Collaboration Data</text>
+
+        <!-- Vendor AI Agents -->
+        <rect x="20" y="140" width="160" height="70" rx="8" class="diagram-box coral" />
+        <text x="100" y="165" class="diagram-text">SharePoint Agents</text>
+        <text x="100" y="180" class="diagram-text small slate">Microsoft Copilot</text>
+        <text x="100" y="195" class="diagram-text small slate">Own LLM / Vector Store</text>
+
+        <rect x="200" y="140" width="160" height="70" rx="8" class="diagram-box coral" />
+        <text x="280" y="165" class="diagram-text">SAP Joule</text>
+        <text x="280" y="180" class="diagram-text small slate">SAP-managed LLM</text>
+        <text x="280" y="195" class="diagram-text small slate">Separate data pipeline</text>
+
+        <rect x="380" y="140" width="160" height="70" rx="8" class="diagram-box coral" />
+        <text x="460" y="165" class="diagram-text">Agentforce</text>
+        <text x="460" y="180" class="diagram-text small slate">Salesforce Einstein</text>
+        <text x="460" y="195" class="diagram-text small slate">Own trust layer</text>
+
+        <rect x="560" y="140" width="160" height="70" rx="8" class="diagram-box coral" />
+        <text x="640" y="165" class="diagram-text">Now Assist</text>
+        <text x="640" y="180" class="diagram-text small slate">ServiceNow AI</text>
+        <text x="640" y="195" class="diagram-text small slate">Workflow agents</text>
+
+        <rect x="740" y="140" width="160" height="70" rx="8" class="diagram-box coral" />
+        <text x="820" y="165" class="diagram-text">DBIQ / Genie</text>
+        <text x="820" y="180" class="diagram-text small slate">Databricks AI</text>
+        <text x="820" y="195" class="diagram-text small slate">SQL-native agents</text>
+
+        <rect x="920" y="140" width="160" height="70" rx="8" class="diagram-box coral" />
+        <text x="1000" y="165" class="diagram-text">M365 Copilots</text>
+        <text x="1000" y="180" class="diagram-text small slate">Teams / Word / Excel</text>
+        <text x="1000" y="195" class="diagram-text small slate">Graph-grounded</text>
+
+        <!-- Arrows down -->
+        <line x1="100" y1="90" x2="100" y2="140" class="diagram-line" marker-end="url(#arr)"/>
+        <line x1="280" y1="90" x2="280" y2="140" class="diagram-line" marker-end="url(#arr)"/>
+        <line x1="460" y1="90" x2="460" y2="140" class="diagram-line" marker-end="url(#arr)"/>
+        <line x1="640" y1="90" x2="640" y2="140" class="diagram-line" marker-end="url(#arr)"/>
+        <line x1="820" y1="90" x2="820" y2="140" class="diagram-line" marker-end="url(#arr)"/>
+        <line x1="1000" y1="90" x2="1000" y2="140" class="diagram-line" marker-end="url(#arr)"/>
+
+        <!-- Warning Zone -->
+        <rect x="20" y="250" width="1060" height="150" rx="12" fill="rgba(255,107,107,0.04)" stroke="rgba(255,107,107,0.2)" stroke-width="1.5" stroke-dasharray="6,4"/>
+        <text x="550" y="280" class="diagram-text" style="font-size:14px;">&#9888; PROBLEMS WITH THIS MODEL</text>
+        
+        <text x="160" y="320" class="diagram-text small slate" style="text-anchor:middle;">6 Different LLM Providers</text>
+        <text x="160" y="335" class="diagram-text small slate" style="text-anchor:middle;">Duplicated API costs</text>
+        <text x="160" y="350" class="diagram-text small slate" style="text-anchor:middle;">No rate limiting</text>
+
+        <text x="440" y="320" class="diagram-text small slate" style="text-anchor:middle;">6 Different Vector Stores</text>
+        <text x="440" y="335" class="diagram-text small slate" style="text-anchor:middle;">Inconsistent embeddings</text>
+        <text x="440" y="350" class="diagram-text small slate" style="text-anchor:middle;">Stale / duplicated data</text>
+
+        <text x="720" y="320" class="diagram-text small slate" style="text-anchor:middle;">Zero Cross-System Context</text>
+        <text x="720" y="335" class="diagram-text small slate" style="text-anchor:middle;">Agents cannot collaborate</text>
+        <text x="720" y="350" class="diagram-text small slate" style="text-anchor:middle;">Siloed insights</text>
+
+        <text x="950" y="320" class="diagram-text small slate" style="text-anchor:middle;">No Unified Governance</text>
+        <text x="950" y="335" class="diagram-text small slate" style="text-anchor:middle;">Shadow AI everywhere</text>
+        <text x="950" y="350" class="diagram-text small slate" style="text-anchor:middle;">Compliance nightmare</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 5: THE CHALLENGE ============ -->
+<div class="slide" data-slide="4">
+  <div class="wide">
+    <span class="tag coral">The Challenge</span>
+    <h2>Every Vendor Ships <span class="highlight-coral">Their Own Agents</span></h2>
+    <p style="margin-bottom:24px;">We are not choosing one AI vendor. We are being forced to manage many — each with its own agent runtime, trust model, data pipeline, and cost structure.</p>
+    <div class="split-3">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-box blue" style="margin:0;width:40px;height:40px;font-size:1.1rem;">&#129302;</div>
+          <div><h3 style="margin:0;">Salesforce Agentforce</h3><span style="font-size:0.78rem;color:var(--slate2);">CRM-native autonomous agents</span></div>
+        </div>
+        <ul style="padding-left:16px;font-size:0.85rem;color:var(--slate);">
+          <li>Auto-qualifies leads, drafts proposals</li>
+          <li>Runs on Salesforce trust layer</li>
+          <li>Uses its own LLM (Einstein)</li>
+          <li>Cannot see SAP supply data</li>
+          <li>Cannot see ServiceNow tickets</li>
+        </ul>
+        <div style="margin-top:10px;"><span class="badge danger">Siloed to CRM</span></div>
+      </div>
+      <div class="card blue">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-box gold" style="margin:0;width:40px;height:40px;font-size:1.1rem;">&#128187;</div>
+          <div><h3 style="margin:0;">SAP Joule & AI</h3><span style="font-size:0.78rem;color:var(--slate2);">ERP & supply chain agents</span></div>
+        </div>
+        <ul style="padding-left:16px;font-size:0.85rem;color:var(--slate);">
+          <li>Natural language ERP queries</li>
+          <li>Procurement & inventory agents</li>
+          <li>Runs on SAP BTP / managed LLM</li>
+          <li>Cannot see Salesforce pipeline</li>
+          <li>Cannot read SharePoint contracts</li>
+        </ul>
+        <div style="margin-top:10px;"><span class="badge danger">Siloed to ERP</span></div>
+      </div>
+      <div class="card gold">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-box purple" style="margin:0;width:40px;height:40px;font-size:1.1rem;">&#128295;</div>
+          <div><h3 style="margin:0;">ServiceNow AI Agents</h3><span style="font-size:0.78rem;color:var(--slate2);">ITSM & workflow automation</span></div>
+        </div>
+        <ul style="padding-left:16px;font-size:0.85rem;color:var(--slate);">
+          <li>Auto-resolves IT incidents</li>
+          <li>HR case routing & summarization</li>
+          <li>Now Assist for every workflow</li>
+          <li>Cannot see CRM customer context</li>
+          <li>Cannot access ERP part numbers</li>
+        </ul>
+        <div style="margin-top:10px;"><span class="badge danger">Siloed to ITSM</span></div>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="card purple">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-box" style="margin:0;width:40px;height:40px;font-size:1.1rem;">&#128202;</div>
+          <div><h3 style="margin:0;">Databricks DBIQ / Genie</h3><span style="font-size:0.78rem;color:var(--slate2);">Data & analytics agents</span></div>
+        </div>
+        <ul style="padding-left:16px;font-size:0.85rem;color:var(--slate);">
+          <li>Natural language SQL generation</li>
+          <li>Lakehouse intelligence & monitoring</li>
+          <li>Runs on Unity Catalog governance</li>
+          <li>Cannot trigger CRM actions</li>
+          <li>Cannot create ServiceNow tickets</li>
+        </ul>
+        <div style="margin-top:10px;"><span class="badge danger">Siloed to Data</span></div>
+      </div>
+      <div class="card coral">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-box blue" style="margin:0;width:40px;height:40px;font-size:1.1rem;">&#128172;</div>
+          <div><h3 style="margin:0;">Microsoft 365 Copilots</h3><span style="font-size:0.78rem;color:var(--slate2);">Productivity & collaboration</span></div>
+        </div>
+        <ul style="padding-left:16px;font-size:0.85rem;color:var(--slate);">
+          <li>Teams, Word, Excel, Outlook AI</li>
+          <li>Graph-grounded enterprise search</li>
+          <li>Copilot Studio for custom agents</li>
+          <li>Cannot write to SAP directly</li>
+          <li>Cannot see Salesforce custom objects</li>
+        </ul>
+        <div style="margin-top:10px;"><span class="badge danger">Siloed to M365</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============ SLIDE 6: ENTERPRISE DATA FOUNDATION ============ -->
+<div class="slide" data-slide="5">
+  <div class="wide">
+    <span class="tag purple">Foundation Layer</span>
+    <h2>The Enterprise Data Foundation: <span class="highlight-purple">Azure Databricks</span></h2>
+    <p style="margin-bottom:24px;">Before AI can be intelligent, data must be unified. Azure Databricks is our Lakehouse — the single source of truth for structured, semi-structured, and unstructured enterprise data.</p>
+    <div class="split">
+      <div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="card" style="padding:16px;display:flex;align-items:center;gap:14px;">
+            <div class="icon-box purple" style="margin:0;flex-shrink:0;">&#128230;</div>
+            <div><h3 style="margin:0 0 4px 0;">Delta Lake — Unified Storage</h3><p style="margin:0;font-size:0.85rem;">ACID transactions, time travel, schema enforcement across all data domains</p></div>
+          </div>
+          <div class="card blue" style="padding:16px;display:flex;align-items:center;gap:14px;">
+            <div class="icon-box blue" style="margin:0;flex-shrink:0;">&#128272;</div>
+            <div><h3 style="margin:0 0 4px 0;">Unity Catalog — Unified Governance</h3><p style="margin:0;font-size:0.85rem;">Fine-grained access control, lineage tracking, data discovery across all workloads</p></div>
+          </div>
+          <div class="card teal" style="padding:16px;display:flex;align-items:center;gap:14px;">
+            <div class="icon-box" style="margin:0;flex-shrink:0;">&#9889;</div>
+            <div><h3 style="margin:0 0 4px 0;">Photon Engine — Fast Query</h3><p style="margin:0;font-size:0.85rem;">Vectorized execution engine for sub-second analytics on petabyte-scale data</p></div>
+          </div>
+          <div class="card gold" style="padding:16px;display:flex;align-items:center;gap:14px;">
+            <div class="icon-box gold" style="margin:0;flex-shrink:0;">&#128300;</div>
+            <div><h3 style="margin:0 0 4px 0;">MLflow — Model Lifecycle</h3><p style="margin:0;font-size:0.85rem;">Experiment tracking, model registry, deployment automation for all AI models</p></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="svg-container">
+          <svg viewBox="0 0 500 380" style="width:100%;">
+            <defs>
+              <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#475569"/></marker>
+            </defs>
+            <!-- Ingestion Layer -->
+            <rect x="20" y="10" width="105" height="50" rx="8" class="diagram-box" />
+            <text x="72" y="30" class="diagram-text small">SAP</text>
+            <text x="72" y="44" class="diagram-text small slate">CDC / OData</text>
+
+            <rect x="140" y="10" width="105" height="50" rx="8" class="diagram-box" />
+            <text x="192" y="30" class="diagram-text small">Salesforce</text>
+            <text x="192" y="44" class="diagram-text small slate">Bulk API</text>
+
+            <rect x="260" y="10" width="105" height="50" rx="8" class="diagram-box" />
+            <text x="312" y="30" class="diagram-text small">ServiceNow</text>
+            <text x="312" y="44" class="diagram-text small slate">REST API</text>
+
+            <rect x="380" y="10" width="105" height="50" rx="8" class="diagram-box" />
+            <text x="432" y="30" class="diagram-text small">SharePoint</text>
+            <text x="432" y="44" class="diagram-text small slate">Graph API</text>
+
+            <!-- Arrows to Medallion -->
+            <line x1="72" y1="60" x2="72" y2="95" class="diagram-line" marker-end="url(#arr2)"/>
+            <line x1="192" y1="60" x2="192" y2="95" class="diagram-line" marker-end="url(#arr2)"/>
+            <line x1="312" y1="60" x2="312" y2="95" class="diagram-line" marker-end="url(#arr2)"/>
+            <line x1="432" y1="60" x2="432" y2="95" class="diagram-line" marker-end="url(#arr2)"/>
+
+            <!-- Medallion Architecture -->
+            <rect x="20" y="100" width="150" height="70" rx="8" class="diagram-box coral" />
+            <text x="95" y="125" class="diagram-text">Bronze (Raw)</text>
+            <text x="95" y="142" class="diagram-text small slate">Kafka / Event Hubs</text>
+            <text x="95" y="155" class="diagram-text small slate">Batch & streaming ingest</text>
+
+            <rect x="180" y="100" width="150" height="70" rx="8" class="diagram-box gold" />
+            <text x="255" y="125" class="diagram-text">Silver (Clean)</text>
+            <text x="255" y="142" class="diagram-text small slate">Delta Live Tables</text>
+            <text x="255" y="155" class="diagram-text small slate">Quality rules & dedup</text>
+
+            <rect x="340" y="100" width="145" height="70" rx="8" class="diagram-box teal" />
+            <text x="412" y="125" class="diagram-text">Gold (Curated)</text>
+            <text x="412" y="142" class="diagram-text small slate">Business aggregates</text>
+            <text x="412" y="155" class="diagram-text small slate">Feature store</text>
+
+            <line x1="170" y1="135" x2="180" y2="135" class="diagram-line" marker-end="url(#arr2)"/>
+            <line x1="330" y1="135" x2="340" y2="135" class="diagram-line" marker-end="url(#arr2)"/>
+
+            <!-- Unity Catalog -->
+            <rect x="20" y="190" width="465" height="55" rx="8" class="diagram-box purple" />
+            <text x="252" y="215" class="diagram-text">Unity Catalog — Unified Governance & Lineage</text>
+            <text x="252" y="232" class="diagram-text small slate">Access control | Data sharing | Discovery | Audit</text>
+
+            <line x1="252" y1="170" x2="252" y2="190" class="diagram-line" marker-end="url(#arr2)"/>
+
+            <!-- Consumption -->
+            <rect x="20" y="265" width="140" height="50" rx="8" class="diagram-box blue" />
+            <text x="90" y="285" class="diagram-text small">BI & Analytics</text>
+            <text x="90" y="300" class="diagram-text small slate">Power BI / Tableau</text>
+
+            <rect x="180" y="265" width="140" height="50" rx="8" class="diagram-box blue" />
+            <text x="250" y="285" class="diagram-text small">ML & AI Training</text>
+            <text x="250" y="300" class="diagram-text small slate">Spark / GPU Clusters</text>
+
+            <rect x="340" y="265" width="145" height="50" rx="8" class="diagram-box blue" />
+            <text x="412" y="285" class="diagram-text small">Vector Store / RAG</text>
+            <text x="412" y="300" class="diagram-text small slate">Embeddings for GenAI</text>
+
+            <line x1="90" y1="245" x2="90" y2="265" class="diagram-line" marker-end="url(#arr2)"/>
+            <line x1="250" y1="245" x2="250" y2="265" class="diagram-line" marker-end="url(#arr2)"/>
+            <line x1="412" y1="245" x2="412" y2="265" class="diagram-line" marker-end="url(#arr2)"/>
+
+            <!-- Label -->
+            <text x="250" y="350" class="diagram-text slate" style="font-size:11px;text-anchor:middle;">Azure Databricks Lakehouse — The Data Foundation for All Enterprise AI</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 7: THE PROPOSED ARCHITECTURE ============ -->
+<div class="slide" data-slide="6">
+  <div class="wide">
+    <span class="tag teal">Target State</span>
+    <h2>The <span class="highlight">Enterprise GenAI Operating System</span></h2>
+    <p style="margin-bottom:20px;">Two central platforms govern every AI interaction: the <strong style="color:var(--white);">GenAI Platform</strong> (provides LLMs, orchestration, RAG) and the <strong style="color:var(--white);">Observability Platform</strong> (monitors, traces, governs). Every agent — from any vendor — runs through these.</p>
+    <div class="svg-container">
+      <svg viewBox="0 0 1200 520" style="width:100%;">
+        <defs>
+          <marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#475569"/></marker>
+          <marker id="arr3T" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#00d4aa"/></marker>
+          <marker id="arr3G" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#ffd166"/></marker>
+          <linearGradient id="gradGenAI" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(0,212,170,0.12)"/><stop offset="100%" stop-color="rgba(0,212,170,0.03)"/></linearGradient>
+          <linearGradient id="gradObs" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,209,102,0.12)"/><stop offset="100%" stop-color="rgba(255,209,102,0.03)"/></linearGradient>
+        </defs>
+
+        <!-- Enterprise Systems (Top) -->
+        <rect x="30" y="15" width="130" height="55" rx="8" class="diagram-box" />
+        <text x="95" y="35" class="diagram-text small">Salesforce</text>
+        <text x="95" y="50" class="diagram-text small slate">Agentforce</text>
+
+        <rect x="185" y="15" width="130" height="55" rx="8" class="diagram-box" />
+        <text x="250" y="35" class="diagram-text small">SAP</text>
+        <text x="250" y="50" class="diagram-text small slate">Joule</text>
+
+        <rect x="340" y="15" width="130" height="55" rx="8" class="diagram-box" />
+        <text x="405" y="35" class="diagram-text small">ServiceNow</text>
+        <text x="405" y="50" class="diagram-text small slate">Now Assist</text>
+
+        <rect x="495" y="15" width="130" height="55" rx="8" class="diagram-box" />
+        <text x="560" y="35" class="diagram-text small">Microsoft 365</text>
+        <text x="560" y="50" class="diagram-text small slate">Copilots</text>
+
+        <rect x="650" y="15" width="130" height="55" rx="8" class="diagram-box" />
+        <text x="715" y="35" class="diagram-text small">SharePoint</text>
+        <text x="715" y="50" class="diagram-text small slate">Wiki / Docs</text>
+
+        <rect x="805" y="15" width="130" height="55" rx="8" class="diagram-box" />
+        <text x="870" y="35" class="diagram-text small">Custom Apps</text>
+        <text x="870" y="50" class="diagram-text small slate">Internal Agents</text>
+
+        <rect x="960" y="15" width="130" height="55" rx="8" class="diagram-box" />
+        <text x="1025" y="35" class="diagram-text small">Databricks</text>
+        <text x="1025" y="50" class="diagram-text small slate">DBIQ / Genie</text>
+
+        <!-- Agent Gateway -->
+        <rect x="30" y="95" width="1060" height="45" rx="8" class="diagram-box blue" />
+        <text x="560" y="115" class="diagram-text" style="font-size:13px;">Enterprise Agent Gateway — API Unification, Protocol Translation, Auth Normalization</text>
+        <text x="560" y="130" class="diagram-text small slate">All vendor agents communicate through this single ingress/egress point</text>
+
+        <!-- Arrows down from systems to gateway -->
+        <line x1="95" y1="70" x2="95" y2="95" class="diagram-line blue" marker-end="url(#arr3)"/>
+        <line x1="250" y1="70" x2="250" y2="95" class="diagram-line blue" marker-end="url(#arr3)"/>
+        <line x1="405" y1="70" x2="405" y2="95" class="diagram-line blue" marker-end="url(#arr3)"/>
+        <line x1="560" y1="70" x2="560" y2="95" class="diagram-line blue" marker-end="url(#arr3)"/>
+        <line x1="715" y1="70" x2="715" y2="95" class="diagram-line blue" marker-end="url(#arr3)"/>
+        <line x1="870" y1="70" x2="870" y2="95" class="diagram-line blue" marker-end="url(#arr3)"/>
+        <line x1="1025" y1="70" x2="1025" y2="95" class="diagram-line blue" marker-end="url(#arr3)"/>
+
+        <!-- GENAI PLATFORM -->
+        <rect x="30" y="165" width="620" height="220" rx="12" fill="url(#gradGenAI)" stroke="rgba(0,212,170,0.25)" stroke-width="1.5"/>
+        <text x="60" y="190" class="diagram-text" style="font-size:14px;color:var(--teal);">&#9679; ENTERPRISE GENAI PLATFORM</text>
+        <text x="340" y="190" class="diagram-text small slate">Provides all LLMs, embeddings, RAG, and prompt governance</text>
+
+        <!-- GenAI Components -->
+        <rect x="50" y="210" width="170" height="65" rx="8" class="diagram-box teal" />
+        <text x="135" y="230" class="diagram-text small">LLM Gateway</text>
+        <text x="135" y="245" class="diagram-text small slate">Azure OpenAI</text>
+        <text x="135" y="258" class="diagram-text small slate">GPT-4o / Claude / Llama</text>
+
+        <rect x="240" y="210" width="170" height="65" rx="8" class="diagram-box teal" />
+        <text x="325" y="230" class="diagram-text small">RAG Engine</text>
+        <text x="325" y="245" class="diagram-text small slate">Vector Search</text>
+        <text x="325" y="258" class="diagram-text small slate">Re-ranking & Context</text>
+
+        <rect x="430" y="210" width="200" height="65" rx="8" class="diagram-box teal" />
+        <text x="530" y="230" class="diagram-text small">Prompt Management</text>
+        <text x="530" y="245" class="diagram-text small slate">Versioning, A/B Testing</text>
+        <text x="530" y="258" class="diagram-text small slate">Injection Guardrails</text>
+
+        <rect x="50" y="295" width="170" height="65" rx="8" class="diagram-box teal" />
+        <text x="135" y="315" class="diagram-text small">Model Registry</text>
+        <text x="135" y="330" class="diagram-text small slate">MLflow Integration</text>
+        <text x="135" y="343" class="diagram-text small slate">Fine-tuned Models</text>
+
+        <rect x="240" y="295" width="170" height="65" rx="8" class="diagram-box teal" />
+        <text x="325" y="315" class="diagram-text small">Agent Runtime</text>
+        <text x="325" y="330" class="diagram-text small slate">Multi-agent Orchestration</text>
+        <text x="325" y="343" class="diagram-text small slate">Tool Use & Function Calling</text>
+
+        <rect x="430" y="295" width="200" height="65" rx="8" class="diagram-box teal" />
+        <text x="530" y="315" class="diagram-text small">Data Connectors</text>
+        <text x="530" y="330" class="diagram-text small slate">Unity Catalog Integration</text>
+        <text x="530" y="343" class="diagram-text small slate">Real-time & Batch</text>
+
+        <!-- OBSERVABILITY PLATFORM -->
+        <rect x="670" y="165" width="420" height="220" rx="12" fill="url(#gradObs)" stroke="rgba(255,209,102,0.25)" stroke-width="1.5"/>
+        <text x="700" y="190" class="diagram-text" style="font-size:14px;color:var(--gold);">&#9679; ENTERPRISE OBSERVABILITY PLATFORM</text>
+        <text x="930" y="190" class="diagram-text small slate">Monitors every AI call, cost, latency, and compliance event</text>
+
+        <!-- Obs Components -->
+        <rect x="690" y="210" width="180" height="65" rx="8" class="diagram-box gold" />
+        <text x="780" y="230" class="diagram-text small">AI Tracing</text>
+        <text x="780" y="245" class="diagram-text small slate">Request/Response Logs</text>
+        <text x="780" y="258" class="diagram-text small slate">Chain-of-thought Audit</text>
+
+        <rect x="890" y="210" width="180" height="65" rx="8" class="diagram-box gold" />
+        <text x="980" y="230" class="diagram-text small">Cost Management</text>
+        <text x="980" y="245" class="diagram-text small slate">Token Budgeting</text>
+        <text x="980" y="258" class="diagram-text small slate">Chargeback by Business Unit</text>
+
+        <rect x="690" y="295" width="180" height="65" rx="8" class="diagram-box gold" />
+        <text x="780" y="315" class="diagram-text small">Guardrails & Safety</text>
+        <text x="780" y="330" class="diagram-text small slate">PII Detection & Redaction</text>
+        <text x="780" y="343" class="diagram-text small slate">Toxicity & Bias Filters</text>
+
+        <rect x="890" y="295" width="180" height="65" rx="8" class="diagram-box gold" />
+        <text x="980" y="315" class="diagram-text small">Performance SLAs</text>
+        <text x="980" y="330" class="diagram-text small slate">Latency & Availability</text>
+        <text x="980" y="343" class="diagram-text small slate">Alerting & Runbooks</text>
+
+        <!-- Arrows between platforms and gateway -->
+        <line x1="340" y1="140" x2="340" y2="165" class="diagram-line teal" marker-end="url(#arr3T)"/>
+        <line x1="880" y1="140" x2="880" y2="165" class="diagram-line gold" marker-end="url(#arr3G)"/>
+
+        <!-- Bidirectional between GenAI and Obs -->
+        <line x1="650" y1="240" x2="670" y2="240" class="diagram-line" marker-end="url(#arr3)" stroke-dasharray="4,3"/>
+        <line x1="670" y1="260" x2="650" y2="260" class="diagram-line" marker-end="url(#arr3)" stroke-dasharray="4,3"/>
+        <text x="660" y="255" class="diagram-text small slate" style="font-size:9px;">events</text>
+
+        <!-- Bottom: Databricks Foundation -->
+        <rect x="30" y="405" width="1060" height="55" rx="8" class="diagram-box purple" />
+        <text x="560" y="425" class="diagram-text">Azure Databricks Lakehouse — Enterprise Data Foundation</text>
+        <text x="560" y="445" class="diagram-text small slate">Delta Lake | Unity Catalog | Feature Store | Vector DB | MLflow</text>
+
+        <!-- Arrows from platforms to data -->
+        <line x1="340" y1="385" x2="340" y2="405" class="diagram-line" marker-end="url(#arr3)"/>
+        <line x1="880" y1="385" x2="880" y2="405" class="diagram-line" marker-end="url(#arr3)"/>
+
+        <!-- Side label -->
+        <text x="560" y="485" class="diagram-text small slate" style="font-size:11px;text-anchor:middle;">All LLM inference, all agent actions, all data access — centrally governed, centrally observed, centrally billed.</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 8: DATA FLOW ARCHITECTURE ============ -->
+<div class="slide" data-slide="7">
+  <div class="wide">
+    <span class="tag blue">End-to-End Flow</span>
+    <h2>How <span class="highlight-blue">Data Flows</span> Through the Enterprise AI OS</h2>
+    <p style="margin-bottom:20px;">A request from any agent traverses the same path: authenticated at the gateway, enriched via RAG from the lakehouse, executed through the enterprise LLM, traced by observability, and billed to the right cost center.</p>
+    <div class="pipeline">
+      <div class="pipe-seg teal">
+        <div class="pipe-title">1. Request Ingress</div>
+        <div class="pipe-desc">Agent Gateway receives request from any system</div>
+        <div class="pipe-arrow">&#10132;</div>
+      </div>
+      <div class="pipe-seg blue">
+        <div class="pipe-title">2. Auth & Routing</div>
+        <div class="pipe-desc">Validate Entra ID token, route to correct model</div>
+        <div class="pipe-arrow">&#10132;</div>
+      </div>
+      <div class="pipe-seg purple">
+        <div class="pipe-title">3. RAG Enrichment</div>
+        <div class="pipe-desc">Query vector store, inject relevant context</div>
+        <div class="pipe-arrow">&#10132;</div>
+      </div>
+      <div class="pipe-seg gold">
+        <div class="pipe-title">4. LLM Inference</div>
+        <div class="pipe-desc">Call enterprise LLM with governed prompt</div>
+        <div class="pipe-arrow">&#10132;</div>
+      </div>
+      <div class="pipe-seg coral">
+        <div class="pipe-title">5. Guardrail Check</div>
+        <div class="pipe-desc">PII scan, toxicity filter, policy compliance</div>
+        <div class="pipe-arrow">&#10132;</div>
+      </div>
+      <div class="pipe-seg teal">
+        <div class="pipe-title">6. Response & Trace</div>
+        <div class="pipe-desc">Return to agent, log to observability, bill</div>
+      </div>
+    </div>
+    <div class="svg-container" style="margin-top:24px;">
+      <svg viewBox="0 0 1100 300" style="width:100%;">
+        <defs>
+          <marker id="arrF" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#475569"/></marker>
+        </defs>
+        <!-- User/Agent -->
+        <rect x="20" y="110" width="100" height="60" rx="8" class="diagram-box" />
+        <text x="70" y="135" class="diagram-text small">User / Agent</text>
+        <text x="70" y="150" class="diagram-text small slate">Any System</text>
+
+        <!-- Arrow to Gateway -->
+        <line x1="120" y1="140" x2="160" y2="140" class="diagram-line" marker-end="url(#arrF)"/>
+        <text x="140" y="130" class="diagram-text small slate" style="font-size:9px;">HTTPS + JWT</text>
+
+        <!-- Gateway -->
+        <rect x="170" y="90" width="120" height="100" rx="8" class="diagram-box blue" />
+        <text x="230" y="120" class="diagram-text small">Agent Gateway</text>
+        <text x="230" y="138" class="diagram-text small slate">Auth / Rate Limit</text>
+        <text x="230" y="152" class="diagram-text small slate">Protocol Translation</text>
+        <text x="230" y="166" class="diagram-text small slate">Request Validation</text>
+
+        <!-- Arrow to RAG -->
+        <line x1="290" y1="120" x2="340" y2="120" class="diagram-line" marker-end="url(#arrF)"/>
+        <text x="315" y="110" class="diagram-text small slate" style="font-size:9px;">context needed</text>
+
+        <!-- RAG -->
+        <rect x="350" y="70" width="130" height="80" rx="8" class="diagram-box purple" />
+        <text x="415" y="95" class="diagram-text small">RAG Engine</text>
+        <text x="415" y="112" class="diagram-text small slate">Vector Search</text>
+        <text x="415" y="126" class="diagram-text small slate">Re-ranking</text>
+        <text x="415" y="140" class="diagram-text small slate">Context Assembly</text>
+
+        <!-- Arrow to LLM -->
+        <line x1="415" y1="150" x2="415" y2="170" class="diagram-line" marker-end="url(#arrF)"/>
+        <text x="445" y="165" class="diagram-text small slate" style="font-size:9px;">enriched prompt</text>
+
+        <!-- LLM -->
+        <rect x="350" y="180" width="130" height="80" rx="8" class="diagram-box teal" />
+        <text x="415" y="205" class="diagram-text small">LLM Gateway</text>
+        <text x="415" y="222" class="diagram-text small slate">Model Selection</text>
+        <text x="415" y="236" class="diagram-text small slate">Azure OpenAI</text>
+        <text x="415" y="250" class="diagram-text small slate">Fallback Routing</text>
+
+        <!-- Arrow from gateway to LLM directly (when no RAG) -->
+        <line x1="290" y1="160" x2="350" y2="200" class="diagram-line" stroke-dasharray="4,3" marker-end="url(#arrF)"/>
+        <text x="310" y="190" class="diagram-text small slate" style="font-size:9px;">direct</text>
+
+        <!-- Arrow to Guardrails -->
+        <line x1="480" y1="220" x2="530" y2="220" class="diagram-line" marker-end="url(#arrF)"/>
+
+        <!-- Guardrails -->
+        <rect x="540" y="170" width="130" height="100" rx="8" class="diagram-box coral" />
+        <text x="605" y="198" class="diagram-text small">Guardrails</text>
+        <text x="605" y="216" class="diagram-text small slate">PII Detection</text>
+        <text x="605" y="232" class="diagram-text small slate">Toxicity Filter</text>
+        <text x="605" y="248" class="diagram-text small slate">Policy Enforcement</text>
+        <text x="605" y="262" class="diagram-text small slate">Output Validation</text>
+
+        <!-- Arrow to Response -->
+        <line x1="670" y1="220" x2="720" y2="220" class="diagram-line" marker-end="url(#arrF)"/>
+
+        <!-- Response -->
+        <rect x="730" y="190" width="120" height="60" rx="8" class="diagram-box gold" />
+        <text x="790" y="215" class="diagram-text small">Response</text>
+        <text x="790" y="230" class="diagram-text small slate">To User / Agent</text>
+
+        <!-- Arrow back -->
+        <line x1="850" y1="220" x2="890" y2="220" class="diagram-line" marker-end="url(#arrF)"/>
+
+        <!-- Back to user -->
+        <rect x="900" y="190" width="100" height="60" rx="8" class="diagram-box" />
+        <text x="950" y="215" class="diagram-text small">User / Agent</text>
+        <text x="950" y="230" class="diagram-text small slate">Receives Output</text>
+
+        <!-- Observability (side trace) -->
+        <rect x="540" y="20" width="460" height="50" rx="8" class="diagram-box gold" />
+        <text x="770" y="40" class="diagram-text small">Observability Platform — Every call traced, costed, and audited</text>
+        <text x="770" y="56" class="diagram-text small slate">Latency | Tokens | Errors | Cost Center | Compliance Score | Model Version</text>
+
+        <!-- Trace arrows from each stage to observability -->
+        <line x1="230" y1="90" x2="230" y2="60" class="diagram-line gold" stroke-dasharray="3,3" marker-end="url(#arrF)"/>
+        <line x1="415" y1="70" x2="540" y2="45" class="diagram-line gold" stroke-dasharray="3,3" marker-end="url(#arrF)"/>
+        <line x1="415" y1="180" x2="540" y2="50" class="diagram-line gold" stroke-dasharray="3,3" marker-end="url(#arrF)"/>
+        <line x1="605" y1="170" x2="605" y2="70" class="diagram-line gold" stroke-dasharray="3,3" marker-end="url(#arrF)"/>
+        <line x1="790" y1="190" x2="790" y2="70" class="diagram-line gold" stroke-dasharray="3,3" marker-end="url(#arrF)"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 8B: OSI LAYER ARCHITECTURE ============ -->
+<div class="slide" data-slide="18">
+  <div class="wide">
+    <span class="tag purple">Azure Infrastructure</span>
+    <h2>The <span class="highlight-purple">Enterprise AI Stack</span> — OSI Layer to Azure Mapping</h2>
+    <p style="margin-bottom:20px;">Every layer of the AI operating system maps to Azure infrastructure. This is not abstract — it is the exact cloud architecture we will deploy.</p>
+    <div class="split">
+      <div>
+        <div class="osi-stack">
+          <div class="osi-layer app">
+            <div class="osi-layer-num">7</div>
+            <div class="osi-layer-name">Application</div>
+            <div class="osi-layer-tech">Copilot Studio, Salesforce Agentforce, SAP Joule, ServiceNow Portal, Custom Chat UIs, Teams Bots</div>
+          </div>
+          <div class="osi-layer pres">
+            <div class="osi-layer-num">6</div>
+            <div class="osi-layer-name">Presentation</div>
+            <div class="osi-layer-tech">TLS 1.3, JWT/OAuth 2.0, PII Redaction, Prompt Encryption, Output Filtering, API Management Policies</div>
+          </div>
+          <div class="osi-layer sess">
+            <div class="osi-layer-num">5</div>
+            <div class="osi-layer-name">Session</div>
+            <div class="osi-layer-tech">Entra ID Sessions, Redis Cache, Conversation Memory, Context Window Management, Agent State Store</div>
+          </div>
+          <div class="osi-layer trans">
+            <div class="osi-layer-num">4</div>
+            <div class="osi-layer-name">Transport</div>
+            <div class="osi-layer-tech">Azure Front Door, Application Gateway, API Management, HTTP/2, gRPC, Rate Limiting, Circuit Breakers</div>
+          </div>
+          <div class="osi-layer net">
+            <div class="osi-layer-num">3</div>
+            <div class="osi-layer-name">Network</div>
+            <div class="osi-layer-tech">Azure VNets, NSGs, Private Link, Private Endpoints, Network Segmentation, DDoS Protection</div>
+          </div>
+          <div class="osi-layer data">
+            <div class="osi-layer-num">2</div>
+            <div class="osi-layer-name">Data Link</div>
+            <div class="osi-layer-tech">ExpressRoute, Virtual WAN, VPN Gateway, SD-WAN, Inter-Region Backbone, On-Prem Hybrid</div>
+          </div>
+          <div class="osi-layer phys">
+            <div class="osi-layer-num">1</div>
+            <div class="osi-layer-name">Physical</div>
+            <div class="osi-layer-tech">Azure Regions (20+), Availability Zones, GPU Clusters (NC/ND-series), Edge PoPs, TPM / Secure Enclaves</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="padding:20px;margin-bottom:12px;">
+          <h3 style="color:var(--white);margin-bottom:10px;">&#128208; Azure-Specific Design Choices</h3>
+          <ul style="padding-left:18px;font-size:0.85rem;color:var(--slate);line-height:1.7;">
+            <li><strong style="color:var(--white);">ExpressRoute</strong> for hybrid connectivity — no AI traffic over public internet</li>
+            <li><strong style="color:var(--white);">Private Link</strong> for all PaaS services (OpenAI, AI Search, Storage)</li>
+            <li><strong style="color:var(--white);">Availability Zones</strong> for 99.99% SLA on critical inference paths</li>
+            <li><strong style="color:var(--white);">Azure Firewall + NSGs</strong> for zero-trust micro-segmentation</li>
+            <li><strong style="color:var(--white);">Front Door + WAF</strong> for global edge caching and DDoS protection</li>
+            <li><strong style="color:var(--white);">Key Vault + Managed Identity</strong> — no secrets in code or config</li>
+          </ul>
+        </div>
+        <div class="card teal" style="padding:20px;">
+          <h3 style="color:var(--white);margin-bottom:10px;">&#127760; Multi-Region Topology</h3>
+          <div class="arch-layer" style="justify-content:flex-start;">
+            <div class="arch-node teal">East US 2</div><div class="arch-connector"></div>
+            <div class="arch-node blue">West Europe</div><div class="arch-connector"></div>
+            <div class="arch-node gold">Azure China</div><div class="arch-connector"></div>
+            <div class="arch-node purple">Southeast Asia</div>
+          </div>
+          <p style="font-size:0.85rem;margin-top:10px;">Each region runs an identical stack: VNet, OpenAI endpoint, AI Search, AKS cluster, Databricks workspace. Data never crosses regions. Global load balancer routes users to their sovereign region.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 9: THE GENAI PLATFORM ============ -->
+<div class="slide" data-slide="8">
+  <div class="wide">
+    <span class="tag teal">Platform Deep Dive</span>
+    <h2>The <span class="highlight">Enterprise GenAI Platform</span></h2>
+    <p style="margin-bottom:24px;">This is not a single model. It is a full operating system for AI: model selection, prompt governance, RAG infrastructure, and multi-agent orchestration — all running on enterprise-owned infrastructure.</p>
+    <div class="split-3">
+      <div class="card">
+        <div class="icon-box">&#127757;</div>
+        <h3>LLM Gateway & Router</h3>
+        <p>The single front door for all LLM inference. Supports Azure OpenAI GPT-4o, Anthropic Claude, Meta Llama, and fine-tuned enterprise models.</p>
+        <ul style="padding-left:18px;margin-top:10px;font-size:0.85rem;color:var(--slate);">
+          <li>Intelligent model routing by task type</li>
+          <li>Cost-based fallback (GPT-4o &#8594; GPT-4o-mini)</li>
+          <li>Latency-based circuit breakers</li>
+          <li>Enterprise API key management</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <div class="icon-box blue">&#128269;</div>
+        <h3>RAG & Vector Infrastructure</h3>
+        <p>Retrieval-Augmented Generation grounded in the enterprise data lake. Every agent answer is tied to real, governed documents.</p>
+        <ul style="padding-left:18px;margin-top:10px;font-size:0.85rem;color:var(--slate);">
+          <li>Unified vector store on Delta Lake</li>
+          <li>Multi-tenant embedding pipelines</li>
+          <li>Hybrid search: semantic + keyword</li>
+          <li>Source attribution for every answer</li>
+        </ul>
+      </div>
+      <div class="card gold">
+        <div class="icon-box gold">&#128221;</div>
+        <h3>Prompt Engineering & Governance</h3>
+        <p>Prompts are versioned, tested, and governed like code. No ad-hoc prompts in production.</p>
+        <ul style="padding-left:18px;margin-top:10px;font-size:0.85rem;color:var(--slate);">
+          <li>Prompt registry with Git versioning</li>
+          <li>A/B testing framework for prompts</li>
+          <li>System prompt injection prevention</li>
+          <li>Brand voice & compliance templates</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="card purple">
+        <div class="icon-box purple">&#129302;</div>
+        <h3>Multi-Agent Orchestration</h3>
+        <p>Agents do not work in isolation. The orchestration layer plans, delegates, and coordinates across multiple specialized agents to solve complex enterprise tasks.</p>
+        <ul style="padding-left:18px;margin-top:10px;font-size:0.85rem;color:var(--slate);">
+          <li>Agent-to-agent communication protocol</li>
+          <li>Task planning and decomposition</li>
+          <li>Human-in-the-loop escalation gates</li>
+          <li>State management and recovery</li>
+        </ul>
+      </div>
+      <div class="card coral">
+        <div class="icon-box coral">&#128228;</div>
+        <h3>Model Registry & Fine-Tuning</h3>
+        <p>Enterprise-specific models trained on proprietary data, governed through MLflow, and deployed with canary rollouts.</p>
+        <ul style="padding-left:18px;margin-top:10px;font-size:0.85rem;color:var(--slate);">
+          <li>MLflow model registry integration</li>
+          <li>Private fine-tuning pipelines</li>
+          <li>Evaluation harness (accuracy, safety)</li>
+          <li>Canary deployments with auto-rollback</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 9B: LLM-as-a-SERVICE PLATFORM ARCHITECTURE ============ -->
+<div class="slide" data-slide="19">
+  <div class="wide">
+    <span class="tag teal">Platform Internals</span>
+    <h2>LLM-as-a-Service: <span class="highlight">Model Serving, GPUs & Batch</span></h2>
+    <p style="margin-bottom:20px;">The GenAI Platform is not just an API wrapper. It is a full model-serving infrastructure with GPU provisioning, real-time endpoints, batch queues, and intelligent routing across model sizes.</p>
+    <div class="svg-container">
+      <svg viewBox="0 0 1200 420" style="width:100%;">
+        <defs>
+          <marker id="arrL" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#475569"/></marker>
+        </defs>
+        <!-- Ingress -->
+        <rect x="20" y="160" width="120" height="60" rx="8" class="diagram-box blue" />
+        <text x="80" y="185" class="diagram-text small">Azure Front Door</text>
+        <text x="80" y="200" class="diagram-text small slate">Global Load Balancer</text>
+        <text x="80" y="213" class="diagram-text small slate">WAF + Edge Cache</text>
+
+        <rect x="160" y="160" width="120" height="60" rx="8" class="diagram-box blue" />
+        <text x="220" y="185" class="diagram-text small">API Management</text>
+        <text x="220" y="200" class="diagram-text small slate">Rate Limiting</text>
+        <text x="220" y="213" class="diagram-text small slate">Auth / Throttling</text>
+
+        <line x1="140" y1="190" x2="160" y2="190" class="diagram-line" marker-end="url(#arrL)"/>
+
+        <!-- Router -->
+        <rect x="300" y="140" width="140" height="100" rx="8" class="diagram-box teal" />
+        <text x="370" y="165" class="diagram-text small">LLM Router</text>
+        <text x="370" y="182" class="diagram-text small slate">Task Classification</text>
+        <text x="370" y="196" class="diagram-text small slate">Cost-Based Routing</text>
+        <text x="370" y="210" class="diagram-text small slate">Latency Fallback</text>
+        <text x="370" y="224" class="diagram-text small slate">A/B Test Splits</text>
+
+        <line x1="280" y1="190" x2="300" y2="190" class="diagram-line" marker-end="url(#arrL)"/>
+
+        <!-- Real-Time Endpoints -->
+        <rect x="20" y="20" width="180" height="110" rx="8" class="diagram-box" />
+        <text x="110" y="40" class="diagram-text small">Real-Time Endpoints</text>
+        <rect x="30" y="50" width="160" height="22" rx="4" fill="rgba(0,212,170,0.08)" stroke="rgba(0,212,170,0.3)" stroke-width="1"/>
+        <text x="110" y="65" class="diagram-text small" style="font-size:10px;">Azure OpenAI GPT-4o</text>
+        <rect x="30" y="76" width="160" height="22" rx="4" fill="rgba(79,195,247,0.08)" stroke="rgba(79,195,247,0.3)" stroke-width="1"/>
+        <text x="110" y="91" class="diagram-text small" style="font-size:10px;">Azure OpenAI GPT-4o-mini</text>
+        <rect x="30" y="102" width="160" height="22" rx="4" fill="rgba(155,93,229,0.08)" stroke="rgba(155,93,229,0.3)" stroke-width="1"/>
+        <text x="110" y="117" class="diagram-text small" style="font-size:10px;">Claude via Azure AI Foundry</text>
+
+        <line x1="340" y1="140" x2="110" y2="130" class="diagram-line" marker-end="url(#arrL)"/>
+        <text x="180" y="128" class="diagram-text small slate" style="font-size:9px;">real-time</text>
+
+        <!-- GPU Cluster -->
+        <rect x="220" y="20" width="180" height="110" rx="8" class="diagram-box gold" />
+        <text x="310" y="40" class="diagram-text small">GPU Cluster (AKS)</text>
+        <rect x="230" y="50" width="160" height="22" rx="4" fill="rgba(255,209,102,0.08)" stroke="rgba(255,209,102,0.3)" stroke-width="1"/>
+        <text x="310" y="65" class="diagram-text small" style="font-size:10px;">Fine-Tuned Llama 3 (8B/70B)</text>
+        <rect x="230" y="76" width="160" height="22" rx="4" fill="rgba(255,209,102,0.08)" stroke="rgba(255,209,102,0.3)" stroke-width="1"/>
+        <text x="310" y="91" class="diagram-text small" style="font-size:10px;">NC24ads A100 v4 Nodes</text>
+        <rect x="230" y="102" width="160" height="22" rx="4" fill="rgba(255,209,102,0.08)" stroke="rgba(255,209,102,0.3)" stroke-width="1"/>
+        <text x="310" y="117" class="diagram-text small" style="font-size:10px;">ONNX Runtime + vLLM</text>
+
+        <line x1="370" y1="140" x2="310" y2="130" class="diagram-line" marker-end="url(#arrL)"/>
+        <text x="310" y="138" class="diagram-text small slate" style="font-size:9px;">private models</text>
+
+        <!-- Batch Queue -->
+        <rect x="420" y="20" width="180" height="110" rx="8" class="diagram-box purple" />
+        <text x="510" y="40" class="diagram-text small">Batch Processing</text>
+        <rect x="430" y="50" width="160" height="22" rx="4" fill="rgba(155,93,229,0.08)" stroke="rgba(155,93,229,0.3)" stroke-width="1"/>
+        <text x="510" y="65" class="diagram-text small" style="font-size:10px;">Azure Batch / AKS Jobs</text>
+        <rect x="430" y="76" width="160" height="22" rx="4" fill="rgba(155,93,229,0.08)" stroke="rgba(155,93,229,0.3)" stroke-width="1"/>
+        <text x="510" y="91" class="diagram-text small" style="font-size:10px;">Document Summarization</text>
+        <rect x="430" y="102" width="160" height="22" rx="4" fill="rgba(155,93,229,0.08)" stroke="rgba(155,93,229,0.3)" stroke-width="1"/>
+        <text x="510" y="117" class="diagram-text small" style="font-size:10px;">Embedding Pipeline (2TB/day)</text>
+
+        <line x1="400" y1="140" x2="510" y2="130" class="diagram-line" marker-end="url(#arrL)"/>
+        <text x="420" y="128" class="diagram-text small slate" style="font-size:9px;">batch</text>
+
+        <!-- Cache Layer -->
+        <rect x="620" y="20" width="160" height="110" rx="8" class="diagram-box" />
+        <text x="700" y="40" class="diagram-text small">Semantic Cache</text>
+        <rect x="630" y="50" width="140" height="22" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="700" y="65" class="diagram-text small" style="font-size:10px;">Azure Redis Enterprise</text>
+        <rect x="630" y="76" width="140" height="22" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="700" y="91" class="diagram-text small" style="font-size:10px;">Embedding Similarity Match</text>
+        <rect x="630" y="102" width="140" height="22" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="700" y="117" class="diagram-text small" style="font-size:10px;">30-40% Cache Hit Rate</text>
+
+        <line x1="600" y1="75" x2="620" y2="75" class="diagram-line" marker-end="url(#arrL)"/>
+
+        <!-- Model Registry -->
+        <rect x="800" y="20" width="160" height="110" rx="8" class="diagram-box" />
+        <text x="880" y="40" class="diagram-text small">Model Registry</text>
+        <rect x="810" y="50" width="140" height="22" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="880" y="65" class="diagram-text small" style="font-size:10px;">MLflow on Databricks</text>
+        <rect x="810" y="76" width="140" height="22" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="880" y="91" class="diagram-text small" style="font-size:10px;">Versioning + Promotion</text>
+        <rect x="810" y="102" width="140" height="22" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="880" y="117" class="diagram-text small" style="font-size:10px;">Canary + Rollback</text>
+
+        <line x1="780" y1="75" x2="800" y2="75" class="diagram-line" marker-end="url(#arrL)"/>
+
+        <!-- GPU Strategy Box -->
+        <rect x="620" y="160" width="540" height="110" rx="8" class="diagram-box gold" />
+        <text x="890" y="180" class="diagram-text small">GPU Strategy & Cost Optimization</text>
+        <text x="660" y="200" class="diagram-text small slate" style="text-anchor:start;">&#9679; Reserved Instances for baseline load (60% savings vs pay-as-you-go)</text>
+        <text x="660" y="218" class="diagram-text small slate" style="text-anchor:start;">&#9679; Spot/preemptible VMs for training workloads (up to 90% savings)</text>
+        <text x="660" y="236" class="diagram-text small slate" style="text-anchor:start;">&#9679; Quantization: INT8 for latency-critical, INT4 for batch (50% GPU reduction)</text>
+        <text x="660" y="254" class="diagram-text small slate" style="text-anchor:start;">&#9679; Multi-tenancy: shared GPU clusters across BUs with namespace isolation</text>
+
+        <line x1="440" y1="190" x2="620" y2="210" class="diagram-line" marker-end="url(#arrL)"/>
+
+        <!-- Observability -->
+        <rect x="620" y="300" width="540" height="90" rx="8" class="diagram-box" />
+        <text x="890" y="322" class="diagram-text small">Observability Integration</text>
+        <text x="660" y="342" class="diagram-text small slate" style="text-anchor:start;">&#9679; Prometheus + Grafana for GPU utilization, queue depth, inference latency</text>
+        <text x="660" y="360" class="diagram-text small slate" style="text-anchor:start;">&#9679; Azure Monitor for token burn rate, cost per model, per-BU chargeback</text>
+        <text x="660" y="378" class="diagram-text small slate" style="text-anchor:start;">&#9679; Custom alerts: GPU memory >85%, P95 latency >500ms, error rate >1%</text>
+
+        <line x1="890" y1="270" x2="890" y2="300" class="diagram-line" marker-end="url(#arrL)"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 9C: RAG ARCHITECTURE DEEP DIVE ============ -->
+<div class="slide" data-slide="20">
+  <div class="wide">
+    <span class="tag blue">Platform Internals</span>
+    <h2>RAG Architecture: <span class="highlight-blue">From Document to Answer</span></h2>
+    <p style="margin-bottom:20px;">Retrieval-Augmented Generation is the backbone of enterprise AI. Every answer must be grounded in governed documents. Here is the full Azure-native pipeline.</p>
+    <div class="svg-container">
+      <svg viewBox="0 0 1200 380" style="width:100%;">
+        <defs>
+          <marker id="arrR" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#475569"/></marker>
+        </defs>
+        <!-- Ingestion Pipeline (Top) -->
+        <rect x="20" y="15" width="140" height="55" rx="8" class="diagram-box" />
+        <text x="90" y="35" class="diagram-text small">SharePoint</text>
+        <text x="90" y="50" class="diagram-text small slate">PDF, Word, Wiki</text>
+
+        <rect x="180" y="15" width="140" height="55" rx="8" class="diagram-box" />
+        <text x="250" y="35" class="diagram-text small">SAP</text>
+        <text x="250" y="50" class="diagram-text small slate">Reports, Tables</text>
+
+        <rect x="340" y="15" width="140" height="55" rx="8" class="diagram-box" />
+        <text x="410" y="35" class="diagram-text small">Salesforce</text>
+        <text x="410" y="50" class="diagram-text small slate">Cases, Contracts</text>
+
+        <rect x="500" y="15" width="140" height="55" rx="8" class="diagram-box" />
+        <text x="570" y="35" class="diagram-text small">ServiceNow</text>
+        <text x="570" y="50" class="diagram-text small slate">KB Articles, Tickets</text>
+
+        <rect x="660" y="15" width="140" height="55" rx="8" class="diagram-box" />
+        <text x="730" y="35" class="diagram-text small">Databricks</text>
+        <text x="730" y="50" class="diagram-text small slate">Structured Data</text>
+
+        <!-- Ingestion Engine -->
+        <rect x="20" y="90" width="780" height="50" rx="8" class="diagram-box blue" />
+        <text x="410" y="108" class="diagram-text small">Ingestion Engine — Azure Data Factory + Databricks Delta Live Tables</text>
+        <text x="410" y="126" class="diagram-text small slate">CDC | Batch | Event-driven | Schema Detection | PII Scan</text>
+
+        <line x1="90" y1="70" x2="90" y2="90" class="diagram-line" marker-end="url(#arrR)"/>
+        <line x1="250" y1="70" x2="250" y2="90" class="diagram-line" marker-end="url(#arrR)"/>
+        <line x1="410" y1="70" x2="410" y2="90" class="diagram-line" marker-end="url(#arrR)"/>
+        <line x1="570" y1="70" x2="570" y2="90" class="diagram-line" marker-end="url(#arrR)"/>
+        <line x1="730" y1="70" x2="730" y2="90" class="diagram-line" marker-end="url(#arrR)"/>
+
+        <!-- Processing Pipeline -->
+        <rect x="20" y="160" width="180" height="70" rx="8" class="diagram-box teal" />
+        <text x="110" y="180" class="diagram-text small">Document Parsing</text>
+        <text x="110" y="196" class="diagram-text small slate">Azure Document Intelligence</text>
+        <text x="110" y="210" class="diagram-text small slate">OCR, Tables, Layout</text>
+        <text x="110" y="224" class="diagram-text small slate">PII Redaction</text>
+
+        <rect x="220" y="160" width="180" height="70" rx="8" class="diagram-box teal" />
+        <text x="310" y="180" class="diagram-text small">Chunking Strategy</text>
+        <text x="310" y="196" class="diagram-text small slate">Semantic Chunking</text>
+        <text x="310" y="210" class="diagram-text small slate">Hierarchical (parent/child)</text>
+        <text x="310" y="224" class="diagram-text small slate">Overlap: 20% | Size: 512 tokens</text>
+
+        <rect x="420" y="160" width="180" height="70" rx="8" class="diagram-box teal" />
+        <text x="510" y="180" class="diagram-text small">Embedding Model</text>
+        <text x="510" y="196" class="diagram-text small slate">Azure OpenAI text-embedding-3</text>
+        <text x="510" y="210" class="diagram-text small slate">3072-dim vectors</text>
+        <text x="510" y="224" class="diagram-text small slate">Batch: 10K chunks/min</text>
+
+        <rect x="620" y="160" width="180" height="70" rx="8" class="diagram-box teal" />
+        <text x="710" y="180" class="diagram-text small">Vector Store</text>
+        <text x="710" y="196" class="diagram-text small slate">Azure AI Search</text>
+        <text x="710" y="210" class="diagram-text small slate">Hybrid: Semantic + BM25</text>
+        <text x="710" y="224" class="diagram-text small slate">Multi-tenant indexes</text>
+
+        <line x1="200" y1="195" x2="220" y2="195" class="diagram-line" marker-end="url(#arrR)"/>
+        <line x1="400" y1="195" x2="420" y2="195" class="diagram-line" marker-end="url(#arrR)"/>
+        <line x1="600" y1="195" x2="620" y2="195" class="diagram-line" marker-end="url(#arrR)"/>
+        <line x1="410" y1="140" x2="110" y2="160" class="diagram-line" marker-end="url(#arrR)"/>
+
+        <!-- Query Path (Bottom) -->
+        <rect x="20" y="260" width="140" height="50" rx="8" class="diagram-box coral" />
+        <text x="90" y="280" class="diagram-text small">User Query</text>
+        <text x="90" y="295" class="diagram-text small slate">Natural Language</text>
+
+        <rect x="180" y="260" width="140" height="50" rx="8" class="diagram-box coral" />
+        <text x="250" y="280" class="diagram-text small">Query Rewrite</text>
+        <text x="250" y="295" class="diagram-text small slate">Expansion + HyDE</text>
+
+        <rect x="340" y="260" width="140" height="50" rx="8" class="diagram-box coral" />
+        <text x="410" y="280" class="diagram-text small">Retrieval</text>
+        <text x="410" y="295" class="diagram-text small slate">Top-K: 20 chunks</text>
+
+        <rect x="500" y="260" width="140" height="50" rx="8" class="diagram-box coral" />
+        <text x="570" y="280" class="diagram-text small">Re-ranking</text>
+        <text x="570" y="295" class="diagram-text small slate">Cross-encoder model</text>
+
+        <rect x="660" y="260" width="140" height="50" rx="8" class="diagram-box coral" />
+        <text x="730" y="280" class="diagram-text small">Context Assembly</text>
+        <text x="730" y="295" class="diagram-text small slate">Top 5 + Source URLs</text>
+
+        <line x1="160" y1="285" x2="180" y2="285" class="diagram-line" marker-end="url(#arrR)"/>
+        <line x1="320" y1="285" x2="340" y2="285" class="diagram-line" marker-end="url(#arrR)"/>
+        <line x1="480" y1="285" x2="500" y2="285" class="diagram-line" marker-end="url(#arrR)"/>
+        <line x1="640" y1="285" x2="660" y2="285" class="diagram-line" marker-end="url(#arrR)"/>
+
+        <!-- Vector to Retrieval -->
+        <line x1="710" y1="230" x2="410" y2="260" class="diagram-line" stroke-dasharray="4,3" marker-end="url(#arrR)"/>
+        <text x="520" y="250" class="diagram-text small slate" style="font-size:9px;">vector search</text>
+
+        <!-- To LLM -->
+        <rect x="840" y="260" width="140" height="50" rx="8" class="diagram-box gold" />
+        <text x="910" y="280" class="diagram-text small">LLM Prompt</text>
+        <text x="910" y="295" class="diagram-text small slate">Query + Context</text>
+
+        <line x1="800" y1="285" x2="840" y2="285" class="diagram-line" marker-end="url(#arrR)"/>
+
+        <!-- Metadata box -->
+        <rect x="840" y="90" width="340" height="140" rx="8" class="diagram-box purple" />
+        <text x="1010" y="110" class="diagram-text small">RAG Quality Controls</text>
+        <text x="860" y="132" class="diagram-text small slate" style="text-anchor:start;">&#9679; Source attribution on every answer</text>
+        <text x="860" y="150" class="diagram-text small slate" style="text-anchor:start;">&#9679; Confidence score threshold: &lt;0.7 = "I don't know"</text>
+        <text x="860" y="168" class="diagram-text small slate" style="text-anchor:start;">&#9679; Chunk freshness: auto-expire docs &gt;90 days</text>
+        <text x="860" y="186" class="diagram-text small slate" style="text-anchor:start;">&#9679; Access control: user sees only allowed documents</text>
+        <text x="860" y="204" class="diagram-text small slate" style="text-anchor:start;">&#9679; Audit: which chunks were retrieved for every query</text>
+        <text x="860" y="222" class="diagram-text small slate" style="text-anchor:start;">&#9679; Feedback loop: thumbs down triggers re-indexing review</text>
+
+        <line x1="800" y1="195" x2="840" y2="160" class="diagram-line" marker-end="url(#arrR)"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 20B: NV-INGEST RAG ARCHITECTURE ============ -->
+<div class="slide" data-slide="25">
+  <div class="wide">
+    <span class="tag teal">NVIDIA Powered Ingestion</span>
+    <h2>RAG Pipeline Powered by <span class="highlight">NVIDIA NV-Ingest</span> & NIM Microservices</h2>
+    <p style="margin-bottom:16px;">The enterprise ingestion engine is NV-Ingest — a GPU-accelerated, multimodal document parsing pipeline that uses specialized NVIDIA NIM microservices to extract text, tables, charts, and images at scale. This is the difference between naive chunking and true document intelligence.</p>
+    <div class="svg-container">
+      <svg viewBox="0 0 1200 680" style="width:100%;">
+        <defs>
+          <marker id="arrN" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#475569"/></marker>
+          <linearGradient id="gradNim" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(118,185,0,0.12)"/><stop offset="100%" stop-color="rgba(118,185,0,0.03)"/></linearGradient>
+          <linearGradient id="gradNvingest" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(0,212,170,0.1)"/><stop offset="100%" stop-color="rgba(0,212,170,0.02)"/></linearGradient>
+        </defs>
+
+        <!-- ===== LEFT: INGESTION PIPELINE ===== -->
+        <text x="275" y="22" class="diagram-text" style="font-size:13px;color:var(--teal);text-anchor:middle;">&#9679; INGESTION PIPELINE</text>
+
+        <!-- Input Documents -->
+        <rect x="20" y="32" width="100" height="42" rx="6" class="diagram-box" />
+        <text x="70" y="50" class="diagram-text small">PDF</text>
+        <text x="70" y="62" class="diagram-text small slate">Scanned + Native</text>
+
+        <rect x="135" y="32" width="100" height="42" rx="6" class="diagram-box" />
+        <text x="185" y="50" class="diagram-text small">Word / PPTX</text>
+        <text x="185" y="62" class="diagram-text small slate">.docx, .pptx</text>
+
+        <rect x="250" y="32" width="100" height="42" rx="6" class="diagram-box" />
+        <text x="300" y="50" class="diagram-text small">Images</text>
+        <text x="300" y="62" class="diagram-text small slate">JPEG, PNG, TIFF</text>
+
+        <rect x="365" y="32" width="100" height="42" rx="6" class="diagram-box" />
+        <text x="415" y="50" class="diagram-text small">Text</text>
+        <text x="415" y="62" class="diagram-text small slate">.txt, .csv</text>
+
+        <!-- Arrow from inputs down -->
+        <line x1="70" y1="74" x2="70" y2="85" class="diagram-line" marker-end="url(#arrN)"/>
+        <line x1="185" y1="74" x2="185" y2="85" class="diagram-line" marker-end="url(#arrN)"/>
+        <line x1="300" y1="74" x2="300" y2="85" class="diagram-line" marker-end="url(#arrN)"/>
+        <line x1="415" y1="74" x2="415" y2="85" class="diagram-line" marker-end="url(#arrN)"/>
+
+        <!-- NV-Ingest Main Box -->
+        <rect x="20" y="90" width="510" height="170" rx="10" fill="url(#gradNvingest)" stroke="rgba(0,212,170,0.25)" stroke-width="1.5"/>
+        <text x="275" y="108" class="diagram-text" style="font-size:12px;color:var(--teal);text-anchor:middle;">NV-INGEST SERVICE — Ingestor Server | Message Broker | Job Queue</text>
+
+        <!-- Extraction Backends -->
+        <rect x="35" y="118" width="110" height="38" rx="5" class="diagram-box" />
+        <text x="90" y="133" class="diagram-text small" style="font-size:10px;">pdfium</text>
+        <text x="90" y="145" class="diagram-text small slate" style="font-size:9px;">Fast, Native PDFs</text>
+
+        <rect x="158" y="118" width="110" height="38" rx="5" class="diagram-box" />
+        <text x="213" y="133" class="diagram-text small" style="font-size:10px;">NeMo Parse</text>
+        <text x="213" y="145" class="diagram-text small slate" style="font-size:9px;">Accurate, Scanned</text>
+
+        <rect x="281" y="118" width="110" height="38" rx="5" class="diagram-box" />
+        <text x="336" y="133" class="diagram-text small" style="font-size:10px;">Unstructured.io</text>
+        <text x="336" y="145" class="diagram-text small slate" style="font-size:9px;">Multi-format, OSS</text>
+
+        <rect x="404" y="118" width="110" height="38" rx="5" class="diagram-box" />
+        <text x="459" y="133" class="diagram-text small" style="font-size:10px;">Adobe Extract</text>
+        <text x="459" y="145" class="diagram-text small slate" style="font-size:9px;">Complex Layouts</text>
+
+        <!-- NIMs Row -->
+        <rect x="35" y="168" width="155" height="42" rx="5" fill="url(#gradNim)" stroke="rgba(118,185,0,0.35)" stroke-width="1"/>
+        <text x="112" y="183" class="diagram-text small" style="fill:#76b900;font-weight:700;font-size:10px;">Page Elements NIM</text>
+        <text x="112" y="196" class="diagram-text small slate" style="font-size:9px;">Classify text, table, chart, image</text>
+
+        <rect x="202" y="168" width="155" height="42" rx="5" fill="url(#gradNim)" stroke="rgba(118,185,0,0.35)" stroke-width="1"/>
+        <text x="279" y="183" class="diagram-text small" style="fill:#76b900;font-weight:700;font-size:10px;">Table Structure NIM</text>
+        <text x="279" y="196" class="diagram-text small slate" style="font-size:9px;">Extract rows, columns, headers</text>
+
+        <rect x="369" y="168" width="145" height="42" rx="5" fill="url(#gradNim)" stroke="rgba(118,185,0,0.35)" stroke-width="1"/>
+        <text x="441" y="183" class="diagram-text small" style="fill:#76b900;font-weight:700;font-size:10px;">Graphic Elements NIM</text>
+        <text x="441" y="196" class="diagram-text small slate" style="font-size:9px;">Charts, diagrams, logos</text>
+
+        <!-- OCR NIM (to the right of NV-Ingest box) -->
+        <rect x="545" y="118" width="140" height="50" rx="5" fill="url(#gradNim)" stroke="rgba(118,185,0,0.35)" stroke-width="1"/>
+        <text x="615" y="135" class="diagram-text small" style="fill:#76b900;font-weight:700;font-size:10px;">PaddleOCR / OCR NIM</text>
+        <text x="615" y="148" class="diagram-text small slate" style="font-size:9px;">GPU OCR, Multi-language</text>
+        <text x="615" y="160" class="diagram-text small slate" style="font-size:9px;">Handwriting + Printed</text>
+
+        <line x1="530" y1="137" x2="545" y2="137" class="diagram-line" marker-end="url(#arrN)"/>
+
+        <!-- Post-Processing -->
+        <rect x="20" y="275" width="350" height="55" rx="8" class="diagram-box blue" />
+        <text x="195" y="292" class="diagram-text small">Post-Processing</text>
+        <rect x="30" y="300" width="100" height="22" rx="4" fill="rgba(79,195,247,0.07)" stroke="rgba(79,195,247,0.25)" stroke-width="1"/>
+        <text x="80" y="314" class="diagram-text small" style="font-size:9px;">Text Splitting</text>
+        <rect x="140" y="300" width="100" height="22" rx="4" fill="rgba(79,195,247,0.07)" stroke="rgba(79,195,247,0.25)" stroke-width="1"/>
+        <text x="190" y="314" class="diagram-text small" style="font-size:9px;">Transform / Filter</text>
+        <rect x="250" y="300" width="110" height="22" rx="4" fill="rgba(79,195,247,0.07)" stroke="rgba(79,195,247,0.25)" stroke-width="1"/>
+        <text x="305" y="314" class="diagram-text small" style="font-size:9px;">Image Offloading</text>
+
+        <line x1="275" y1="260" x2="195" y2="275" class="diagram-line" marker-end="url(#arrN)"/>
+        <text x="210" y="268" class="diagram-text small slate" style="font-size:9px;">extracted JSON</text>
+
+        <!-- Embedding NIM -->
+        <rect x="390" y="275" width="170" height="55" rx="8" fill="url(#gradNim)" stroke="rgba(118,185,0,0.35)" stroke-width="1"/>
+        <text x="475" y="292" class="diagram-text small" style="fill:#76b900;font-weight:700;font-size:10px;">Embed NIM</text>
+        <text x="475" y="306" class="diagram-text small slate" style="font-size:9px;">llama-nemotron-embed-1b-v2</text>
+        <text x="475" y="318" class="diagram-text small slate" style="font-size:9px;">2048-dim | 10K docs/min GPU</text>
+
+        <line x1="370" y1="302" x2="390" y2="302" class="diagram-line" marker-end="url(#arrN)"/>
+
+        <!-- Vector Store -->
+        <rect x="20" y="350" width="270" height="55" rx="8" class="diagram-box purple" />
+        <text x="155" y="368" class="diagram-text small">Milus Vector DB</text>
+        <text x="155" y="382" class="diagram-text small slate" style="font-size:9px;">GPU-accelerated with NVIDIA cuVS</text>
+        <text x="155" y="394" class="diagram-text small slate" style="font-size:9px;">Hybrid Dense + Sparse + Full-Text | Multi-tenant</text>
+
+        <line x1="475" y1="330" x2="155" y2="350" class="diagram-line" marker-end="url(#arrN)"/>
+        <text x="280" y="345" class="diagram-text small slate" style="font-size:9px;">vectors + metadata</text>
+
+        <!-- Object Store -->
+        <rect x="310" y="350" width="250" height="55" rx="8" class="diagram-box" />
+        <text x="435" y="368" class="diagram-text small">Azure Blob / S3</text>
+        <text x="435" y="382" class="diagram-text small slate" style="font-size:9px;">Raw docs + extracted images | 7-year retention</text>
+        <text x="435" y="394" class="diagram-text small slate" style="font-size:9px;">Immutable audit | Lifecycle to Glacier</text>
+
+        <line x1="155" y1="377" x2="310" y2="377" class="diagram-line" marker-end="url(#arrN)"/>
+
+        <!-- ===== RIGHT: QUERY PIPELINE ===== -->
+        <text x="900" y="22" class="diagram-text" style="font-size:13px;color:var(--blue);text-anchor:middle;">&#9679; QUERY PIPELINE</text>
+
+        <rect x="620" y="32" width="120" height="42" rx="6" class="diagram-box coral" />
+        <text x="680" y="50" class="diagram-text small">User Query</text>
+        <text x="680" y="62" class="diagram-text small slate" style="font-size:9px;">Natural Language</text>
+
+        <rect x="755" y="32" width="120" height="42" rx="6" class="diagram-box" />
+        <text x="815" y="50" class="diagram-text small">Query Rewrite</text>
+        <text x="815" y="62" class="diagram-text small slate" style="font-size:9px;">Expansion + HyDE</text>
+
+        <rect x="890" y="32" width="120" height="42" rx="6" fill="url(#gradNim)" stroke="rgba(118,185,0,0.35)" stroke-width="1"/>
+        <text x="950" y="50" class="diagram-text small" style="fill:#76b900;font-weight:700;font-size:10px;">Embed NIM</text>
+        <text x="950" y="62" class="diagram-text small slate" style="font-size:9px;">Query → 2048-dim vector</text>
+
+        <line x1="740" y1="53" x2="755" y2="53" class="diagram-line" marker-end="url(#arrN)"/>
+        <line x1="875" y1="53" x2="890" y2="53" class="diagram-line" marker-end="url(#arrN)"/>
+
+        <!-- Retrieval Row -->
+        <rect x="620" y="90" width="130" height="45" rx="6" class="diagram-box purple" />
+        <text x="685" y="108" class="diagram-text small">Milvus Search</text>
+        <text x="685" y="122" class="diagram-text small slate" style="font-size:9px;">Top-K | cuVS GPU Index</text>
+
+        <rect x="765" y="90" width="130" height="45" rx="6" fill="url(#gradNim)" stroke="rgba(118,185,0,0.35)" stroke-width="1"/>
+        <text x="830" y="108" class="diagram-text small" style="fill:#76b900;font-weight:700;font-size:10px;">Rerank NIM</text>
+        <text x="830" y="122" class="diagram-text small slate" style="font-size:9px;">llama-nemotron-rerank</text>
+
+        <rect x="910" y="90" width="120" height="45" rx="6" class="diagram-box gold" />
+        <text x="970" y="108" class="diagram-text small">Context</text>
+        <text x="970" y="122" class="diagram-text small slate" style="font-size:9px;">Top 5 chunks + Sources</text>
+
+        <line x1="685" y1="74" x2="685" y2="90" class="diagram-line" marker-end="url(#arrN)"/>
+        <line x1="950" y1="74" x2="950" y2="90" class="diagram-line" marker-end="url(#arrN)"/>
+        <line x1="750" y1="112" x2="765" y2="112" class="diagram-line" marker-end="url(#arrN)"/>
+        <line x1="895" y1="112" x2="910" y2="112" class="diagram-line" marker-end="url(#arrN)"/>
+
+        <!-- LLM Response -->
+        <rect x="620" y="152" width="560" height="55" rx="8" fill="url(#gradNim)" stroke="rgba(118,185,0,0.35)" stroke-width="1"/>
+        <text x="900" y="172" class="diagram-text small" style="fill:#76b900;font-weight:700;font-size:11px;">Response Generation NIM</text>
+        <text x="900" y="188" class="diagram-text small slate" style="font-size:9px;">nemotron-4-340b or llama-3.1-nemotron-70b | H100/A100 Tensor Parallel | FP8 | TensorRT-LLM</text>
+        <text x="900" y="200" class="diagram-text small slate" style="font-size:9px;">Prompt = Query + Context + Instructions → Grounded Answer with Citations</text>
+
+        <line x1="970" y1="135" x2="970" y2="152" class="diagram-line" marker-end="url(#arrN)"/>
+        <line x1="970" y1="207" x2="970" y2="225" class="diagram-line" marker-end="url(#arrN)" stroke-dasharray="3,3"/>
+        <text x="985" y="218" class="diagram-text small slate" style="font-size:9px;">response</text>
+
+        <!-- Guardrails -->
+        <rect x="620" y="225" width="560" height="70" rx="8" fill="rgba(255,107,107,0.04)" stroke="rgba(255,107,107,0.18)" stroke-width="1"/>
+        <text x="640" y="242" class="diagram-text small" style="color:var(--coral);font-size:10px;">&#9679; OPTIONAL NEMO GUARDRAILS NIMs</text>
+
+        <rect x="635" y="250" width="165" height="36" rx="5" fill="url(#gradNim)" stroke="rgba(118,185,0,0.3)" stroke-width="1"/>
+        <text x="717" y="263" class="diagram-text small" style="fill:#76b900;font-weight:700;font-size:9px;">NemoGuard Content Safety</text>
+        <text x="717" y="276" class="diagram-text small slate" style="font-size:8px;">Toxicity, bias, harm</text>
+
+        <rect x="815" y="250" width="165" height="36" rx="5" fill="url(#gradNim)" stroke="rgba(118,185,0,0.3)" stroke-width="1"/>
+        <text x="897" y="263" class="diagram-text small" style="fill:#76b900;font-weight:700;font-size:9px;">NemoGuard Topic Control</text>
+        <text x="897" y="276" class="diagram-text small slate" style="font-size:8px;">Blocklist, jailbreak guard</text>
+
+        <rect x="995" y="250" width="165" height="36" rx="5" fill="url(#gradNim)" stroke="rgba(118,185,0,0.3)" stroke-width="1"/>
+        <text x="1077" y="263" class="diagram-text small" style="fill:#76b900;font-weight:700;font-size:9px;">Nemotron Parse NIM</text>
+        <text x="1077" y="276" class="diagram-text small slate" style="font-size:8px;">Deep PDF structure</text>
+
+        <line x1="680" y1="74" x2="680" y2="225" class="diagram-line" stroke-dasharray="3,3" marker-end="url(#arrN)"/>
+        <text x="690" y="155" class="diagram-text small slate" style="font-size:9px;">filter</text>
+
+        <!-- ===== DEPLOYMENT BOX ===== -->
+        <rect x="620" y="310" width="560" height="95" rx="8" class="diagram-box gold" />
+        <text x="900" y="330" class="diagram-text small" style="font-size:11px;">NV-Ingest Deployment</text>
+        <text x="640" y="348" class="diagram-text small slate" style="text-anchor:start;font-size:9px;">&#9679; Kubernetes (AKS) via Helm | GPU Nodes: A100 / H100 | Autoscaling: HPA + KEDA</text>
+        <text x="640" y="363" class="diagram-text small slate" style="text-anchor:start;font-size:9px;">&#9679; Message Broker: Redis / RabbitMQ for job queue | OTEL + Prometheus observability</text>
+        <text x="640" y="378" class="diagram-text small slate" style="text-anchor:start;font-size:9px;">&#9679; JSON output: text, tables, charts, images, metadata, trace timing per document</text>
+        <text x="640" y="393" class="diagram-text small slate" style="text-anchor:start;font-size:9px;">&#9679; Library mode + CLI + REST API for batch and streaming ingestion</text>
+
+        <!-- ===== BOTTOM: ARROW FROM VECTOR TO QUERY ===== -->
+        <rect x="20" y="425" width="1160" height="40" rx="6" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.08)" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="600" y="445" class="diagram-text small" style="font-size:10px;text-anchor:middle;">Milvus Vector Database serves both Ingestion (write) and Query (read) pipelines | Same index, same schema, tenant-isolated</text>
+        <text x="600" y="458" class="diagram-text small slate" style="font-size:9px;text-anchor:middle;">All NIM microservices run as containers on AKS GPU nodes | Auto-scaled based on queue depth and inference latency</text>
+      </svg>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <span class="badge success">PDFium: Fast</span>
+      <span class="badge info">NeMo Parse: Accurate</span>
+      <span class="badge info">Unstructured: Flexible</span>
+      <span class="badge warning">Adobe: Complex Layouts</span>
+      <span class="badge success">GPU OCR: 50x Faster</span>
+      <span class="badge info">cuVS: GPU Vector Search</span>
+      <span class="badge info">TensorRT-LLM: Optimized</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 10: OBSERVABILITY PLATFORM ============ -->
+<div class="slide" data-slide="9">
+  <div class="wide">
+    <span class="tag gold">Governance Layer</span>
+    <h2>The <span class="highlight-gold">Enterprise Observability Platform</span></h2>
+    <p style="margin-bottom:24px;">You cannot govern what you cannot see. The observability platform provides real-time visibility into every AI interaction: who called what, which model, how much it cost, and whether it was compliant.</p>
+    <div class="split">
+      <div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="card gold" style="padding:18px;">
+            <h3 style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.3rem;">&#128269;</span> Full Request Tracing</h3>
+            <p style="font-size:0.88rem;">Every prompt, every token, every tool call, every data access — traced end-to-end with correlation IDs. Replay any conversation for audit.</p>
+          </div>
+          <div class="card" style="padding:18px;">
+            <h3 style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.3rem;">&#128176;</span> Cost Management & Chargeback</h3>
+            <p style="font-size:0.88rem;">Per-business-unit token budgets, real-time cost dashboards, and automated chargeback to the right P&L. No more surprise $50K API bills.</p>
+          </div>
+          <div class="card blue" style="padding:18px;">
+            <h3 style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.3rem;">&#128737;</span> Guardrails & Safety</h3>
+            <p style="font-size:0.88rem;">Pre-call PII detection, post-call toxicity scoring, topic blocklists, and data residency enforcement. Blocks before damage.</p>
+          </div>
+          <div class="card coral" style="padding:18px;">
+            <h3 style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.3rem;">&#9888;</span> Performance & SLA Monitoring</h3>
+            <p style="font-size:0.88rem;">P95 latency tracking, error rate alerting, model drift detection, and automatic failover when SLAs breach.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="padding:24px;height:100%;">
+          <h3 style="margin-bottom:16px;color:var(--white);">Observability Dashboard Preview</h3>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(0,212,170,0.06);border-radius:8px;border-left:3px solid var(--teal);">
+              <span style="font-size:0.9rem;color:var(--white);">Total API Calls (24h)</span>
+              <span style="font-size:1.2rem;font-weight:700;color:var(--teal);">2.4M</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(79,195,247,0.06);border-radius:8px;border-left:3px solid var(--blue);">
+              <span style="font-size:0.9rem;color:var(--white);">Avg Latency (P95)</span>
+              <span style="font-size:1.2rem;font-weight:700;color:var(--blue);">420ms</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(255,209,102,0.06);border-radius:8px;border-left:3px solid var(--gold);">
+              <span style="font-size:0.9rem;color:var(--white);">Daily LLM Spend</span>
+              <span style="font-size:1.2rem;font-weight:700;color:var(--gold);">$18,400</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(155,93,229,0.06);border-radius:8px;border-left:3px solid var(--purple);">
+              <span style="font-size:0.9rem;color:var(--white);">Guardrail Blocks</span>
+              <span style="font-size:1.2rem;font-weight:700;color:var(--purple);">1,247</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(255,107,107,0.06);border-radius:8px;border-left:3px solid var(--coral);">
+              <span style="font-size:0.9rem;color:var(--white);">PII Redactions</span>
+              <span style="font-size:1.2rem;font-weight:700;color:var(--coral);">342</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:rgba(255,255,255,0.04);border-radius:8px;border-left:3px solid var(--slate2);">
+              <span style="font-size:0.9rem;color:var(--white);">Active Models</span>
+              <span style="font-size:1.2rem;font-weight:700;color:var(--slate);">8</span>
+            </div>
+          </div>
+          <p style="margin-top:16px;font-size:0.82rem;color:var(--slate2);">Dashboards available in real-time for CISO, CFO, and business unit leaders. Full audit trail retained for 7 years.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 10B: EVALUATION FLYWHEEL ============ -->
+<div class="slide" data-slide="21">
+  <div class="wide">
+    <span class="tag teal">Quality & Trust</span>
+    <h2>The <span class="highlight">Evaluation Flywheel</span> — How Agents Get Better</h2>
+    <p style="margin-bottom:24px;">Deploying agents without measuring them is flying blind. We run a continuous loop: deploy, monitor, evaluate, improve, redeploy. Every agent has a scorecard.</p>
+    <div class="flywheel">
+      <div class="flywheel-step teal">
+        <div class="flywheel-num">1</div>
+        <div class="flywheel-title">Deploy</div>
+        <div class="flywheel-desc">Canary rollout to 5% of users, shadow mode for critical agents</div>
+      </div>
+      <div class="flywheel-step blue">
+        <div class="flywheel-num">2</div>
+        <div class="flywheel-title">Monitor</div>
+        <div class="flywheel-desc">Real-time latency, error rates, user feedback, cost per interaction</div>
+      </div>
+      <div class="flywheel-step gold">
+        <div class="flywheel-num">3</div>
+        <div class="flywheel-title">Evaluate</div>
+        <div class="flywheel-desc">LLM-as-judge + human review + benchmark suites + red-teaming</div>
+      </div>
+      <div class="flywheel-step purple">
+        <div class="flywheel-num">4</div>
+        <div class="flywheel-title">Improve</div>
+        <div class="flywheel-desc">Prompt tuning, RAG updates, model swap, fine-tuning on feedback</div>
+      </div>
+      <div class="flywheel-step coral">
+        <div class="flywheel-num">5</div>
+        <div class="flywheel-title">Redeploy</div>
+        <div class="flywheel-desc">A/B test against baseline, auto-promote if metrics improve</div>
+      </div>
+    </div>
+    <div style="margin-top:24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+      <div class="card" style="padding:18px;">
+        <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:1.2rem;">&#128202;</span> <span style="color:var(--white);">Automated Metrics</span></h3>
+        <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);line-height:1.7;">
+          <li><strong>Faithfulness:</strong> Does the answer match retrieved chunks?</li>
+          <li><strong>Relevance:</strong> Does it answer the user's actual question?</li>
+          <li><strong>Latency:</strong> P50, P95, P99 per model and region</li>
+          <li><strong>Cost-per-query:</strong> Tracked by BU, by agent, by model</li>
+          <li><strong>Human escalation rate:</strong> % of conversations handed to people</li>
+        </ul>
+      </div>
+      <div class="card blue" style="padding:18px;">
+        <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:1.2rem;">&#127919;</span> <span style="color:var(--white);">Benchmarking</span></h3>
+        <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);line-height:1.7;">
+          <li><strong>Human baseline:</strong> Expert answers scored as gold standard</li>
+          <li><strong>Regression tests:</strong> 500 representative queries run nightly</li>
+          <li><strong>Adversarial sets:</strong> Jailbreak attempts, edge cases, ambiguity</li>
+          <li><strong>Cross-model comparison:</strong> Same prompt, different LLMs</li>
+          <li><strong>A/B framework:</strong> Prompt v2.1 vs v2.2 with statistical significance</li>
+        </ul>
+      </div>
+      <div class="card coral" style="padding:18px;">
+        <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:1.2rem;">&#128163;</span> <span style="color:var(--white);">Red-Teaming Program</span></h3>
+        <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);line-height:1.7;">
+          <li><strong>Internal red team:</strong> Security + domain experts, quarterly</li>
+          <li><strong>External red team:</strong> Big-4 cyber + AI ethics firms, annually</li>
+          <li><strong>Automated probing:</strong> Continuous fuzzing for prompt injection</li>
+          <li><strong>Bias testing:</strong> Demographic parity across HR and customer agents</li>
+          <li><strong>Findings:</strong> Tracked in Jira, remediated in sprint, retested before release</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:14px 20px;background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.15);border-radius:10px;">
+      <p style="font-size:0.9rem;color:var(--teal);margin:0;"><strong style="color:var(--white);">Governance Rule:</strong> No agent promotes from canary to production without a 7-day evaluation window, a human review of the worst 50 responses, and sign-off from both the business owner and the AI ethics reviewer.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 10: AGENT PLACEMENT DECISION FRAMEWORK ============ -->
+<div class="slide" data-slide="15">
+  <div class="wide">
+    <span class="tag teal">Decision Framework</span>
+    <h2>Where to Build Each Agent: <span class="highlight">Platform-Native vs Custom</span></h2>
+    <p style="margin-bottom:20px;">Not every agent belongs in the enterprise GenAI Platform. The right placement depends on scope, complexity, data sensitivity, and time-to-market pressure. Here is the decision framework we will use for every AI initiative.</p>
+    
+    <div class="matrix">
+      <div class="matrix-cell teal">
+        <div class="q-label">Configure Platform Agent</div>
+        <h3 style="margin-top:6px;color:var(--white);">Simple + Single-System</h3>
+        <p style="font-size:0.85rem;margin-bottom:10px;">Use the vendor's built-in AI when the task stays inside one system and needs no custom logic.</p>
+        <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);">
+          <li>Salesforce: Auto-generate email drafts in Agentforce</li>
+          <li>SAP: Natural-language inventory lookup in Joule</li>
+          <li>ServiceNow: Auto-categorize IT incidents</li>
+          <li>M365: Summarize Teams threads in Copilot</li>
+        </ul>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="badge success">Fastest TTM</span>
+          <span class="badge success">Lowest Cost</span>
+          <span class="badge info">Vendor Managed</span>
+        </div>
+      </div>
+      <div class="matrix-cell blue">
+        <div class="q-label">Enterprise Platform + Connector</div>
+        <h3 style="margin-top:6px;color:var(--white);">Simple + Cross-System</h3>
+        <p style="font-size:0.85rem;margin-bottom:10px;">Use the enterprise GenAI Platform when the agent needs data from multiple systems but the logic is straightforward.</p>
+        <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);">
+          <li>"What is the status of customer X's order, ticket, and invoice?"</li>
+          <li>Cross-system dashboard summaries for executives</li>
+          <li>Unified search across SharePoint, CRM, and ERP</li>
+          <li>Standard RAG on combined enterprise knowledge</li>
+        </ul>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="badge info">Medium TTM</span>
+          <span class="badge info">Governed</span>
+          <span class="badge success">Reusable</span>
+        </div>
+      </div>
+      <div class="matrix-cell gold">
+        <div class="q-label">Custom on Platform, via Gateway</div>
+        <h3 style="margin-top:6px;color:var(--white);">Complex + Single-System</h3>
+        <p style="font-size:0.85rem;margin-bottom:10px;">Build a custom agent inside the vendor ecosystem but route all LLM calls through the enterprise gateway for governance.</p>
+        <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);">
+          <li>Custom Salesforce agent with proprietary scoring logic</li>
+          <li>SAP procurement agent with multi-step approval flows</li>
+          <li>ServiceNow agent with custom KB retrieval patterns</li>
+          <li>Requires platform expertise + gateway integration</li>
+        </ul>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="badge warning">Slower TTM</span>
+          <span class="badge info">Governed</span>
+          <span class="badge warning">Platform Lock-in</span>
+        </div>
+      </div>
+      <div class="matrix-cell coral">
+        <div class="q-label">Custom Enterprise Agent</div>
+        <h3 style="margin-top:6px;color:var(--white);">Complex + Cross-System</h3>
+        <p style="font-size:0.85rem;margin-bottom:10px;">Build on the enterprise GenAI Platform. Full control, full observability, no vendor lock-in. This is our strategic default.</p>
+        <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);">
+          <li>End-to-end supply chain optimization agents</li>
+          <li>Multi-system customer journey orchestration</li>
+          <li>Regulatory compliance agents spanning ERP + CRM</li>
+          <li>Strategic IP we want to own and reuse</li>
+        </ul>
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="badge danger">Longest TTM</span>
+          <span class="badge success">Fully Governed</span>
+          <span class="badge success">IP Owned</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:14px 20px;background:rgba(255,209,102,0.05);border:1px solid rgba(255,209,102,0.15);border-radius:10px;">
+      <p style="font-size:0.9rem;color:var(--gold);margin:0;"><strong style="color:var(--white);">Decision Rule:</strong> Start with "Simple + Single-System" (configure vendor agent). If it needs data from another system, escalate to the Enterprise GenAI Platform. If it contains proprietary business logic we want to own, build custom regardless of scope.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 11: ORCHESTRATION DECISION FRAMEWORK ============ -->
+<div class="slide" data-slide="16">
+  <div class="wide">
+    <span class="tag gold">Decision Framework</span>
+    <h2>The <span class="highlight-gold">Orchestration Decision</span>: Who Coordinates the Agents?</h2>
+    <p style="margin-bottom:20px;">When a workflow involves multiple steps, multiple agents, or human approval, something must coordinate them. The choice of orchestrator determines flexibility, observability, and long-term maintainability.</p>
+    
+    <div class="split">
+      <div>
+        <h3 style="margin-bottom:14px;color:var(--white);">Three Orchestration Patterns</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="card" style="padding:16px;">
+            <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="font-size:1.2rem;">&#127760;</span> <span style="color:var(--white);">Platform-Native Orchestration</span></h3>
+            <p style="font-size:0.85rem;margin-bottom:8px;">Use Salesforce Flow, SAP BTP Process Automation, ServiceNow Flow Designer, or Power Automate.</p>
+            <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);">
+              <li>Best for: Linear workflows inside one platform</li>
+              <li>Pros: Fast, citizen-developer friendly, native UI</li>
+              <li>Cons: Cannot orchestrate cross-platform agents; limited error handling; vendor lock-in</li>
+            </ul>
+            <div style="margin-top:8px;"><span class="badge info">Use when: 1 system, simple flow, no AI reasoning</span></div>
+          </div>
+          <div class="card blue" style="padding:16px;">
+            <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="font-size:1.2rem;">&#128736;</span> <span style="color:var(--white);">Enterprise Gateway Orchestration</span></h3>
+            <p style="font-size:0.85rem;margin-bottom:8px;">The Agent Gateway handles routing, sequencing, and state management across multiple vendor agents.</p>
+            <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);">
+              <li>Best for: Cross-platform workflows with 2-4 steps</li>
+              <li>Pros: Centralized observability, unified auth, cost tracking</li>
+              <li>Cons: Not designed for complex multi-turn reasoning</li>
+            </ul>
+            <div style="margin-top:8px;"><span class="badge info">Use when: 2+ systems, defined steps, need governance</span></div>
+          </div>
+          <div class="card teal" style="padding:16px;">
+            <h3 style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="font-size:1.2rem;">&#129302;</span> <span style="color:var(--white);">Custom Orchestrator</span></h3>
+            <p style="font-size:0.85rem;margin-bottom:8px;">Build on LangGraph, AutoGen, or a custom state machine for complex multi-agent reasoning with human-in-the-loop.</p>
+            <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);">
+              <li>Best for: Complex reasoning, planning, multi-agent debate</li>
+              <li>Pros: Full control, advanced patterns (reflection, ReAct), portable</li>
+              <li>Cons: Requires specialized MLOps talent, longer build cycle</li>
+            </ul>
+            <div style="margin-top:8px;"><span class="badge success">Use when: Strategic IP, complex logic, human approval gates</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="padding:24px;height:100%;">
+          <h3 style="margin-bottom:16px;color:var(--white);">Orchestrator Decision Flow</h3>
+          <div class="decision-flow">
+            <div class="decision-row">
+              <div class="decision-diamond">Does the workflow stay in ONE system?</div>
+              <div class="decision-branch">
+                <div class="decision-yes">Yes &#8594; Platform-Native (Salesforce Flow, SAP BTP, etc.)</div>
+                <div class="decision-no">No &#8594; Continue below</div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:1.2rem;color:var(--slate3);">&#8595;</div>
+            <div class="decision-row">
+              <div class="decision-diamond">Is the flow linear with &lt;4 steps?</div>
+              <div class="decision-branch">
+                <div class="decision-yes">Yes &#8594; Enterprise Gateway Orchestration</div>
+                <div class="decision-no">No &#8594; Continue below</div>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:1.2rem;color:var(--slate3);">&#8595;</div>
+            <div class="decision-row">
+              <div class="decision-diamond">Does it need multi-turn reasoning or human approval?</div>
+              <div class="decision-branch">
+                <div class="decision-yes">Yes &#8594; Custom Orchestrator (LangGraph / Custom)</div>
+                <div class="decision-no">No &#8594; Enterprise Gateway Orchestration</div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="margin-top:20px;padding:14px;background:rgba(0,212,170,0.06);border-radius:10px;border-left:3px solid var(--teal);">
+            <h4 style="color:var(--teal);margin-bottom:6px;font-size:0.95rem;">Enterprise Default Policy</h4>
+            <p style="font-size:0.85rem;color:var(--slate);margin:0;">For any workflow touching customer PII, financial data, or supply chain decisions: <strong style="color:var(--white);">Enterprise Gateway minimum</strong>. For strategic competitive advantage: <strong style="color:var(--white);">Custom Orchestrator</strong>. Platform-native orchestration is allowed only for internal productivity tools with no sensitive data.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 12: ENTERPRISE DECISION ANGLES ============ -->
+<div class="slide" data-slide="17">
+  <div class="wide">
+    <span class="tag blue">Strategic Considerations</span>
+    <h2>Enterprise <span class="highlight-blue">Decision Angles</span> — What the Board Should Know</h2>
+    <p style="margin-bottom:20px;">Beyond architecture, several strategic questions determine success or failure at $100B scale. These are the questions we have answered before asking for funding.</p>
+    <div class="split-3">
+      <div class="card">
+        <div class="icon-box">&#128272;</div>
+        <h3>Vendor Lock-in Mitigation</h3>
+        <p style="font-size:0.88rem;">Platform-native agents embed vendor-specific logic. The GenAI Platform abstracts LLMs, embeddings, and vector stores so we can swap vendors without rebuilding agents.</p>
+        <div style="margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;">
+          <p style="font-size:0.8rem;color:var(--slate);margin:0;"><strong style="color:var(--white);">Rule:</strong> Proprietary business logic lives in our platform. Vendor-specific logic is limited to connectors and UI wrappers.</p>
+        </div>
+      </div>
+      <div class="card blue">
+        <div class="icon-box blue">&#128101;</div>
+        <h3>Talent & Organization</h3>
+        <p style="font-size:0.88rem;">We cannot hire 500 AI engineers. We need a center of excellence (CoE) that sets standards, while business units configure and extend.</p>
+        <div style="margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;">
+          <p style="font-size:0.8rem;color:var(--slate);margin:0;"><strong style="color:var(--white);">Model:</strong> CoE builds platform & governance. Business units build use cases. IT maintains integrations. Vendors handle infrastructure.</p>
+        </div>
+      </div>
+      <div class="card gold">
+        <div class="icon-box gold">&#9201;</div>
+        <h3>Time-to-Market Tradeoffs</h3>
+        <p style="font-size:0.88rem;">Platform-native agents deploy in weeks. Enterprise custom agents take months. We will use a dual-speed model: fast wins now, strategic builds in parallel.</p>
+        <div style="margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;">
+          <p style="font-size:0.8rem;color:var(--slate);margin:0;"><strong style="color:var(--white);">Plan:</strong> 60% of Year 1 agents are platform-native or lightly customized. 40% are enterprise-built. By Year 3, the ratio inverts.</p>
+        </div>
+      </div>
+      <div class="card purple">
+        <div class="icon-box purple">&#128187;</div>
+        <h3>Citizen Developer Governance</h3>
+        <p style="font-size:0.88rem;">Business users will build Copilot agents and Power Automate flows. Without governance, this becomes shadow AI 2.0. We will enable with guardrails.</p>
+        <div style="margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;">
+          <p style="font-size:0.8rem;color:var(--slate);margin:0;"><strong style="color:var(--white);">Policy:</strong> Citizen-built agents must register in the gateway. Unregistered agents are blocked at the network layer. Approved templates only.</p>
+        </div>
+      </div>
+      <div class="card coral">
+        <div class="icon-box coral">&#128269;</div>
+        <h3>Shadow AI Detection & Redirect</h3>
+        <p style="font-size:0.88rem;">Employees already use ChatGPT, Claude, and Perplexity with company data. We detect this at the network and endpoint level and redirect to the governed platform.</p>
+        <div style="margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;">
+          <p style="font-size:0.8rem;color:var(--slate);margin:0;"><strong style="color:var(--white);">Tactic:</strong> Block public AI APIs at corporate firewall. Offer better internal alternatives. Monitor via DLP and endpoint agents.</p>
+        </div>
+      </div>
+      <div class="card teal">
+        <div class="icon-box">&#9889;</div>
+        <h3>Performance & Latency Requirements</h3>
+        <p style="font-size:0.88rem;">Real-time customer-facing agents need sub-second latency. Batch analytics agents can tolerate minutes. We will colocate models and data regionally.</p>
+        <div style="margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;">
+          <p style="font-size:0.8rem;color:var(--slate);margin:0;"><strong style="color:var(--white);">SLA:</strong> Customer-facing: &lt;500ms P95. Internal tools: &lt;3s P95. Batch: &lt;1hr. Models cached at edge where needed.</p>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="padding:14px 18px;background:rgba(255,107,107,0.05);border:1px solid rgba(255,107,107,0.15);border-radius:10px;">
+        <h4 style="color:var(--coral);margin-bottom:6px;font-size:0.95rem;">&#128220; Regulatory Per Jurisdiction</h4>
+        <p style="font-size:0.85rem;color:var(--slate);margin:0;">EU requires GDPR compliance + EU AI Act risk classification. China requires data residency + algorithm filing. US has sectoral rules (FDA, SEC). The platform enforces jurisdiction-aware routing automatically.</p>
+      </div>
+      <div style="padding:14px 18px;background:rgba(0,212,170,0.05);border:1px solid rgba(0,212,170,0.15);border-radius:10px;">
+        <h4 style="color:var(--teal);margin-bottom:6px;font-size:0.95rem;">&#128176; Cost Model Evolution</h4>
+        <p style="font-size:0.85rem;color:var(--slate);margin:0;">Year 1: High per-token costs (public LLMs). Year 2: Cost optimization via model routing, caching, and smaller fine-tuned models. Year 3: Predominantly smaller enterprise models, 60-70% cost reduction per inference vs Year 1.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 17B: RESILIENCE & FALLBACK ARCHITECTURE ============ -->
+<div class="slide" data-slide="22">
+  <div class="wide">
+    <span class="tag coral">Operational Resilience</span>
+    <h2>Resilience & <span class="highlight-coral">Fallback Architecture</span></h2>
+    <p style="margin-bottom:20px;">At $100B scale, AI downtime during earnings, product launches, or supply chain disruptions is unacceptable. We architect for failure at every layer.</p>
+    <div class="split">
+      <div>
+        <h3 style="margin-bottom:14px;color:var(--white);">Multi-Model Fallback Cascade</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="padding:14px 16px;background:rgba(0,212,170,0.08);border-radius:10px;border-left:4px solid var(--teal);display:flex;align-items:center;gap:14px;">
+            <div style="font-size:1.6rem;font-weight:800;color:var(--teal);">1</div>
+            <div>
+              <div style="font-weight:700;color:var(--white);font-size:0.95rem;">Primary: Azure OpenAI GPT-4o</div>
+              <div style="font-size:0.8rem;color:var(--slate);">Best quality, managed SLA, enterprise support</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:1.2rem;color:var(--slate3);">&#8595; timeout >2s OR error rate >1%</div>
+          <div style="padding:14px 16px;background:rgba(79,195,247,0.08);border-radius:10px;border-left:4px solid var(--blue);display:flex;align-items:center;gap:14px;">
+            <div style="font-size:1.6rem;font-weight:800;color:var(--blue);">2</div>
+            <div>
+              <div style="font-weight:700;color:var(--white);font-size:0.95rem;">Fallback A: Azure OpenAI GPT-4o-mini</div>
+              <div style="font-size:0.8rem;color:var(--slate);">Faster, cheaper, 90% of quality for most tasks</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:1.2rem;color:var(--slate3);">&#8595; regional outage OR rate limit</div>
+          <div style="padding:14px 16px;background:rgba(255,209,102,0.08);border-radius:10px;border-left:4px solid var(--gold);display:flex;align-items:center;gap:14px;">
+            <div style="font-size:1.6rem;font-weight:800;color:var(--gold);">3</div>
+            <div>
+              <div style="font-weight:700;color:var(--white);font-size:0.95rem;">Fallback B: Claude via Azure AI Foundry</div>
+              <div style="font-size:0.8rem;color:var(--slate);">Different model family, different failure modes</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:1.2rem;color:var(--slate3);">&#8595; complete Azure AI outage</div>
+          <div style="padding:14px 16px;background:rgba(255,107,107,0.08);border-radius:10px;border-left:4px solid var(--coral);display:flex;align-items:center;gap:14px;">
+            <div style="font-size:1.6rem;font-weight:800;color:var(--coral);">4</div>
+            <div>
+              <div style="font-weight:700;color:var(--white);font-size:0.95rem;">Emergency: On-Prem GPU Cluster (Llama 3)</div>
+              <div style="font-size:0.8rem;color:var(--slate);">Air-gapped, sovereign, for critical workflows only</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="padding:20px;margin-bottom:12px;">
+          <h3 style="color:var(--white);margin-bottom:10px;">&#127760; Multi-Region Failover</h3>
+          <p style="font-size:0.85rem;margin-bottom:10px;">Each region runs an independent stack. If West Europe goes down, EU traffic fails over to East US 2 with data residency alerts.</p>
+          <div class="arch-layer" style="justify-content:flex-start;">
+            <div class="arch-node teal">East US 2</div><div class="arch-connector"></div>
+            <div class="arch-node blue">West Europe</div><div class="arch-connector"></div>
+            <div class="arch-node gold">Azure China</div>
+          </div>
+          <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);margin-top:10px;">
+            <li>Active-active for read-heavy agents (RAG queries)</li>
+            <li>Active-passive for write-heavy agents (ERP updates)</li>
+            <li>DNS failover via Azure Traffic Manager: &lt;30s detection</li>
+            <li>Data replication: async for non-critical, sync for financial</li>
+          </ul>
+        </div>
+        <div class="card blue" style="padding:20px;">
+          <h3 style="color:var(--white);margin-bottom:10px;">&#9889; Circuit Breakers & Degradation</h3>
+          <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);line-height:1.7;">
+            <li><strong>Circuit breaker:</strong> Open after 5 consecutive errors, half-open after 30s</li>
+            <li><strong>Graceful degradation:</strong> Return cached answer if LLM is down</li>
+            <li><strong>Queue management:</strong> Excess traffic buffered in Azure Service Bus</li>
+            <li><strong>Load shedding:</strong> Batch jobs paused before real-time agents are throttled</li>
+            <li><strong>Emergency mode:</strong> Disable non-critical agents during peak (earnings week)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 17C: PEOPLE, CHANGE & LEGAL RISK ============ -->
+<div class="slide" data-slide="23">
+  <div class="wide">
+    <span class="tag gold">People & Compliance</span>
+    <h2>People, Change & <span class="highlight-gold">Legal Risk</span></h2>
+    <p style="margin-bottom:20px;">The hardest part of enterprise AI is not the technology. It is the people, the contracts, and the liability. We address these head-on.</p>
+    <div class="split-3">
+      <div class="card">
+        <div class="icon-box">&#128101;</div>
+        <h3>Job Impact & Retraining</h3>
+        <p style="font-size:0.88rem;">AI will reshape roles, not eliminate them overnight. We will map every impacted function and build retraining paths.</p>
+        <div style="margin-top:10px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:0.8rem;color:var(--slate);">Customer Service</span><span style="font-size:0.8rem;color:var(--coral);font-weight:600;">High Impact</span></div>
+          <div style="height:5px;background:rgba(255,107,107,0.15);border-radius:3px;margin-bottom:10px;"><div style="width:75%;height:100%;background:var(--coral);border-radius:3px;"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:0.8rem;color:var(--slate);">Finance Operations</span><span style="font-size:0.8rem;color:var(--gold);font-weight:600;">Medium Impact</span></div>
+          <div style="height:5px;background:rgba(255,209,102,0.15);border-radius:3px;margin-bottom:10px;"><div style="width:50%;height:100%;background:var(--gold);border-radius:3px;"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:0.8rem;color:var(--slate);">Sales / Marketing</span><span style="font-size:0.8rem;color:var(--blue);font-weight:600;">Medium Impact</span></div>
+          <div style="height:5px;background:rgba(79,195,247,0.15);border-radius:3px;margin-bottom:10px;"><div style="width:45%;height:100%;background:var(--blue);border-radius:3px;"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:0.8rem;color:var(--slate);">Supply Chain</span><span style="font-size:0.8rem;color:var(--teal);font-weight:600;">Low-Medium</span></div>
+          <div style="height:5px;background:rgba(0,212,170,0.15);border-radius:3px;"><div style="width:35%;height:100%;background:var(--teal);border-radius:3px;"></div></div>
+        </div>
+        <p style="font-size:0.8rem;margin-top:10px;"><strong style="color:var(--white);">Budget:</strong> $3M Year 1 for reskilling, change management, and internal communications.</p>
+      </div>
+      <div class="card blue">
+        <div class="icon-box blue">&#128220;</div>
+        <h3>Legal & Liability Framework</h3>
+        <p style="font-size:0.88rem;">Who owns what the AI creates? Who pays when it is wrong? We have answered both before deployment.</p>
+        <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);margin-top:10px;line-height:1.7;">
+          <li><strong>Vendor indemnification:</strong> Microsoft Copilot indemnifies output. OpenAI API does not. We route accordingly.</li>
+          <li><strong>IP ownership:</strong> Enterprise owns all fine-tuned models and custom prompts. Vendor owns base model weights.</li>
+          <li><strong>Liability gates:</strong> AI recommendations for financial, medical, or legal decisions require human sign-off.</li>
+          <li><strong>Insurance:</strong> Cyber liability extended to cover AI errors and data leakage. $50M coverage.</li>
+          <li><strong>Contract terms:</strong> All AI vendor contracts include SLA penalties, data deletion rights, and audit clauses.</li>
+        </ul>
+      </div>
+      <div class="card gold">
+        <div class="icon-box gold">&#129309;</div>
+        <h3>Unions & Change Management</h3>
+        <p style="font-size:0.88rem;">We will not surprise the workforce. Union co-design, transparent communication, and phased rollouts are mandatory.</p>
+        <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);margin-top:10px;line-height:1.7;">
+          <li><strong>Union engagement:</strong> Joint AI committee with worker representatives before any job-impacting deployment</li>
+          <li><strong>Transparency:</strong> Every employee sees which tasks use AI, why, and how to escalate concerns</li>
+          <li><strong>Phased rollout:</strong> Pilot → opt-in → general availability. No forced adoption in Year 1.</li>
+          <li><strong>Incentive alignment:</strong> Sales reps earn commission on AI-assisted closes, not penalized for using the tool</li>
+          <li><strong>Feedback channels:</strong> Anonymous reporting for AI bias, errors, or unfair outcomes</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============ SLIDE 11: SYSTEM INTEGRATION MAP ============ -->
+<div class="slide" data-slide="10">
+  <div class="wide">
+    <span class="tag purple">Integration</span>
+    <h2>How <span class="highlight-purple">Every System Connects</span> to the GenAI OS</h2>
+    <p style="margin-bottom:20px;">No system is left behind. Each vendor agent is adapted to route through the enterprise GenAI Platform and report to the Observability Platform.</p>
+    <div class="split-3">
+      <div class="card blue">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-box blue" style="margin:0;width:40px;height:40px;font-size:1.1rem;">&#129302;</div>
+          <div><h3 style="margin:0;">Salesforce Integration</h3></div>
+        </div>
+        <p style="font-size:0.88rem;">Agentforce and Einstein agents route through the Enterprise Agent Gateway instead of directly calling Salesforce-managed LLMs.</p>
+        <ul style="padding-left:16px;font-size:0.82rem;color:var(--slate);margin-top:10px;">
+          <li>Custom Apex callout to Gateway</li>
+          <li>CRM data fed via Unity Catalog connector</li>
+          <li>All prompts logged to Observability</li>
+          <li>Charged to Sales P&L</li>
+        </ul>
+        <div style="margin-top:10px;"><span class="badge info">Apex / REST</span><span class="badge info" style="margin-left:4px;">OAuth 2.0</span></div>
+      </div>
+      <div class="card gold">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-box gold" style="margin:0;width:40px;height:40px;font-size:1.1rem;">&#128187;</div>
+          <div><h3 style="margin:0;">SAP Integration</h3></div>
+        </div>
+        <p style="font-size:0.88rem;">Joule and custom BTP extensions use the enterprise LLM gateway for all natural language processing, with ERP data sourced from the lakehouse.</p>
+        <ul style="padding-left:16px;font-size:0.82rem;color:var(--slate);margin-top:10px;">
+          <li>BTP sidecar extension for Gateway calls</li>
+          <li>SAP HANA data replicated to Delta Lake</li>
+          <li>Procurement agents use unified RAG</li>
+          <li>All costs tracked to Supply Chain</li>
+        </ul>
+        <div style="margin-top:10px;"><span class="badge warning">BTP Sidecar</span><span class="badge warning" style="margin-left:4px;">OData</span></div>
+      </div>
+      <div class="card teal">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-box" style="margin:0;width:40px;height:40px;font-size:1.1rem;">&#128295;</div>
+          <div><h3 style="margin:0;">ServiceNow Integration</h3></div>
+        </div>
+        <p style="font-size:0.88rem;">Now Assist and custom Flow Designer workflows call the enterprise GenAI Platform for summarization, routing, and resolution.</p>
+        <ul style="padding-left:16px;font-size:0.82rem;color:var(--slate);margin-top:10px;">
+          <li>Integration Hub spoke for Gateway</li>
+          <li>ITSM data synced to lakehouse nightly</li>
+          <li>Incident agents use unified vector store</li>
+          <li>Costs allocated to IT Operations</li>
+        </ul>
+        <div style="margin-top:10px;"><span class="badge success">REST Spoke</span><span class="badge success" style="margin-left:4px;">MID Server</span></div>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">
+      <div class="card coral">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-box coral" style="margin:0;width:40px;height:40px;font-size:1.1rem;">&#128172;</div>
+          <div><h3 style="margin:0;">Microsoft 365 Copilot</h3></div>
+        </div>
+        <p style="font-size:0.88rem;">Copilot Studio custom agents and Graph connectors are configured to use the enterprise LLM gateway for all generative tasks.</p>
+        <ul style="padding-left:16px;font-size:0.82rem;color:var(--slate);margin-top:8px;">
+          <li>Copilot Studio &#8594; Gateway API</li>
+          <li>Graph data enriches unified vector store</li>
+          <li>Teams bots use enterprise RAG</li>
+        </ul>
+        <div style="margin-top:8px;"><span class="badge danger">Graph API</span><span class="badge danger" style="margin-left:4px;">Copilot Studio</span></div>
+      </div>
+      <div class="card purple">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-box purple" style="margin:0;width:40px;height:40px;font-size:1.1rem;">&#128193;</div>
+          <div><h3 style="margin:0;">SharePoint & Wiki</h3></div>
+        </div>
+        <p style="font-size:0.88rem;">All enterprise knowledge bases are indexed into the unified vector store. SharePoint agents query through the GenAI Platform.</p>
+        <ul style="padding-left:16px;font-size:0.82rem;color:var(--slate);margin-top:8px;">
+          <li>SharePoint indexer to vector DB</li>
+          <li>Wiki content embedded nightly</li>
+          <li>Knowledge agents use single RAG</li>
+        </ul>
+        <div style="margin-top:8px;"><span class="badge info">Graph Indexer</span><span class="badge info" style="margin-left:4px;">Delta Live Tables</span></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div class="icon-box" style="margin:0;width:40px;height:40px;font-size:1.1rem;">&#128300;</div>
+          <div><h3 style="margin:0;">Databricks Native</h3></div>
+        </div>
+        <p style="font-size:0.88rem;">DBIQ, Genie, and custom ML models run natively on the lakehouse and consume LLM inference through the gateway.</p>
+        <ul style="padding-left:16px;font-size:0.82rem;color:var(--slate);margin-top:8px;">
+          <li>DBIQ &#8594; LLM Gateway (internal)</li>
+          <li>Genie queries Unity Catalog directly</li>
+          <li>Custom models registered in MLflow</li>
+        </ul>
+        <div style="margin-top:8px;"><span class="badge success">Unity Catalog</span><span class="badge success" style="margin-left:4px;">MLflow</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 12: SECURITY & GOVERNANCE ============ -->
+<div class="slide" data-slide="11">
+  <div class="wide">
+    <span class="tag coral">Trust & Compliance</span>
+    <h2>Security, Privacy, and <span class="highlight-coral">Enterprise Governance</span></h2>
+    <p style="margin-bottom:24px;">At $100B scale, a single data leak or compliance failure is a board-level crisis. The GenAI OS embeds security at every layer — not as an afterthought.</p>
+    <div class="split">
+      <div>
+        <div class="card" style="padding:20px;margin-bottom:14px;">
+          <h3 style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><span style="font-size:1.3rem;">&#128272;</span> Identity & Access</h3>
+          <p style="font-size:0.88rem;">Microsoft Entra ID for all authentication. Role-based access control (RBAC) at the data, model, and agent level. Zero-trust architecture: never trust, always verify.</p>
+        </div>
+        <div class="card blue" style="padding:20px;margin-bottom:14px;">
+          <h3 style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><span style="font-size:1.3rem;">&#128737;</span> Data Residency & Sovereignty</h3>
+          <p style="font-size:0.88rem;">EU data stays in EU Azure regions. China data stays in Azure China. US data in US. The GenAI Platform routes inference to region-local LLM endpoints automatically.</p>
+        </div>
+        <div class="card gold" style="padding:20px;margin-bottom:14px;">
+          <h3 style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><span style="font-size:1.3rem;">&#128683;</span> PII & Sensitive Data Handling</h3>
+          <p style="font-size:0.88rem;">Presidio + Azure AI Language for PII detection. Automatic redaction before LLM calls. Re-hydration after response. Configurable by jurisdiction (GDPR, CCPA, PIPL).</p>
+        </div>
+        <div class="card coral" style="padding:20px;">
+          <h3 style="display:flex;align-items:center;gap:10px;margin-bottom:10px;"><span style="font-size:1.3rem;">&#128220;</span> Audit & Compliance</h3>
+          <p style="font-size:0.88rem;">Immutable logs of every prompt, every response, every data access. SOC 2 Type II, ISO 27001, and GDPR Article 30 record of processing. External auditor API access.</p>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="padding:24px;height:100%;">
+          <h3 style="margin-bottom:16px;color:var(--white);">Governance Control Matrix</h3>
+          <table class="comparison-table">
+            <tr><th>Control</th><th>Implementation</th><th>Status</th></tr>
+            <tr><td>Authentication</td><td>Entra ID + MFA</td><td><span class="badge success">Enforced</span></td></tr>
+            <tr><td>Authorization</td><td>RBAC + ABAC</td><td><span class="badge success">Enforced</span></td></tr>
+            <tr><td>Data Encryption</td><td>AES-256 (at rest), TLS 1.3 (in transit)</td><td><span class="badge success">Enforced</span></td></tr>
+            <tr><td>PII Redaction</td><td>Presidio + Azure AI</td><td><span class="badge success">Enforced</span></td></tr>
+            <tr><td>Prompt Injection</td><td>Input validation + sandboxing</td><td><span class="badge success">Enforced</span></td></tr>
+            <tr><td>Output Filtering</td><td>Toxicity + bias + topic filters</td><td><span class="badge success">Enforced</span></td></tr>
+            <tr><td>Data Residency</td><td>Region-locked inference endpoints</td><td><span class="badge success">Enforced</span></td></tr>
+            <tr><td>Audit Retention</td><td>7-year immutable logs</td><td><span class="badge success">Enforced</span></td></tr>
+            <tr><td>Model Drift</td><td>Continuous evaluation harness</td><td><span class="badge warning">Monitored</span></td></tr>
+            <tr><td>Third-party LLM</td><td>No data to public APIs</td><td><span class="badge success">Blocked</span></td></tr>
+            <tr><td>Shadow AI</td><td>Network + endpoint detection</td><td><span class="badge warning">Detecting</span></td></tr>
+          </table>
+          <p style="margin-top:14px;font-size:0.82rem;color:var(--slate2);">All controls mapped to NIST AI RMF, ISO 42001, and EU AI Act requirements. Quarterly attestation by external auditor.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 12B: DATA CLASSIFICATION STRATEGY ============ -->
+<div class="slide" data-slide="24">
+  <div class="wide">
+    <span class="tag coral">Data Governance</span>
+    <h2>Data Classification: <span class="highlight-coral">Internal vs Confidential vs Restricted</span></h2>
+    <p style="margin-bottom:20px;">Not all data can go to an LLM. We classify every data source and enforce handling rules automatically through the platform. This is the difference between governed AI and shadow AI.</p>
+    <div class="split">
+      <div>
+        <div class="data-class internal">
+          <div class="data-class-label">Internal</div>
+          <div style="flex:1;">
+            <h3 style="margin:0 0 4px 0;color:var(--white);font-size:1rem;">Internal Use Data</h3>
+            <p style="font-size:0.85rem;margin:0 0 8px 0;">Company newsletters, training materials, public-facing documentation, org charts, policy handbooks.</p>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="badge success">Allowed in RAG</span>
+              <span class="badge info">No PII</span>
+              <span class="badge info">Standard Encryption</span>
+            </div>
+          </div>
+        </div>
+        <div class="data-class confidential">
+          <div class="data-class-label">Confidential</div>
+          <div style="flex:1;">
+            <h3 style="margin:0 0 4px 0;color:var(--white);font-size:1rem;">Confidential Business Data</h3>
+            <p style="font-size:0.85rem;margin:0 0 8px 0;">Customer contracts, financial forecasts, supplier agreements, product roadmaps, marketing plans. Shared internally on need-to-know.</p>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="badge warning">Allowed with Guardrails</span>
+              <span class="badge warning">PII Redaction Required</span>
+              <span class="badge info">AES-256 Encryption</span>
+              <span class="badge info">Access Logging</span>
+            </div>
+          </div>
+        </div>
+        <div class="data-class restricted">
+          <div class="data-class-label">Restricted</div>
+          <div style="flex:1;">
+            <h3 style="margin:0 0 4px 0;color:var(--white);font-size:1rem;">Restricted / Regulated Data</h3>
+            <p style="font-size:0.85rem;margin:0 0 8px 0;">Board materials, M&A plans, patient health data, consumer credit data, military/defense contracts, unpatented inventions.</p>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="badge danger">Blocked from Cloud LLMs</span>
+              <span class="badge warning">On-Prem Only</span>
+              <span class="badge info">HSM Encryption</span>
+              <span class="badge info">Dual Control</span>
+              <span class="badge info">Audit Trail</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="padding:20px;margin-bottom:12px;">
+          <h3 style="color:var(--white);margin-bottom:12px;">&#128272; Enforcement Mechanisms</h3>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="padding:10px 14px;background:rgba(0,212,170,0.06);border-radius:8px;border-left:3px solid var(--teal);">
+              <strong style="color:var(--white);font-size:0.9rem;">Unity Catalog Tags</strong>
+              <p style="font-size:0.82rem;color:var(--slate);margin:4px 0 0 0;">Every table, file, and document is tagged at ingestion. The GenAI Platform reads tags before retrieval.</p>
+            </div>
+            <div style="padding:10px 14px;background:rgba(79,195,247,0.06);border-radius:8px;border-left:3px solid var(--blue);">
+              <strong style="color:var(--white);font-size:0.9rem;">Vector Store Filtering</strong>
+              <p style="font-size:0.82rem;color:var(--slate);margin:4px 0 0 0;">User's Entra ID group membership determines which vector indexes they can query. Restricted chunks are invisible.</p>
+            </div>
+            <div style="padding:10px 14px;background:rgba(255,209,102,0.06);border-radius:8px;border-left:3px solid var(--gold);">
+              <strong style="color:var(--white);font-size:0.9rem;">Prompt Injection Scan</strong>
+              <p style="font-size:0.82rem;color:var(--slate);margin:4px 0 0 0;">Before any LLM call, a secondary model scans for attempts to extract restricted data via social engineering.</p>
+            </div>
+            <div style="padding:10px 14px;background:rgba(255,107,107,0.06);border-radius:8px;border-left:3px solid var(--coral);">
+              <strong style="color:var(--white);font-size:0.9rem;">Output Classification</strong>
+              <p style="font-size:0.82rem;color:var(--slate);margin:4px 0 0 0;">Every LLM response is classified post-generation. If it contains restricted fragments, it is blocked and alerted.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card blue" style="padding:20px;">
+          <h3 style="color:var(--white);margin-bottom:10px;">&#9888; Special Handling Rules</h3>
+          <ul style="padding-left:18px;font-size:0.82rem;color:var(--slate);line-height:1.7;">
+            <li><strong>EU personal data:</strong> Processed only in EU regions. No cross-border inference.</li>
+            <li><strong>China data:</strong> Azure China 21Vianet only. Separate LLM endpoints.</li>
+            <li><strong>Third-party data:</strong> Customer data under NDA requires explicit opt-in per contract.</li>
+            <li><strong>Merger data:</strong> Ring-fenced during M&A. No AI access until legal clearance.</li>
+            <li><strong>Auto-downgrade:</strong> If classification engine is uncertain, treat as Restricted.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 13: IMPLEMENTATION ROADMAP ============ -->
+<div class="slide" data-slide="12">
+  <div class="wide">
+    <span class="tag teal">Execution</span>
+    <h2><span class="highlight">Implementation Roadmap</span> — 18 Months to Full Operation</h2>
+    <p style="margin-bottom:28px;">We will not boil the ocean. The build is phased: foundation first, then platform, then agents at scale.</p>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-q">Q1 FY2026</div>
+        <div class="timeline-title">Foundation</div>
+        <div class="timeline-desc">Azure Databricks landing zone, Unity Catalog setup, data pipeline migration, initial vector store</div>
+        <div style="margin-top:10px;"><span class="badge info">$2.4M</span></div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-q">Q2 FY2026</div>
+        <div class="timeline-title">GenAI Platform v1</div>
+        <div class="timeline-desc">LLM Gateway, RAG engine, prompt registry, initial Salesforce & SAP connectors, pilot with 2 BUs</div>
+        <div style="margin-top:10px;"><span class="badge info">$3.1M</span></div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-q">Q3 FY2026</div>
+        <div class="timeline-title">Observability & Scale</div>
+        <div class="timeline-desc">Observability platform live, cost management, guardrails, ServiceNow + M365 integration, 5 BUs</div>
+        <div style="margin-top:10px;"><span class="badge info">$2.8M</span></div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-q">Q4 FY2026</div>
+        <div class="timeline-title">Enterprise Rollout</div>
+        <div class="timeline-desc">All 6 platforms integrated, custom agents deployed, full governance, global regions live, 50+ agent types</div>
+        <div style="margin-top:10px;"><span class="badge info">$2.2M</span></div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-q">FY2027</div>
+        <div class="timeline-title">Optimize & Innovate</div>
+        <div class="timeline-desc">Fine-tuned models, multi-agent orchestration, advanced analytics, partner ecosystem, continuous improvement</div>
+        <div style="margin-top:10px;"><span class="badge info">$3.5M/yr</span></div>
+      </div>
+    </div>
+    <div style="margin-top:28px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+      <div class="card" style="text-align:center;padding:18px;">
+        <div class="stat-box" style="padding:0;"><div class="num" style="font-size:2.2rem;">$10.5M</div><div class="label">Year 1 Capital</div></div>
+        <p style="font-size:0.8rem;margin-top:6px;">Infrastructure, engineering, licenses, professional services</p>
+      </div>
+      <div class="card blue" style="text-align:center;padding:18px;">
+        <div class="stat-box" style="padding:0;"><div class="num" style="font-size:2.2rem;">24</div><div class="label">Engineers</div></div>
+        <p style="font-size:0.8rem;margin-top:6px;">Platform, MLOps, data engineering, security, SRE</p>
+      </div>
+      <div class="card gold" style="text-align:center;padding:18px;">
+        <div class="stat-box" style="padding:0;"><div class="num" style="font-size:2.2rem;">6</div><div class="label">Integrations</div></div>
+        <p style="font-size:0.8rem;margin-top:6px;">Salesforce, SAP, ServiceNow, M365, SharePoint, Databricks</p>
+      </div>
+      <div class="card teal" style="text-align:center;padding:18px;">
+        <div class="stat-box" style="padding:0;"><div class="num" style="font-size:2.2rem;">50+</div><div class="label">Agent Types</div></div>
+        <p style="font-size:0.8rem;margin-top:6px;">By end of Year 1, across sales, supply chain, IT, HR, finance</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 14: BUSINESS VALUE & ROI ============ -->
+<div class="slide" data-slide="13">
+  <div class="wide">
+    <span class="tag gold">Business Case</span>
+    <h2>The <span class="highlight-gold">Value Proposition</span> — Why Fund This Now</h2>
+    <p style="margin-bottom:24px;">The cost of inaction exceeds the cost of action. Fragmented AI creates technical debt, compliance risk, and missed productivity. A unified platform compounds returns.</p>
+    <div class="split">
+      <div>
+        <h3 style="margin-bottom:14px;color:var(--white);">Year 1-3 Value Drivers</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="padding:16px;background:rgba(0,212,170,0.06);border-radius:10px;border-left:3px solid var(--teal);">
+            <div style="display:flex;justify-content:space-between;"><strong style="color:var(--white);">Productivity Gains</strong><span style="color:var(--teal);font-weight:700;">$45M/yr</span></div>
+            <p style="font-size:0.85rem;margin-top:4px;">30% time savings across 100K employees in AI-enabled roles: sales ops, customer service, supply chain planning, finance reconciliation.</p>
+          </div>
+          <div style="padding:16px;background:rgba(79,195,247,0.06);border-radius:10px;border-left:3px solid var(--blue);">
+            <div style="display:flex;justify-content:space-between;"><strong style="color:var(--white);">Cost Avoidance</strong><span style="color:var(--blue);font-weight:700;">$22M/yr</span></div>
+            <p style="font-size:0.85rem;margin-top:4px;">Eliminate duplicated LLM subscriptions, reduce shadow AI tool sprawl, consolidate vector stores and data pipelines.</p>
+          </div>
+          <div style="padding:16px;background:rgba(255,209,102,0.06);border-radius:10px;border-left:3px solid var(--gold);">
+            <div style="display:flex;justify-content:space-between;"><strong style="color:var(--white);">Revenue Uplift</strong><span style="color:var(--gold);font-weight:700;">$38M/yr</span></div>
+            <p style="font-size:0.85rem;margin-top:4px;">Faster sales cycles (AI-powered proposals), better demand forecasting, personalized customer engagement at scale.</p>
+          </div>
+          <div style="padding:16px;background:rgba(255,107,107,0.06);border-radius:10px;border-left:3px solid var(--coral);">
+            <div style="display:flex;justify-content:space-between;"><strong style="color:var(--white);">Risk Reduction</strong><span style="color:var(--coral);font-weight:700;">Immeasurable</span></div>
+            <p style="font-size:0.85rem;margin-top:4px;">Prevent a single GDPR breach ($4% of revenue = $4B max fine). Block shadow AI data leakage. Ensure audit readiness.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="padding:24px;height:100%;">
+          <h3 style="margin-bottom:16px;color:var(--white);">3-Year Financial Summary</h3>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.9rem;color:var(--slate);">Platform Investment (3yr)</span><span style="font-size:0.9rem;font-weight:600;color:var(--white);">$28M</span></div>
+              <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;"><div style="width:20%;height:100%;background:var(--coral);border-radius:3px;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.9rem;color:var(--slate);">LLM Inference Costs (3yr)</span><span style="font-size:0.9rem;font-weight:600;color:var(--white);">$18M</span></div>
+              <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;"><div style="width:13%;height:100%;background:var(--purple);border-radius:3px;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.9rem;color:var(--slate);">Total Cost (3yr)</span><span style="font-size:0.9rem;font-weight:600;color:var(--white);">$46M</span></div>
+              <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;"><div style="width:33%;height:100%;background:var(--slate2);border-radius:3px;"></div></div>
+            </div>
+            <div style="margin:8px 0;border-top:1px solid rgba(255,255,255,0.08);"></div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.9rem;color:var(--slate);">Productivity + Revenue (3yr)</span><span style="font-size:0.9rem;font-weight:600;color:var(--teal);">$249M</span></div>
+              <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;"><div style="width:100%;height:100%;background:var(--teal);border-radius:3px;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.9rem;color:var(--slate);">Cost Avoidance (3yr)</span><span style="font-size:0.9rem;font-weight:600;color:var(--blue);">$66M</span></div>
+              <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;"><div style="width:26%;height:100%;background:var(--blue);border-radius:3px;"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:0.9rem;color:var(--slate);">Total Value (3yr)</span><span style="font-size:1rem;font-weight:700;color:var(--gold);">$315M</span></div>
+              <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;"><div style="width:100%;height:100%;background:var(--gold);border-radius:3px;"></div></div>
+            </div>
+            <div style="margin:8px 0;border-top:1px solid rgba(255,255,255,0.08);"></div>
+            <div style="text-align:center;padding:16px;background:rgba(0,212,170,0.08);border-radius:10px;">
+              <div style="font-size:0.85rem;color:var(--slate2);text-transform:uppercase;letter-spacing:1px;">3-Year ROI</div>
+              <div style="font-size:3rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">585%</div>
+              <div style="font-size:0.85rem;color:var(--slate);">Payback period: 8 months</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 15: THE ASK ============ -->
+<div class="slide" data-slide="14">
+  <div class="orb orb1"></div><div class="orb orb2"></div>
+  <div class="center" style="position:relative;z-index:2;">
+    <span class="tag gold">The Board Ask</span>
+    <h1 style="margin-bottom:20px;">Fund the Enterprise<br><span class="highlight-gold">GenAI Operating System</span></h1>
+    <p class="subtitle" style="font-size:1.2rem;max-width:700px;margin:0 auto 32px;">
+      Approve <strong style="color:var(--white);">$10.5M for FY2026</strong> to build the unified GenAI Platform and Observability Platform.
+      Every vendor agent — Salesforce, SAP, ServiceNow, Microsoft, custom — will run through enterprise-owned infrastructure.
+    </p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:32px 0;">
+      <div class="card" style="min-width:200px;text-align:center;padding:20px;">
+        <div class="stat-box" style="padding:0;"><div class="num" style="font-size:2.2rem;">$10.5M</div><div class="label">FY2026 Capital</div></div>
+      </div>
+      <div class="card blue" style="min-width:200px;text-align:center;padding:20px;">
+        <div class="stat-box" style="padding:0;"><div class="num" style="font-size:2.2rem;">585%</div><div class="label">3-Year ROI</div></div>
+      </div>
+      <div class="card gold" style="min-width:200px;text-align:center;padding:20px;">
+        <div class="stat-box" style="padding:0;"><div class="num" style="font-size:2.2rem;">8 Months</div><div class="label">Payback Period</div></div>
+      </div>
+      <div class="card teal" style="min-width:200px;text-align:center;padding:20px;">
+        <div class="stat-box" style="padding:0;"><div class="num" style="font-size:2.2rem;">100%</div><div class="label">Governed & Observed</div></div>
+      </div>
+    </div>
+    <div style="max-width:800px;margin:0 auto;padding:20px 24px;background:rgba(255,209,102,0.06);border:1px solid rgba(255,209,102,0.2);border-radius:12px;text-align:left;">
+      <h3 style="color:var(--gold);margin-bottom:10px;">What the Board Decides Today</h3>
+      <p style="font-size:0.95rem;color:var(--slate);margin-bottom:10px;"><strong style="color:var(--white);">Option A (Recommended):</strong> Approve full $10.5M FY2026 budget. Greenlight the 18-month roadmap. Begin foundation work in Q1.</p>
+      <p style="font-size:0.95rem;color:var(--slate);margin-bottom:10px;"><strong style="color:var(--white);">Option B:</strong> Approve $4M pilot budget for Q1-Q2 only. Fund Databricks foundation + Salesforce integration. Revisit for scale funding in mid-year review.</p>
+      <p style="font-size:0.95rem;color:var(--slate);"><strong style="color:var(--white);">Option C:</strong> Defer decision. Risk: vendor agent sprawl accelerates, shadow AI grows, compliance gaps widen, and we lose 6-12 months of compounding advantage.</p>
+    </div>
+    <p style="margin-top:28px;font-size:0.9rem;color:var(--slate2);">
+      Enterprise AI Strategy &middot; Global Technology Council &middot; FY2026 Funding Request<br>
+      <span style="font-size:0.8rem;">Questions? Contact: Chief Technology Officer & Chief Data Officer</span>
+    </p>
+  </div>
+</div>
+
+<!-- ============ NAVIGATION ============ -->
+<div class="nav">
+  <button onclick="prevSlide()">&#10094;</button>
+  <button onclick="nextSlide()">&#10095;</button>
+</div>
+<div class="nav-dots" id="dots"></div>
+<div class="slide-num" id="slideNum">1 / 15</div>
+<div class="progress" id="progress"></div>
+
+</div><!-- /deck -->
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+function update() {
+  slides.forEach((s, i) => {
+    s.classList.toggle('active', i === current);
+  });
+  document.getElementById('slideNum').textContent = (current + 1) + ' / ' + total;
+  document.getElementById('progress').style.width = ((current + 1) / total * 100) + '%';
+  document.querySelectorAll('.nav-dots button').forEach((d, i) => {
+    d.classList.toggle('active', i === current);
+  });
+}
+
+function nextSlide() {
+  if (current < total - 1) { current++; update(); }
+}
+function prevSlide() {
+  if (current > 0) { current--; update(); }
+}
+
+// Build dots
+const dotsContainer = document.getElementById('dots');
+for (let i = 0; i < total; i++) {
+  const b = document.createElement('button');
+  b.onclick = () => { current = i; update(); };
+  dotsContainer.appendChild(b);
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+  if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  if (e.key === 'Home') { current = 0; update(); }
+  if (e.key === 'End') { current = total - 1; update(); }
+});
+
+update();
+</script>
+</body>
+</html>
